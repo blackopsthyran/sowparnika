@@ -44,22 +44,22 @@ const Footer = () => {
                 <IconButtonLink
                   icon={FiFacebook}
                   href="https://facebook.com"
-                  aria-label="Facebook"
+                  ariaLabel="Facebook"
                 />
                 <IconButtonLink
                   icon={FiTwitter}
                   href="https://twitter.com"
-                  aria-label="Twitter"
+                  ariaLabel="Twitter"
                 />
                 <IconButtonLink
                   icon={FiInstagram}
                   href="https://instagram.com"
-                  aria-label="Instagram"
+                  ariaLabel="Instagram"
                 />
                 <IconButtonLink
                   icon={FiLinkedin}
                   href="https://linkedin.com"
-                  aria-label="LinkedIn"
+                  ariaLabel="LinkedIn"
                 />
               </HStack>
             </Box>

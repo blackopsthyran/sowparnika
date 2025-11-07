@@ -136,7 +136,7 @@ const EditListingPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, router]);
+  }, [id, router, toast]);
 
   useEffect(() => {
     if (id && isAuthenticated) {

@@ -237,7 +237,9 @@ const Properties = () => {
             <VStack spacing={4} align="stretch">
               {/* Search Bar */}
               <InputGroup size="lg">
-                <InputLeftElement pointerEvents="none" children={<FiSearch style={{ color: 'gray' }} />} />
+                <InputLeftElement pointerEvents="none">
+                  <FiSearch style={{ color: 'gray' }} />
+                </InputLeftElement>
                 <Input
                   placeholder="Search by title, address, or city..."
                   value={searchQuery}

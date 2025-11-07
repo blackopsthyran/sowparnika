@@ -216,13 +216,13 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
               </Text>
               <Box position="relative">
                 <Slider
-                  value={sliderValue}
-                  onChange={handleSliderChange}
+                  value={sliderValue as any}
+                  onChange={handleSliderChange as any}
                   min={0}
                   max={10000000}
                   step={100000}
                   colorScheme="blue"
-                  aria-label={['min-price', 'max-price']}
+                  aria-label="price-range"
                 >
                   <SliderTrack bg="gray.200" h={2} borderRadius="full">
                     <SliderFilledTrack />
