@@ -127,6 +127,7 @@ const Properties = () => {
       
       router.replace(newUrl, undefined, { shallow: true });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchQuery, filters, sortBy, sortOrder, router.isReady]);
 
   // Fetch properties
@@ -172,6 +173,7 @@ const Properties = () => {
 
   useEffect(() => {
     fetchProperties();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchQuery, filters, sortBy, sortOrder]);
 
   // Get unique values for filters

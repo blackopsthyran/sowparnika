@@ -67,6 +67,7 @@ const ManageListingsPage = () => {
     if (isAuthenticated) {
       fetchProperties();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   const fetchProperties = async () => {

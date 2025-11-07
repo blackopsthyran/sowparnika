@@ -91,13 +91,8 @@ const EditListingPage = () => {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  useEffect(() => {
-    if (id && isAuthenticated) {
-      fetchProperty();
-    }
-  }, [id, isAuthenticated]);
-
-  const fetchProperty = async () => {
+  const fetchProperty = React.useCallback(async () => {
+    if (!id) return;
     try {
       setLoading(true);
       const response = await fetch(`/api/get-property?id=${id}`);
@@ -141,7 +136,13 @@ const EditListingPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, router]);
+
+  useEffect(() => {
+    if (id && isAuthenticated) {
+      fetchProperty();
+    }
+  }, [id, isAuthenticated, fetchProperty]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setNewImages((prev) => [...prev, ...acceptedFiles]);

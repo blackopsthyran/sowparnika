@@ -57,11 +57,11 @@ const About = () => {
             <Box bg="white" borderRadius="xl" p={{ base: 6, md: 10 }} boxShadow="lg">
               <VStack spacing={6} align="stretch">
                 <Text fontSize="lg" color="gray.700" lineHeight="tall">
-                  We are more than just a property listing platform. We are a dedicated team of real estate professionals, consultants, and local market experts committed to helping individuals and businesses find the perfect space—whether it's a dream home, a smart investment, or a commercial opportunity.
+                  We are more than just a property listing platform. We are a dedicated team of real estate professionals, consultants, and local market experts committed to helping individuals and businesses find the perfect space—whether it&apos;s a dream home, a smart investment, or a commercial opportunity.
                 </Text>
 
                 <Text fontSize="lg" color="gray.700" lineHeight="tall">
-                  With Kakkanad rapidly growing as Kochi's IT and residential hub, the demand for quality, well-located, and verified properties is higher than ever. That's where we come in. At <strong>Sowparnika Properties</strong>, we handpick listings, thoroughly verify documents, and ensure that every property showcased on our platform meets high standards of quality and legality.
+                  With Kakkanad rapidly growing as Kochi&apos;s IT and residential hub, the demand for quality, well-located, and verified properties is higher than ever. That&apos;s where we come in. At <strong>Sowparnika Properties</strong>, we handpick listings, thoroughly verify documents, and ensure that every property showcased on our platform meets high standards of quality and legality.
                 </Text>
 
                 <Heading
@@ -108,7 +108,7 @@ const About = () => {
                       For Everyone
                     </Heading>
                     <Text color="gray.700" lineHeight="tall">
-                      Whether you're a first-time buyer, an NRI looking to invest, a landlord seeking tenants, or someone searching for rental options, we cater to all types of clients with equal care.
+                      Whether you&apos;re a first-time buyer, an NRI looking to invest, a landlord seeking tenants, or someone searching for rental options, we cater to all types of clients with equal care.
                     </Text>
                   </Box>
                 </VStack>
