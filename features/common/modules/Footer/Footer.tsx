@@ -211,6 +211,7 @@ const IconButtonLink = ({ icon, href, ariaLabel }: { icon: any; href: string; ar
       _hover={{ bg: 'blue.600', color: 'white', transform: 'translateY(-2px)' }}
       transition="all 0.2s"
       aria-label={ariaLabel}
+      role="button"
     >
       <Icon as={icon} />
     </Box>

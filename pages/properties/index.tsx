@@ -237,13 +237,11 @@ const Properties = () => {
             <VStack spacing={4} align="stretch">
               {/* Search Bar */}
               <InputGroup size="lg">
-                <InputLeftElement pointerEvents="none">
-                  <FiSearch color="gray" />
-                </InputLeftElement>
+                <InputLeftElement pointerEvents="none" children={<FiSearch style={{ color: 'gray' }} />} />
                 <Input
                   placeholder="Search by title, address, or city..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                   borderRadius="lg"
                 />
               </InputGroup>
@@ -253,7 +251,7 @@ const Properties = () => {
                 <Select
                   placeholder="All Property Types"
                   value={filters.propertyType}
-                  onChange={(e) =>
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     setFilters({ ...filters, propertyType: e.target.value })
                   }
                   borderRadius="lg"
@@ -268,7 +266,7 @@ const Properties = () => {
                 <Select
                   placeholder="Sale or Rent"
                   value={filters.sellingType}
-                  onChange={(e) =>
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     setFilters({ ...filters, sellingType: e.target.value })
                   }
                   borderRadius="lg"
@@ -280,7 +278,7 @@ const Properties = () => {
                 <Select
                   placeholder="All Cities"
                   value={filters.city}
-                  onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, city: e.target.value })}
                   borderRadius="lg"
                 >
                   {uniqueCities.map((city) => (
@@ -294,7 +292,7 @@ const Properties = () => {
                   <Select
                     placeholder="Sort By"
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortBy(e.target.value)}
                     borderRadius="lg"
                     flex={1}
                   >
