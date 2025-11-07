@@ -1,0 +1,251 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Box, Text, Icon, Flex, Input, IconButton, HStack, VStack, Slider, SliderTrack, SliderFilledTrack, SliderThumb } from '@chakra-ui/react';
+import { FiDollarSign, FiX } from 'react-icons/fi';
+import { ChevronDownIcon } from '@chakra-ui/icons';
+
+interface PriceRangeSelectorProps {
+  value: string;
+  onChange: (value: string) => void;
+  maxW?: string | object;
+}
+
+const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
+  value,
+  onChange,
+  maxW = '180px',
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [sliderValue, setSliderValue] = useState([0, 10000000]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (value) {
+      const [min, max] = value.split('-').map(Number);
+      if (!isNaN(min)) setMinPrice(min.toLocaleString());
+      if (!isNaN(max)) setMaxPrice(max.toLocaleString());
+      setSliderValue([min || 0, max || 10000000]);
+    }
+  }, [value]);
+
+  const handleSliderChange = (val: number[]) => {
+    setSliderValue(val);
+    setMinPrice(val[0].toLocaleString());
+    setMaxPrice(val[1].toLocaleString());
+    onChange(`${val[0]}-${val[1]}`);
+  };
+
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/,/g, '');
+    if (val === '' || /^\d+$/.test(val)) {
+      setMinPrice(val === '' ? '' : Number(val).toLocaleString());
+      const numVal = val === '' ? 0 : Number(val);
+      setSliderValue([numVal, sliderValue[1]]);
+      onChange(`${numVal}-${sliderValue[1]}`);
+    }
+  };
+
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/,/g, '');
+    if (val === '' || /^\d+$/.test(val)) {
+      setMaxPrice(val === '' ? '' : Number(val).toLocaleString());
+      const numVal = val === '' ? 10000000 : Number(val);
+      setSliderValue([sliderValue[0], numVal]);
+      onChange(`${sliderValue[0]}-${numVal}`);
+    }
+  };
+
+  const clearMin = () => {
+    setMinPrice('');
+    setSliderValue([0, sliderValue[1]]);
+    onChange(`0-${sliderValue[1]}`);
+  };
+
+  const clearMax = () => {
+    setMaxPrice('');
+    setSliderValue([sliderValue[0], 10000000]);
+    onChange(`${sliderValue[0]}-10000000`);
+  };
+
+  const displayText = value && value !== '0-10000000' 
+    ? `₹ ${minPrice || 'No Min'} - ₹ ${maxPrice || 'No Max'}`
+    : 'Any price';
+
+  return (
+    <Box position="relative" maxW={maxW} w="full" ref={dropdownRef}>
+      <Box
+        as="button"
+        type="button"
+        w="full"
+        px={4}
+        py={3}
+        bg="rgba(255, 255, 255, 0.95)"
+        backdropFilter="blur(10px) saturate(180%)"
+        border="1px solid rgba(255, 255, 255, 0.3)"
+        borderRadius="lg"
+        cursor="pointer"
+        transition="all 0.2s ease"
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        _hover={{
+          bg: 'rgba(255, 255, 255, 1)',
+          borderColor: 'rgba(59, 130, 246, 0.5)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        }}
+        _active={{
+          transform: 'scale(0.98)',
+        }}
+        onClick={() => setIsOpen(!isOpen)}
+        boxShadow="0 2px 8px rgba(0, 0, 0, 0.05)"
+      >
+        <Flex align="center" gap={2} flex={1}>
+          <Box color="gray.500" fontSize="sm">
+            <FiDollarSign />
+          </Box>
+          <Text
+            fontSize="sm"
+            fontWeight="500"
+            color={value && value !== '0-10000000' ? 'gray.800' : 'gray.500'}
+            noOfLines={1}
+          >
+            {displayText}
+          </Text>
+        </Flex>
+        <Icon
+          as={ChevronDownIcon}
+          w={4}
+          h={4}
+          color="gray.500"
+          transform={isOpen ? 'rotate(180deg)' : 'rotate(0deg)'}
+          transition="transform 0.2s ease"
+        />
+      </Box>
+
+      {isOpen && (
+        <Box
+          position="absolute"
+          top="100%"
+          left={0}
+          right={0}
+          mt={2}
+          bg="rgba(255, 255, 255, 0.98)"
+          backdropFilter="blur(20px) saturate(200%)"
+          border="1px solid rgba(255, 255, 255, 0.4)"
+          borderRadius="lg"
+          boxShadow="0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5) inset"
+          zIndex={1000}
+          p={4}
+          minW="320px"
+        >
+          <VStack spacing={4} align="stretch">
+            {/* Min/Max Inputs */}
+            <HStack spacing={3}>
+              <Box flex={1}>
+                <Text fontSize="xs" color="gray.600" mb={1} fontWeight="500">
+                  Min Price
+                </Text>
+                <HStack spacing={2}>
+                  <Text fontSize="sm" color="gray.700">₹</Text>
+                  <Input
+                    placeholder="No Min"
+                    value={minPrice}
+                    onChange={handleMinChange}
+                    size="sm"
+                    borderRadius="md"
+                    border="1px solid"
+                    borderColor="gray.300"
+                    _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
+                  />
+                  {minPrice && (
+                    <IconButton
+                      aria-label="Clear min"
+                      icon={<FiX />}
+                      size="xs"
+                      variant="ghost"
+                      onClick={clearMin}
+                    />
+                  )}
+                </HStack>
+              </Box>
+              <Box flex={1}>
+                <Text fontSize="xs" color="gray.600" mb={1} fontWeight="500">
+                  Max Price
+                </Text>
+                <HStack spacing={2}>
+                  <Text fontSize="sm" color="gray.700">₹</Text>
+                  <Input
+                    placeholder="No Max"
+                    value={maxPrice}
+                    onChange={handleMaxChange}
+                    size="sm"
+                    borderRadius="md"
+                    border="1px solid"
+                    borderColor="gray.300"
+                    _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px blue.500' }}
+                  />
+                  {maxPrice && (
+                    <IconButton
+                      aria-label="Clear max"
+                      icon={<FiX />}
+                      size="xs"
+                      variant="ghost"
+                      onClick={clearMax}
+                    />
+                  )}
+                </HStack>
+              </Box>
+            </HStack>
+
+            {/* Slider */}
+            <Box>
+              <Text fontSize="xs" color="gray.600" mb={2} fontWeight="500">
+                Price Range
+              </Text>
+              <Box position="relative">
+                <Slider
+                  value={sliderValue}
+                  onChange={handleSliderChange}
+                  min={0}
+                  max={10000000}
+                  step={100000}
+                  colorScheme="blue"
+                  aria-label={['min-price', 'max-price']}
+                >
+                  <SliderTrack bg="gray.200" h={2} borderRadius="full">
+                    <SliderFilledTrack />
+                  </SliderTrack>
+                  <SliderThumb boxSize={5} index={0} bg="blue.500" border="2px solid white" boxShadow="0 2px 4px rgba(0,0,0,0.2)" />
+                  <SliderThumb boxSize={5} index={1} bg="blue.500" border="2px solid white" boxShadow="0 2px 4px rgba(0,0,0,0.2)" />
+                </Slider>
+              </Box>
+              <HStack justify="space-between" mt={2}>
+                <Text fontSize="xs" color="gray.500" fontWeight="500">
+                  ₹ {sliderValue[0].toLocaleString()}
+                </Text>
+                <Text fontSize="xs" color="gray.500" fontWeight="500">
+                  ₹ {sliderValue[1].toLocaleString()}
+                </Text>
+              </HStack>
+            </Box>
+          </VStack>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+export default PriceRangeSelector;
+
