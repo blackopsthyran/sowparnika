@@ -40,12 +40,6 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
     }
   }, [value]);
 
-  const handleSliderChange = (val: number[]) => {
-    setSliderValue(val);
-    setMinPrice(val[0].toLocaleString());
-    setMaxPrice(val[1].toLocaleString());
-    onChange(`${val[0]}-${val[1]}`);
-  };
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/,/g, '');
@@ -214,31 +208,58 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
               <Text fontSize="xs" color="gray.600" mb={2} fontWeight="500">
                 Price Range
               </Text>
-              <Box position="relative">
-                <Slider
-                  value={sliderValue as any}
-                  onChange={handleSliderChange as any}
-                  min={0}
-                  max={10000000}
-                  step={100000}
-                  colorScheme="blue"
-                  aria-label="price-range"
-                >
-                  <SliderTrack bg="gray.200" h={2} borderRadius="full">
-                    <SliderFilledTrack />
-                  </SliderTrack>
-                  <SliderThumb boxSize={5} index={0} bg="blue.500" border="2px solid white" boxShadow="0 2px 4px rgba(0,0,0,0.2)" />
-                  <SliderThumb boxSize={5} index={1} bg="blue.500" border="2px solid white" boxShadow="0 2px 4px rgba(0,0,0,0.2)" />
-                </Slider>
-              </Box>
-              <HStack justify="space-between" mt={2}>
-                <Text fontSize="xs" color="gray.500" fontWeight="500">
-                  ₹ {sliderValue[0].toLocaleString()}
-                </Text>
-                <Text fontSize="xs" color="gray.500" fontWeight="500">
-                  ₹ {sliderValue[1].toLocaleString()}
-                </Text>
-              </HStack>
+              <VStack spacing={4}>
+                {/* Min Price Slider */}
+                <Box w="full">
+                  <Text fontSize="xs" color="gray.500" mb={1}>
+                    Min: ₹ {sliderValue[0].toLocaleString()}
+                  </Text>
+                  <Slider
+                    value={sliderValue[0]}
+                    onChange={(val) => {
+                      const newValue = [val, sliderValue[1]];
+                      setSliderValue(newValue);
+                      setMinPrice(val.toLocaleString());
+                      onChange(`${val}-${sliderValue[1]}`);
+                    }}
+                    min={0}
+                    max={sliderValue[1]}
+                    step={100000}
+                    colorScheme="blue"
+                    aria-label="min-price"
+                  >
+                    <SliderTrack bg="gray.200" h={2} borderRadius="full">
+                      <SliderFilledTrack />
+                    </SliderTrack>
+                    <SliderThumb boxSize={5} bg="blue.500" border="2px solid white" boxShadow="0 2px 4px rgba(0,0,0,0.2)" />
+                  </Slider>
+                </Box>
+                {/* Max Price Slider */}
+                <Box w="full">
+                  <Text fontSize="xs" color="gray.500" mb={1}>
+                    Max: ₹ {sliderValue[1].toLocaleString()}
+                  </Text>
+                  <Slider
+                    value={sliderValue[1]}
+                    onChange={(val) => {
+                      const newValue = [sliderValue[0], val];
+                      setSliderValue(newValue);
+                      setMaxPrice(val.toLocaleString());
+                      onChange(`${sliderValue[0]}-${val}`);
+                    }}
+                    min={sliderValue[0]}
+                    max={10000000}
+                    step={100000}
+                    colorScheme="blue"
+                    aria-label="max-price"
+                  >
+                    <SliderTrack bg="gray.200" h={2} borderRadius="full">
+                      <SliderFilledTrack />
+                    </SliderTrack>
+                    <SliderThumb boxSize={5} bg="blue.500" border="2px solid white" boxShadow="0 2px 4px rgba(0,0,0,0.2)" />
+                  </Slider>
+                </Box>
+              </VStack>
             </Box>
           </VStack>
         </Box>
