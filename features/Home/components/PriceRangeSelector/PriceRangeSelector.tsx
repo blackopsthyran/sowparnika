@@ -107,7 +107,7 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
       >
         <Flex align="center" gap={2} flex={1}>
           <Text
-            fontSize="15px"
+            fontSize={{ base: '12px', md: '15px' }}
             fontWeight="500"
             color={value && value !== '0-10000000' ? 'gray.900' : 'gray.500'}
             noOfLines={1}
@@ -128,21 +128,37 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
       </Box>
 
       {isOpen && (
-        <Box
-          position="absolute"
-          top="100%"
-          left={0}
-          right={0}
-          mt={2}
-          bg="rgba(255, 255, 255, 0.98)"
-          backdropFilter="blur(20px) saturate(200%)"
-          border="1px solid rgba(255, 255, 255, 0.4)"
-          borderRadius="lg"
-          boxShadow="0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5) inset"
-          zIndex={1000}
-          p={4}
-          minW="320px"
-        >
+        <>
+          {/* Backdrop for mobile */}
+          <Box
+            position="fixed"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            bg="blackAlpha.300"
+            zIndex={9998}
+            display={{ base: 'block', md: 'none' }}
+            onClick={() => setIsOpen(false)}
+          />
+          <Box
+            position={{ base: 'fixed', md: 'absolute' }}
+            top={{ base: 'auto', md: '100%' }}
+            bottom={{ base: '20px', md: 'auto' }}
+            left={{ base: '50%', md: 0 }}
+            right={{ base: 'auto', md: 0 }}
+            transform={{ base: 'translateX(-50%)', md: 'none' }}
+            mt={{ base: 0, md: 2 }}
+            bg="white"
+            border="1px solid rgba(0, 0, 0, 0.1)"
+            borderRadius="lg"
+            boxShadow="0 8px 32px rgba(0, 0, 0, 0.15)"
+            zIndex={9999}
+            p={4}
+            minW={{ base: '280px', md: '320px' }}
+            maxW={{ base: 'calc(100vw - 32px)', md: '400px' }}
+            w={{ base: 'auto', md: 'auto' }}
+          >
           <VStack spacing={4} align="stretch">
             {/* Min/Max Inputs */}
             <HStack spacing={3}>
@@ -261,7 +277,8 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
               </VStack>
             </Box>
           </VStack>
-        </Box>
+          </Box>
+        </>
       )}
     </Box>
   );

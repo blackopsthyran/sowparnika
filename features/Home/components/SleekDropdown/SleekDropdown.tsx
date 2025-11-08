@@ -86,63 +86,79 @@ const SleekDropdown: React.FC<SleekDropdownProps> = ({
       </Box>
 
       {isOpen && (
-        <Box
-          position="absolute"
-          top="100%"
-          left={0}
-          right={0}
-          mt={2}
-          bg="rgba(255, 255, 255, 0.98)"
-          backdropFilter="blur(20px) saturate(200%)"
-          border="1px solid rgba(255, 255, 255, 0.4)"
-          borderRadius="lg"
-          boxShadow="0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5) inset"
-          zIndex={1000}
-          overflow="hidden"
-          py={1}
-          maxH="300px"
-          overflowY="auto"
-          sx={{
-            '&::-webkit-scrollbar': {
-              width: '6px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'rgba(0, 0, 0, 0.05)',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: 'rgba(0, 0, 0, 0.2)',
-              borderRadius: '3px',
-            },
-          }}
-        >
-          {options.map((option) => (
-            <Box
-              key={option.value}
-              as="button"
-              type="button"
-              w="full"
-              px={4}
-              py={2.5}
-              textAlign="left"
-              fontSize="sm"
-              fontWeight={value === option.value ? '600' : '500'}
-              color={value === option.value ? 'blue.600' : 'gray.700'}
-              bg={value === option.value ? 'rgba(59, 130, 246, 0.1)' : 'transparent'}
-              transition="all 0.15s ease"
-              _hover={{
-                bg: value === option.value 
-                  ? 'rgba(59, 130, 246, 0.15)' 
-                  : 'rgba(0, 0, 0, 0.05)',
-              }}
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-            >
-              {option.label}
-            </Box>
-          ))}
-        </Box>
+        <>
+          {/* Backdrop for mobile */}
+          <Box
+            position="fixed"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            bg="blackAlpha.300"
+            zIndex={9998}
+            display={{ base: 'block', md: 'none' }}
+            onClick={() => setIsOpen(false)}
+          />
+          <Box
+            position={{ base: 'fixed', md: 'absolute' }}
+            top={{ base: 'auto', md: '100%' }}
+            bottom={{ base: '20px', md: 'auto' }}
+            left={{ base: '50%', md: 0 }}
+            right={{ base: 'auto', md: 0 }}
+            transform={{ base: 'translateX(-50%)', md: 'none' }}
+            mt={{ base: 0, md: 2 }}
+            bg="white"
+            border="1px solid rgba(0, 0, 0, 0.1)"
+            borderRadius="lg"
+            boxShadow="0 8px 32px rgba(0, 0, 0, 0.15)"
+            zIndex={9999}
+            overflow="hidden"
+            py={2}
+            px={2}
+            minW={{ base: '280px', md: '200px' }}
+            maxW={{ base: 'calc(100vw - 32px)', md: '300px' }}
+            w={{ base: 'auto', md: 'auto' }}
+          >
+          <Flex
+            direction="row"
+            wrap="wrap"
+            gap={1}
+            w="100%"
+          >
+            {options.map((option) => (
+              <Box
+                key={option.value}
+                as="button"
+                type="button"
+                flex={{ base: '1 1 calc(33.333% - 8px)', md: 'none' }}
+                minW={{ base: 'calc(33.333% - 8px)', md: 'auto' }}
+                px={{ base: 2, md: 4 }}
+                py={{ base: 2, md: 2.5 }}
+                textAlign="center"
+                fontSize={{ base: 'xs', md: 'sm' }}
+                fontWeight={value === option.value ? '700' : '500'}
+                color={value === option.value ? 'white' : 'gray.900'}
+                bg={value === option.value ? 'gray.900' : 'gray.100'}
+                borderRadius="md"
+                transition="all 0.15s ease"
+                border="1px solid"
+                borderColor={value === option.value ? 'gray.900' : 'transparent'}
+                _hover={{
+                  bg: value === option.value ? 'gray.800' : 'gray.200',
+                  borderColor: value === option.value ? 'gray.800' : 'gray.300',
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+              >
+                {option.label}
+              </Box>
+            ))}
+          </Flex>
+          </Box>
+        </>
       )}
     </Box>
   );

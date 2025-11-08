@@ -124,9 +124,15 @@ const HeroSection = () => {
       />
 
       {/* Content */}
-      <Container maxW="container.xl" position="relative" zIndex={1}>
-        <VStack spacing={8} color="white" textAlign="center">
-          <VStack spacing={4}>
+      <Container 
+        maxW="container.xl" 
+        position="relative" 
+        zIndex={1}
+        px={{ base: 4, md: 6, lg: 8 }}
+        w="100%"
+      >
+        <VStack spacing={8} color="white" textAlign="center" w="100%">
+          <VStack spacing={4} w="100%">
             <Heading
               fontWeight="700"
               fontSize={{ base: '3xl', md: '5xl', lg: '6xl' }}
@@ -144,8 +150,9 @@ const HeroSection = () => {
 
           {/* Search Bar */}
           <Box
-            w="full"
+            w="100%"
             maxW="1100px"
+            mx="auto"
             bg="rgba(250, 248, 245, 0.95)"
             backdropFilter="blur(24px) saturate(200%)"
             borderRadius="full"
@@ -153,6 +160,12 @@ const HeroSection = () => {
             boxShadow="0 20px 60px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)"
             border="1px solid rgba(220, 215, 210, 0.6)"
             position="relative"
+            sx={{
+              '@media (max-width: 767px)': {
+                p: '1px',
+                borderRadius: 'full',
+              },
+            }}
             _before={{
               content: '""',
               position: 'absolute',
@@ -169,17 +182,25 @@ const HeroSection = () => {
               direction="row"
               align="center"
               gap={0}
-              h="44px"
+              h={{ base: '40px', md: '44px' }}
+              w="100%"
+              overflow="hidden"
             >
               {/* Location Input */}
               <HStack 
-                flex={1} 
-                spacing={3.5}
-                px={5}
+                flex={{ base: '1 1 0', md: '1 1 0' }}
+                minW={0}
+                spacing={{ base: 2, md: 3.5 }}
+                px={{ base: 3, md: 5 }}
                 h="full"
                 borderRight="1px solid rgba(0, 0, 0, 0.06)"
+                flexShrink={1}
               >
-                <Box color="gray.700" sx={{ '& svg': { strokeWidth: '2.5' } }}>
+                <Box 
+                  color="gray.700" 
+                  sx={{ '& svg': { strokeWidth: '2.5', width: { base: '18px', md: '20px' }, height: { base: '18px', md: '20px' } } }} 
+                  flexShrink={0}
+                >
                   <FiMapPin size={20} />
                 </Box>
                 <Input
@@ -189,14 +210,16 @@ const HeroSection = () => {
                   border="none"
                   _focus={{ boxShadow: 'none', outline: 'none' }}
                   color="gray.900"
-                  fontSize="15px"
+                  fontSize={{ base: '13px', md: '15px' }}
                   bg="transparent"
-                  _placeholder={{ color: 'gray.500', fontFamily: "'Playfair Display', serif" }}
+                  _placeholder={{ color: 'gray.500', fontFamily: "'Playfair Display', serif", fontSize: { base: '13px', md: '15px' } }}
                   px={0}
                   h="auto"
                   fontFamily="'Playfair Display', serif"
                   fontWeight="500"
                   letterSpacing="0.01em"
+                  flex={1}
+                  minW={0}
                 />
               </HStack>
               
@@ -204,15 +227,18 @@ const HeroSection = () => {
               <Box 
                 position="relative"
                 borderRight="1px solid rgba(0, 0, 0, 0.06)"
-                minW="200px"
+                minW={{ base: '100px', md: '200px' }}
+                maxW={{ base: '120px', md: '200px' }}
+                w={{ base: '100px', md: 'auto' }}
                 h="full"
+                flexShrink={0}
                 sx={{
                   '& > div': {
                     bg: 'transparent !important',
                     border: 'none !important',
                     borderRadius: '0 !important',
                     boxShadow: 'none !important',
-                    w: 'full',
+                    w: '100%',
                     h: 'full',
                     '& > button': {
                       bg: 'transparent !important',
@@ -221,11 +247,15 @@ const HeroSection = () => {
                       boxShadow: 'none !important',
                       h: 'full',
                       py: 0,
-                      px: 5,
+                      px: { base: 2, md: 5 },
                       _hover: {
                         bg: 'rgba(0, 0, 0, 0.03) !important',
                       },
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.2s ease',
+                      fontSize: { base: '12px', md: '15px' },
+                      '& > div': {
+                        fontSize: { base: '12px', md: '15px' },
+                      }
                     }
                   }
                 }}
@@ -233,7 +263,7 @@ const HeroSection = () => {
                 <PriceRangeSelector
                   value={priceRange}
                   onChange={setPriceRange}
-                  maxW="200px"
+                  maxW="100%"
                 />
               </Box>
               
@@ -241,15 +271,18 @@ const HeroSection = () => {
               <Box 
                 position="relative"
                 borderRight="1px solid rgba(0, 0, 0, 0.06)"
-                minW="160px"
+                minW={{ base: '90px', md: '160px' }}
+                maxW={{ base: '110px', md: '160px' }}
+                w={{ base: '90px', md: 'auto' }}
                 h="full"
+                flexShrink={0}
                 sx={{
                   '& > div': {
                     bg: 'transparent !important',
                     border: 'none !important',
                     borderRadius: '0 !important',
                     boxShadow: 'none !important',
-                    w: 'full',
+                    w: '100%',
                     h: 'full',
                     '& > button': {
                       bg: 'transparent !important',
@@ -258,11 +291,15 @@ const HeroSection = () => {
                       boxShadow: 'none !important',
                       h: 'full',
                       py: 0,
-                      px: 5,
+                      px: { base: 2, md: 5 },
                       _hover: {
                         bg: 'rgba(0, 0, 0, 0.03) !important',
                       },
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.2s ease',
+                      fontSize: { base: '12px', md: '15px' },
+                      '& > div': {
+                        fontSize: { base: '12px', md: '15px' },
+                      }
                     }
                   }
                 }}
@@ -271,14 +308,14 @@ const HeroSection = () => {
                   placeholder="Any beds"
                   value={propertyType}
                   onChange={setPropertyType}
-                  maxW="160px"
+                  maxW="100%"
                   options={[
-                    { value: '', label: 'Any beds' },
-                    { value: '1', label: '1+ Beds' },
-                    { value: '2', label: '2+ Beds' },
-                    { value: '3', label: '3+ Beds' },
-                    { value: '4', label: '4+ Beds' },
-                    { value: '5', label: '5+ Beds' },
+                    { value: '', label: 'Any' },
+                    { value: '1', label: '1+' },
+                    { value: '2', label: '2+' },
+                    { value: '3', label: '3+' },
+                    { value: '4', label: '4+' },
+                    { value: '5', label: '5+' },
                   ]}
                 /> 
               </Box>
@@ -287,7 +324,7 @@ const HeroSection = () => {
               <Button
                 bg="linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)"
                 color="white"
-                px={10}
+                px={{ base: 4, md: 10 }}
                 h="full"
                 borderRadius="full"
                 onClick={handleSearch}
@@ -301,14 +338,14 @@ const HeroSection = () => {
                 }}
                 transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                 fontWeight="600"
-                ml={3}
+                ml={{ base: 2, md: 3 }}
                 flexShrink={0}
-                fontSize="15px"
+                fontSize={{ base: '13px', md: '15px' }}
                 fontFamily="'Playfair Display', serif"
                 letterSpacing="0.02em"
                 boxShadow="0 4px 12px rgba(20, 184, 166, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
                 textTransform="none"
-                minW="140px"
+                minW={{ base: '80px', md: '140px' }}
               >
                 Search
               </Button>
