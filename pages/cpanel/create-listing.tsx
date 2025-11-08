@@ -28,7 +28,7 @@ import DefaultLayout from '@/features/Layout/DefaultLayout';
 import { useDropzone } from 'react-dropzone';
 import dynamic from 'next/dynamic';
 import {
-  FiHome,
+  FiHome as FiHomeIcon,
   FiDollarSign,
   FiMapPin,
   FiUser,
@@ -36,6 +36,7 @@ import {
   FiImage,
   FiX,
   FiUpload,
+  FiHome,
 } from 'react-icons/fi';
 import Link from 'next/link';
 
@@ -54,17 +55,22 @@ const CreateListingPage = () => {
     content: '',
     propertyType: '',
     bhk: '',
+    baths: '',
     sellingType: 'Sale',
     price: '',
     areaSize: '',
     areaUnit: 'Sq. Ft.',
     city: '',
     address: '',
-    state: '',
+    state: 'Kerala',
     ownerName: '',
     ownerNumber: '',
     status: '',
   });
+
+  // Property types that don't require bedrooms/bathrooms
+  const landPropertyTypes = ['plot', 'land', 'commercial land'];
+  const showBedroomsBathrooms = formData.propertyType && !landPropertyTypes.includes(formData.propertyType.toLowerCase());
 
   const [amenities, setAmenities] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
@@ -160,8 +166,11 @@ const CreateListingPage = () => {
         },
         body: JSON.stringify({
           ...formData,
-          amenities,
+          amenities: showBedroomsBathrooms ? amenities : [],
           images: imageUrls,
+          // Clear BHK and baths for land types
+          bhk: showBedroomsBathrooms ? formData.bhk : '',
+          baths: showBedroomsBathrooms ? formData.baths : '',
         }),
       });
 
@@ -215,41 +224,110 @@ const CreateListingPage = () => {
 
   return (
     <DefaultLayout title="Create Listing" description="Create a new property listing">
-      <Box bg="gray.50" minH="100vh" py={8}>
+      <Box bg="white" minH="100vh" py={12}>
         <Container maxW="container.xl">
-          <VStack spacing={6} align="stretch">
-            <Flex justify="space-between" align="center">
+          <VStack spacing={8} align="stretch">
+            <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
               <Box>
-                <Heading size="xl" mb={2} color="blue.700">
+                <Heading 
+                  size="xl" 
+                  mb={3} 
+                  color="gray.900"
+                  fontFamily="'Playfair Display', serif"
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                >
                   Create New Listing
                 </Heading>
-                <Text color="gray.600">Add a new property to your listings</Text>
+                <Text color="gray.900" fontSize="sm" letterSpacing="0.1em">
+                  Add a new property to your listings
+                </Text>
               </Box>
-              <Link href="/cpanel/listings">
-                <Button variant="outline">Back to Listings</Button>
-              </Link>
+              <HStack spacing={3} flexWrap="wrap">
+                <Link href="/">
+                  <Button
+                    leftIcon={<FiHome />}
+                    variant="outline"
+                    borderColor="gray.900"
+                    color="gray.900"
+                    borderRadius="0"
+                    _hover={{
+                      bg: 'gray.900',
+                      color: 'white',
+                    }}
+                    fontFamily="'Playfair Display', serif"
+                    fontWeight="600"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Go to Home
+                  </Button>
+                </Link>
+                <Link href="/cpanel/listings">
+                  <Button 
+                    variant="outline"
+                    borderColor="gray.900"
+                    color="gray.900"
+                    borderRadius="0"
+                    fontWeight="600"
+                    letterSpacing="0.1em"
+                    textTransform="uppercase"
+                    _hover={{
+                      bg: 'gray.900',
+                      color: 'white',
+                    }}
+                  >
+                    Back to Listings
+                  </Button>
+                </Link>
+              </HStack>
             </Flex>
 
             <form onSubmit={handleSubmit}>
               <VStack spacing={6} align="stretch">
                 {/* Basic Information Card */}
-                <Card>
-                  <CardBody>
-                    <Heading size="md" mb={4}>Basic Information</Heading>
+                <Box
+                  border="2px solid"
+                  borderColor="gray.900"
+                  borderRadius="0"
+                  bg="white"
+                  p={8}
+                >
+                  <Heading 
+                    size="md" 
+                    mb={6}
+                    color="gray.900"
+                    fontFamily="'Playfair Display', serif"
+                    fontWeight="700"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Basic Information
+                  </Heading>
                     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                       <FormControl isRequired gridColumn={{ base: '1', md: '1 / -1' }}>
-                        <FormLabel>Property Title</FormLabel>
+                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                          Property Title
+                        </FormLabel>
                         <Input
                           name="title"
                           value={formData.title}
                           onChange={handleInputChange}
                           placeholder="e.g., Luxury 3BHK Apartment"
+                          bg="white"
+                          borderColor="gray.300"
+                          color="gray.900"
+                          borderRadius="0"
+                          _placeholder={{ color: 'gray.400' }}
                         />
                       </FormControl>
 
                       <FormControl isRequired gridColumn={{ base: '1', md: '1 / -1' }}>
-                        <FormLabel>Description</FormLabel>
-                        <Box border="1px" borderColor="gray.300" borderRadius="md" overflow="hidden">
+                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                          Description
+                        </FormLabel>
+                        <Box border="1px" borderColor="gray.300" borderRadius="0" overflow="hidden">
                           <ReactQuill
                             theme="snow"
                             value={formData.content}
@@ -260,237 +338,516 @@ const CreateListingPage = () => {
                       </FormControl>
 
                       <FormControl isRequired>
-                        <FormLabel>Property Type</FormLabel>
+                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                          Property Type
+                        </FormLabel>
                         <Select
                           name="propertyType"
                           value={formData.propertyType}
                           onChange={handleInputChange}
+                          bg="white"
+                          borderColor="gray.300"
+                          color="gray.900"
+                          borderRadius="0"
+                          _focus={{
+                            borderColor: 'gray.900',
+                            boxShadow: '0 0 0 1px gray.900',
+                          }}
                         >
                           <option value="">Select Type</option>
                           <option value="Apartment">Apartment</option>
                           <option value="House">House</option>
                           <option value="Villa">Villa</option>
+                          <option value="Flat">Flat</option>
                           <option value="Studio">Studio</option>
                           <option value="Penthouse">Penthouse</option>
                           <option value="Townhouse">Townhouse</option>
+                          <option value="Plot">Plot</option>
+                          <option value="Land">Land</option>
+                          <option value="Commercial Land">Commercial Land</option>
+                          <option value="Warehouse">Warehouse</option>
+                          <option value="Commercial Building">Commercial Building</option>
                         </Select>
                       </FormControl>
 
-                      <FormControl isRequired>
-                        <FormLabel>BHK</FormLabel>
-                        <Select
-                          name="bhk"
-                          value={formData.bhk}
-                          onChange={handleInputChange}
-                        >
-                          <option value="">Select BHK</option>
-                          <option value="1">1 BHK</option>
-                          <option value="2">2 BHK</option>
-                          <option value="3">3 BHK</option>
-                          <option value="4">4 BHK</option>
-                          <option value="5+">5+ BHK</option>
-                        </Select>
-                      </FormControl>
+                      {showBedroomsBathrooms && (
+                        <>
+                          <FormControl isRequired>
+                            <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                              BHK / Bedrooms
+                            </FormLabel>
+                            <Select
+                              name="bhk"
+                              value={formData.bhk}
+                              onChange={handleInputChange}
+                              bg="white"
+                              borderColor="gray.300"
+                              color="gray.900"
+                              borderRadius="0"
+                              _focus={{
+                                borderColor: 'gray.900',
+                                boxShadow: '0 0 0 1px gray.900',
+                              }}
+                            >
+                              <option value="">Select BHK</option>
+                              <option value="1">1 BHK</option>
+                              <option value="2">2 BHK</option>
+                              <option value="3">3 BHK</option>
+                              <option value="4">4 BHK</option>
+                              <option value="5">5 BHK</option>
+                              <option value="6">6 BHK</option>
+                              <option value="7+">7+ BHK</option>
+                            </Select>
+                          </FormControl>
+
+                          <FormControl isRequired>
+                            <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                              Bathrooms
+                            </FormLabel>
+                            <Select
+                              name="baths"
+                              value={formData.baths}
+                              onChange={handleInputChange}
+                              bg="white"
+                              borderColor="gray.300"
+                              color="gray.900"
+                              borderRadius="0"
+                              _focus={{
+                                borderColor: 'gray.900',
+                                boxShadow: '0 0 0 1px gray.900',
+                              }}
+                            >
+                              <option value="">Select Bathrooms</option>
+                              <option value="1">1 Bathroom</option>
+                              <option value="2">2 Bathrooms</option>
+                              <option value="3">3 Bathrooms</option>
+                              <option value="4">4 Bathrooms</option>
+                              <option value="5">5 Bathrooms</option>
+                              <option value="6+">6+ Bathrooms</option>
+                            </Select>
+                          </FormControl>
+                        </>
+                      )}
 
                       <FormControl isRequired>
-                        <FormLabel>Selling Type</FormLabel>
+                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                          Selling Type
+                        </FormLabel>
                         <Select
                           name="sellingType"
                           value={formData.sellingType}
                           onChange={handleInputChange}
+                          bg="white"
+                          borderColor="gray.300"
+                          color="gray.900"
+                          borderRadius="0"
                         >
                           <option value="Sale">For Sale</option>
                           <option value="Rent">For Rent</option>
                         </Select>
                       </FormControl>
                     </SimpleGrid>
-                  </CardBody>
-                </Card>
+                </Box>
 
                 {/* Price & Location Card */}
-                <Card>
-                  <CardBody>
-                    <Heading size="md" mb={4}>Price & Location</Heading>
-                    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                      <FormControl isRequired>
-                        <FormLabel>Price</FormLabel>
+                <Box
+                  border="2px solid"
+                  borderColor="gray.900"
+                  borderRadius="0"
+                  bg="white"
+                  p={8}
+                >
+                  <Heading 
+                    size="md" 
+                    mb={6}
+                    color="gray.900"
+                    fontFamily="'Playfair Display', serif"
+                    fontWeight="700"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Price & Location
+                  </Heading>
+                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+                    <FormControl isRequired>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                        Price (₹)
+                      </FormLabel>
+                      <Input
+                        name="price"
+                        type="number"
+                        value={formData.price}
+                        onChange={handleInputChange}
+                        placeholder="Enter price"
+                        bg="white"
+                        borderColor="gray.300"
+                        color="gray.900"
+                        borderRadius="0"
+                        _placeholder={{ color: 'gray.400' }}
+                        _focus={{
+                          borderColor: 'gray.900',
+                          boxShadow: '0 0 0 1px gray.900',
+                        }}
+                      />
+                    </FormControl>
+
+                    <FormControl isRequired>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                        Area Size
+                      </FormLabel>
+                      <HStack spacing={2}>
                         <Input
-                          name="price"
+                          name="areaSize"
                           type="number"
-                          value={formData.price}
+                          value={formData.areaSize}
                           onChange={handleInputChange}
+                          placeholder="Enter area"
+                          bg="white"
+                          borderColor="gray.300"
+                          color="gray.900"
+                          borderRadius="0"
+                          _placeholder={{ color: 'gray.400' }}
+                          _focus={{
+                            borderColor: 'gray.900',
+                            boxShadow: '0 0 0 1px gray.900',
+                          }}
+                          flex="1"
+                          minW="0"
                         />
-                      </FormControl>
-
-                      <FormControl isRequired>
-                        <FormLabel>Area Size</FormLabel>
-                        <HStack>
-                          <Input
-                            name="areaSize"
-                            type="number"
-                            value={formData.areaSize}
-                            onChange={handleInputChange}
-                          />
-                          <Select
-                            name="areaUnit"
-                            value={formData.areaUnit}
-                            onChange={handleInputChange}
-                            width="140px"
-                          >
-                            <option value="Sq. Ft.">Sq. Ft.</option>
-                            <option value="Sq. M.">Sq. M.</option>
-                            <option value="Sq. Yd.">Sq. Yd.</option>
-                          </Select>
-                        </HStack>
-                      </FormControl>
-
-                      <FormControl isRequired>
-                        <FormLabel>City</FormLabel>
-                        <Input
-                          name="city"
-                          value={formData.city}
+                        <Select
+                          name="areaUnit"
+                          value={formData.areaUnit}
                           onChange={handleInputChange}
-                        />
-                      </FormControl>
+                          bg="white"
+                          borderColor="gray.300"
+                          color="gray.900"
+                          borderRadius="0"
+                          _focus={{
+                            borderColor: 'gray.900',
+                            boxShadow: '0 0 0 1px gray.900',
+                          }}
+                          flex="1"
+                          minW="0"
+                        >
+                          <option value="Sq. Ft.">Sq. Ft.</option>
+                          <option value="Sq. M.">Sq. M.</option>
+                          <option value="Sq. Yd.">Sq. Yd.</option>
+                          <option value="Acre">Acre</option>
+                          <option value="Acres">Acres</option>
+                          <option value="Cent">Cent</option>
+                          <option value="Cents">Cents</option>
+                          <option value="Ground">Ground</option>
+                          <option value="Grounds">Grounds</option>
+                          <option value="Gunta">Gunta</option>
+                          <option value="Guntas">Guntas</option>
+                        </Select>
+                      </HStack>
+                    </FormControl>
 
-                      <FormControl isRequired>
-                        <FormLabel>State</FormLabel>
-                        <Input
-                          name="state"
-                          value={formData.state}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
+                    <FormControl isRequired>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                        City
+                      </FormLabel>
+                      <Input
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        placeholder="Enter city"
+                        bg="white"
+                        borderColor="gray.300"
+                        color="gray.900"
+                        borderRadius="0"
+                        _placeholder={{ color: 'gray.400' }}
+                        _focus={{
+                          borderColor: 'gray.900',
+                          boxShadow: '0 0 0 1px gray.900',
+                        }}
+                      />
+                    </FormControl>
 
-                      <FormControl isRequired gridColumn={{ base: '1', md: '1 / -1' }}>
-                        <FormLabel>Full Address</FormLabel>
-                        <Input
-                          name="address"
-                          value={formData.address}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
-                    </SimpleGrid>
-                  </CardBody>
-                </Card>
+                    <FormControl isRequired>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                        State
+                      </FormLabel>
+                      <Input
+                        name="state"
+                        value={formData.state}
+                        onChange={handleInputChange}
+                        placeholder="Enter state"
+                        bg="white"
+                        borderColor="gray.300"
+                        color="gray.900"
+                        borderRadius="0"
+                        _placeholder={{ color: 'gray.400' }}
+                        _focus={{
+                          borderColor: 'gray.900',
+                          boxShadow: '0 0 0 1px gray.900',
+                        }}
+                      />
+                    </FormControl>
+
+                    <FormControl isRequired gridColumn={{ base: '1', md: '1 / -1' }}>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                        Full Address
+                      </FormLabel>
+                      <Input
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        placeholder="Enter full address"
+                        bg="white"
+                        borderColor="gray.300"
+                        color="gray.900"
+                        borderRadius="0"
+                        _placeholder={{ color: 'gray.400' }}
+                        _focus={{
+                          borderColor: 'gray.900',
+                          boxShadow: '0 0 0 1px gray.900',
+                        }}
+                      />
+                    </FormControl>
+                  </SimpleGrid>
+                </Box>
 
                 {/* Owner Details Card */}
-                <Card>
-                  <CardBody>
-                    <Heading size="md" mb={4}>Owner Details</Heading>
-                    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                      <FormControl isRequired>
-                        <FormLabel>Owner Name</FormLabel>
-                        <Input
-                          name="ownerName"
-                          value={formData.ownerName}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
+                <Box
+                  border="2px solid"
+                  borderColor="gray.900"
+                  borderRadius="0"
+                  bg="white"
+                  p={8}
+                >
+                  <Heading 
+                    size="md" 
+                    mb={6}
+                    color="gray.900"
+                    fontFamily="'Playfair Display', serif"
+                    fontWeight="700"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Owner Details
+                  </Heading>
+                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+                    <FormControl isRequired>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                        Owner Name
+                      </FormLabel>
+                      <Input
+                        name="ownerName"
+                        value={formData.ownerName}
+                        onChange={handleInputChange}
+                        placeholder="Enter owner name"
+                        bg="white"
+                        borderColor="gray.300"
+                        color="gray.900"
+                        borderRadius="0"
+                        _placeholder={{ color: 'gray.400' }}
+                        _focus={{
+                          borderColor: 'gray.900',
+                          boxShadow: '0 0 0 1px gray.900',
+                        }}
+                      />
+                    </FormControl>
 
-                      <FormControl isRequired>
-                        <FormLabel>Contact Number</FormLabel>
-                        <Input
-                          name="ownerNumber"
-                          type="tel"
-                          value={formData.ownerNumber}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
-                    </SimpleGrid>
-                  </CardBody>
-                </Card>
+                    <FormControl isRequired>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                        Contact Number
+                      </FormLabel>
+                      <Input
+                        name="ownerNumber"
+                        type="tel"
+                        value={formData.ownerNumber}
+                        onChange={handleInputChange}
+                        placeholder="Enter contact number"
+                        bg="white"
+                        borderColor="gray.300"
+                        color="gray.900"
+                        borderRadius="0"
+                        _placeholder={{ color: 'gray.400' }}
+                        _focus={{
+                          borderColor: 'gray.900',
+                          boxShadow: '0 0 0 1px gray.900',
+                        }}
+                      />
+                    </FormControl>
+                  </SimpleGrid>
+                </Box>
 
                 {/* Amenities Card */}
-                <Card>
-                  <CardBody>
-                    <Heading size="md" mb={4}>Amenities</Heading>
-                    <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={3}>
+                {showBedroomsBathrooms && (
+                  <Box
+                    border="2px solid"
+                    borderColor="gray.900"
+                    borderRadius="0"
+                    bg="white"
+                    p={8}
+                  >
+                    <Heading 
+                      size="md" 
+                      mb={6}
+                      color="gray.900"
+                      fontFamily="'Playfair Display', serif"
+                      fontWeight="700"
+                      letterSpacing="0.05em"
+                      textTransform="uppercase"
+                    >
+                      Amenities
+                    </Heading>
+                    <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
                       {amenityOptions.map((amenity) => (
                         <Checkbox
                           key={amenity}
                           isChecked={amenities.includes(amenity)}
                           onChange={() => handleAmenityChange(amenity)}
+                          colorScheme="gray"
+                          borderColor="gray.300"
+                          _checked={{
+                            bg: 'gray.900',
+                            borderColor: 'gray.900',
+                            color: 'white',
+                          }}
+                          color="gray.900"
                         >
-                          {amenity}
+                          <Text
+                            fontSize="sm"
+                            fontFamily="'Playfair Display', serif"
+                            color="gray.900"
+                          >
+                            {amenity}
+                          </Text>
                         </Checkbox>
                       ))}
                     </SimpleGrid>
-                  </CardBody>
-                </Card>
+                  </Box>
+                )}
 
                 {/* Images & Status Card */}
-                <Card>
-                  <CardBody>
-                    <Heading size="md" mb={4}>Images & Status</Heading>
-                    <VStack spacing={4} align="stretch">
-                      <FormControl>
-                        <FormLabel>Property Images</FormLabel>
-                        <Box
-                          {...getRootProps()}
-                          border="2px dashed"
-                          borderColor={isDragActive ? 'blue.500' : 'gray.300'}
-                          borderRadius="md"
-                          p={8}
-                          textAlign="center"
-                          cursor="pointer"
-                        >
-                          <input {...getInputProps()} />
-                          <VStack spacing={2}>
-                            <Icon as={FiUpload} boxSize={8} />
-                            <Text>
-                              {isDragActive ? 'Drop images here' : 'Drag & drop or click to upload'}
-                            </Text>
-                          </VStack>
-                        </Box>
-                        {images.length > 0 && (
-                          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mt={4}>
-                            {images.map((image, index) => (
-                              <Box key={index} position="relative">
-                                <Image
-                                  src={URL.createObjectURL(image)}
-                                  alt={`Preview ${index + 1}`}
-                                  borderRadius="md"
-                                />
-                                <IconButton
-                                  aria-label="Remove"
-                                  icon={<FiX />}
-                                  size="sm"
-                                  position="absolute"
-                                  top={2}
-                                  right={2}
-                                  onClick={() => removeImage(index)}
-                                />
-                              </Box>
-                            ))}
-                          </SimpleGrid>
-                        )}
-                      </FormControl>
+                <Box
+                  border="2px solid"
+                  borderColor="gray.900"
+                  borderRadius="0"
+                  bg="white"
+                  p={8}
+                >
+                  <Heading 
+                    size="md" 
+                    mb={6}
+                    color="gray.900"
+                    fontFamily="'Playfair Display', serif"
+                    fontWeight="700"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Images & Status
+                  </Heading>
+                  <VStack spacing={6} align="stretch">
+                    <FormControl>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase" mb={3}>
+                        Property Images
+                      </FormLabel>
+                      <Box
+                        {...getRootProps()}
+                        border="2px dashed"
+                        borderColor={isDragActive ? 'gray.900' : 'gray.300'}
+                        borderRadius="0"
+                        p={12}
+                        textAlign="center"
+                        cursor="pointer"
+                        bg={isDragActive ? 'gray.50' : 'white'}
+                        transition="all 0.2s"
+                        _hover={{
+                          borderColor: 'gray.900',
+                          bg: 'gray.50',
+                        }}
+                      >
+                        <input {...getInputProps()} />
+                        <VStack spacing={3}>
+                          <Icon as={FiUpload} boxSize={10} color="gray.900" />
+                          <Text color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="500">
+                            {isDragActive ? 'Drop images here' : 'Drag & drop or click to upload images'}
+                          </Text>
+                          <Text fontSize="xs" color="gray.500">
+                            PNG, JPG, JPEG up to 10MB each
+                          </Text>
+                        </VStack>
+                      </Box>
+                      {images.length > 0 && (
+                        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mt={6}>
+                          {images.map((image, index) => (
+                            <Box key={index} position="relative" border="2px solid" borderColor="gray.300" borderRadius="0" overflow="hidden">
+                              <Image
+                                src={URL.createObjectURL(image)}
+                                alt={`Preview ${index + 1}`}
+                                width="100%"
+                                height="200px"
+                                objectFit="cover"
+                              />
+                              <IconButton
+                                aria-label="Remove"
+                                icon={<FiX />}
+                                size="sm"
+                                position="absolute"
+                                top={2}
+                                right={2}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeImage(index);
+                                }}
+                                bg="red.600"
+                                color="white"
+                                borderRadius="0"
+                                _hover={{
+                                  bg: 'red.700',
+                                }}
+                              />
+                            </Box>
+                          ))}
+                        </SimpleGrid>
+                      )}
+                    </FormControl>
 
-                      <FormControl isRequired>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          name="status"
-                          value={formData.status}
-                          onChange={handleInputChange}
-                        >
-                          <option value="">Select Status</option>
-                          <option value="active">Active</option>
-                          <option value="pending">Pending</option>
-                          <option value="sold">Sold</option>
-                          <option value="rented">Rented</option>
-                        </Select>
-                      </FormControl>
-                    </VStack>
-                  </CardBody>
-                </Card>
+                    <FormControl isRequired>
+                      <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                        Status
+                      </FormLabel>
+                      <Select
+                        name="status"
+                        value={formData.status}
+                        onChange={handleInputChange}
+                        bg="white"
+                        borderColor="gray.300"
+                        color="gray.900"
+                        borderRadius="0"
+                        _focus={{
+                          borderColor: 'gray.900',
+                          boxShadow: '0 0 0 1px gray.900',
+                        }}
+                      >
+                        <option value="">Select Status</option>
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="sold">Sold</option>
+                        <option value="rented">Rented</option>
+                      </Select>
+                    </FormControl>
+                  </VStack>
+                </Box>
 
                 <Button
                   type="submit"
                   size="lg"
-                  colorScheme="blue"
+                  bg="gray.900"
+                  color="white"
+                  borderRadius="0"
+                  fontWeight="600"
+                  letterSpacing="0.1em"
+                  textTransform="uppercase"
                   isLoading={isSubmitting}
                   loadingText="Creating..."
+                  _hover={{
+                    bg: 'gray.800',
+                  }}
                 >
                   Create Listing
                 </Button>

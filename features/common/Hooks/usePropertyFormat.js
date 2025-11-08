@@ -29,20 +29,20 @@ export const usePropertyFormat = (property) => {
       if (typeof firstImage === 'string') {
         // Replace old via.placeholder.com with working placehold.co
         if (firstImage.includes('via.placeholder.com')) {
-          firstImage = 'https://placehold.co/800x600/e2e8f0/64748b?text=Property+Image';
+          firstImage = 'https://placehold.co/800x800/e2e8f0/64748b?text=Property+Image';
         }
         
         // Ensure it's a valid URL
         if (firstImage.trim() !== '' && (firstImage.startsWith('http://') || firstImage.startsWith('https://'))) {
           coverPhoto = firstImage;
         } else {
-          coverPhoto = 'https://placehold.co/800x600/e2e8f0/64748b?text=No+Image';
+          coverPhoto = 'https://placehold.co/800x800/e2e8f0/64748b?text=No+Image';
         }
       } else {
-        coverPhoto = 'https://placehold.co/800x600/e2e8f0/64748b?text=No+Image';
+        coverPhoto = 'https://placehold.co/800x800/e2e8f0/64748b?text=No+Image';
       }
     } else {
-      coverPhoto = 'https://placehold.co/800x600/e2e8f0/64748b?text=No+Image';
+      coverPhoto = 'https://placehold.co/800x800/e2e8f0/64748b?text=No+Image';
     }
   } else {
     // API format: coverPhoto object with url
@@ -61,18 +61,21 @@ export const usePropertyFormat = (property) => {
 
   // Price formatting
   const price = property.price
-    ? property.price.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
+    ? `₹ ${property.price.toLocaleString('en-IN', {
         maximumFractionDigits: 0,
-      })
+      })}`
     : '';
 
   const title = property.title || '';
   
-  // Rooms/BHK handling
-  const rooms = isDatabaseProperty ? (property.bhk || 0) : (property.rooms || 0);
-  const baths = property.baths || property.bhk || 0; // Use BHK as fallback for baths
+  // Property types that don't show bedrooms/bathrooms
+  const landPropertyTypes = ['plot', 'land', 'commercial land'];
+  const propertyTypeLower = propertyType.toLowerCase();
+  const isLandType = landPropertyTypes.includes(propertyTypeLower);
+  
+  // Rooms/BHK handling - only for non-land types
+  const rooms = isLandType ? null : (isDatabaseProperty ? (property.bhk || 0) : (property.rooms || 0));
+  const baths = isLandType ? null : (property.baths || (isDatabaseProperty ? null : (property.bhk || 0)));
   
   // Purpose/Selling type
   const purpose = isDatabaseProperty 
@@ -83,6 +86,11 @@ export const usePropertyFormat = (property) => {
   const sqSize = property.area_size || property.area 
     ? (property.area_size || property.area).toFixed(2) 
     : '0.00';
+  
+  // Area unit - use from database, default to 'sq ft' for database properties, 'm²' for API properties
+  const areaUnit = isDatabaseProperty
+    ? (property.area_unit || 'sq ft')
+    : 'm²';
   
   // External ID
   const externalID = isDatabaseProperty 
@@ -100,14 +108,14 @@ export const usePropertyFormat = (property) => {
         .map((img) => {
           // Fix broken placeholder URLs
           if (img.includes('via.placeholder.com')) {
-            return 'https://placehold.co/800x600/e2e8f0/64748b?text=Property+Image';
+            return 'https://placehold.co/800x800/e2e8f0/64748b?text=Property+Image';
           }
           return img;
         });
     }
     // If no valid images, use placeholder
     if (photos.length === 0) {
-      photos = ['https://placehold.co/800x600/e2e8f0/64748b?text=No+Image'];
+      photos = ['https://placehold.co/800x800/e2e8f0/64748b?text=No+Image'];
     }
   } else {
     // API format: photos is an array of objects with url
@@ -147,6 +155,7 @@ export const usePropertyFormat = (property) => {
     baths,
     purpose,
     sqSize,
+    areaUnit,
     externalID,
     photos,
     description,

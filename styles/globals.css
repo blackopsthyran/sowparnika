@@ -126,3 +126,75 @@ a {
     color-scheme: dark;
   }
 }
+
+/* NProgress - Old Money Rich, Crispy, Edgy Theme */
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: white;
+  position: fixed;
+  z-index: 1031;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  border-radius: 0;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px white, 0 0 5px white;
+  opacity: 1.0;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* Remove spinner for cleaner look */
+#nprogress .spinner {
+  display: none !important;
+}
+
+/* Retro Grid Animation */
+@keyframes grid-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(60px);
+  }
+}
+
+/* Testimonials Marquee Animation */
+@keyframes testimonial-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Partners Marquee Animations - Circular Linked List Effect */
+@keyframes partners-marquee-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+@keyframes partners-marquee-right {
+  0% {
+    transform: translateX(-66.666%);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}

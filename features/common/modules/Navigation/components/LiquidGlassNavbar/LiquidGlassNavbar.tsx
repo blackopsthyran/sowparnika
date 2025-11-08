@@ -1,36 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Box, Button, Flex, Text, HStack, IconButton, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+import { 
+  Box, 
+  Button, 
+  Flex, 
+  Text, 
+  HStack, 
+  VStack, 
+  IconButton, 
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  useDisclosure,
+  Input,
+  InputGroup,
+  InputLeftElement
+} from '@chakra-ui/react';
 import { HamburgerIcon } from '@chakra-ui/icons';
-import { navigationLinks } from '@/features/common/modules/Navigation/NavigationConsts';
+import { 
+  FiUser, 
+  FiCamera, 
+  FiHome, 
+  FiMapPin,
+  FiHeart,
+  FiSearch,
+  FiLogOut
+} from 'react-icons/fi';
+import { navigationLinks, propertyTypes } from '@/features/common/modules/Navigation/NavigationConsts';
 import { useAuth } from '@/contexts/AuthContext';
 
 const LiquidGlassNavbar = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isScrolledPastHero, setIsScrolledPastHero] = useState(false);
+  const [showPropertyTypesBar, setShowPropertyTypesBar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Track scroll position to change navbar color after hero section and hide property types bar on mobile
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-      setIsScrolled(scrollPosition > 50);
+      // Hero section is 75vh, so check if scrolled past that
+      const heroHeight = window.innerHeight * 0.75;
+      const scrollPosition = window.scrollY || window.pageYOffset;
+      setIsScrolledPastHero(scrollPosition > heroHeight);
+
+      // Hide/show property types bar on mobile when scrolling
+      if (window.innerWidth < 768) { // Only on mobile
+        if (scrollPosition > lastScrollY && scrollPosition > 100) {
+          // Scrolling down and past 100px - hide the bar
+          setShowPropertyTypesBar(false);
+        } else if (scrollPosition < lastScrollY || scrollPosition <= 100) {
+          // Scrolling up or near top - show the bar
+          setShowPropertyTypesBar(true);
+        }
+        setLastScrollY(scrollPosition);
+      } else {
+        // Always show on desktop
+        setShowPropertyTypesBar(true);
+      }
     };
 
-    // Check initial scroll position
-    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial scroll position
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
-    
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
     };
-  }, []);
+  }, [lastScrollY]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/properties?search=${encodeURIComponent(searchQuery.trim())}&status=active`);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <Box
@@ -40,168 +95,483 @@ const LiquidGlassNavbar = () => {
       right={0}
       zIndex={1000}
       width="100%"
-      transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-      paddingX={isScrolled ? { base: '1rem', md: '2rem' } : 0}
-      paddingTop={isScrolled ? { base: '0.5rem', md: '1rem' } : 0}
     >
-      <Box
-        maxWidth={isScrolled ? '1200px' : '100%'}
-        margin="0 auto"
-        borderRadius={isScrolled ? '2xl' : '0'}
-        transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-        sx={{
-          backdropFilter: isScrolled 
-            ? 'blur(24px) saturate(200%)' 
-            : 'blur(12px) saturate(150%)',
-          backgroundColor: isScrolled
-            ? 'rgba(255, 255, 255, 0.75)'
-            : 'rgba(255, 255, 255, 0.08)',
-          border: isScrolled 
-            ? '1px solid rgba(255, 255, 255, 0.4)' 
-            : '1px solid rgba(255, 255, 255, 0.15)',
-          boxShadow: isScrolled
-            ? '0 12px 40px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.5) inset'
-            : '0 4px 16px 0 rgba(0, 0, 0, 0.05)',
-        }}
-      >
+      <VStack spacing={0} align="stretch">
+        {/* Main Navigation Bar */}
         <Box
-          paddingY={isScrolled ? '1rem' : '1.5rem'}
-          paddingX={{ base: '1.5rem', md: '3rem' }}
-          transition="all 0.3s ease-in-out"
+          width="100%"
+          sx={{
+            backdropFilter: 'blur(12px) saturate(150%)',
+            backgroundColor: isScrolledPastHero 
+              ? 'rgba(255, 255, 255, 0.95)' 
+              : 'rgba(255, 255, 255, 0.08)',
+            borderBottom: isScrolledPastHero 
+              ? '1px solid rgba(0, 0, 0, 0.1)' 
+              : '1px solid rgba(255, 255, 255, 0.15)',
+            transition: 'background-color 0.3s ease, border-color 0.3s ease',
+          }}
         >
-        <Flex alignItems="center" justifyContent="space-between">
-          <Link href="/">
-            <Box
-              display="flex"
-              gap="2"
-              alignItems="center"
-              transition="all 0.3s"
+          <Box
+            paddingY="0.75rem"
+            paddingX={{ base: '1.5rem', md: '3rem' }}
+            position="relative"
+          >
+          <Flex alignItems="center" justifyContent="space-between" gap={4}>
+            {/* Left Side: Hamburger Menu (Mobile) / Hamburger + Logo (Desktop) */}
+            <HStack 
+              gap={{ base: '0', md: '8' }} 
+              alignItems="center" 
+              flexShrink={0}
+              w={{ base: '40px', md: 'auto' }}
             >
-              <Box
-                as="img"
-                src="/logo.png"
-                alt="Sowparnika Properties"
-                height={isScrolled ? '55px' : '65px'}
-                width="auto"
-                objectFit="contain"
-                transition="all 0.3s"
-                loading="eager"
-                sx={{
-                  filter: isScrolled 
-                    ? 'none' 
-                    : 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3))',
-                }}
+              <IconButton
+                aria-label="Open menu"
+                icon={<HamburgerIcon />}
+                variant="ghost"
+                color={isScrolledPastHero ? 'gray.900' : 'white'}
+                fontSize="xl"
+                onClick={onOpen}
+                _hover={{ bg: isScrolledPastHero ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.1)' }}
+                transition="color 0.3s ease"
               />
-              <Text
-                fontSize={isScrolled ? 'lg' : 'xl'}
-                fontWeight="bold"
-                color={isScrolled ? 'blue.900' : 'white'}
-                transition="all 0.3s"
-                display={{ base: 'none', md: 'block' }}
-                fontFamily="'Playfair Display', serif"
+              <Box display={{ base: 'none', md: 'block' }}>
+                <Link href="/">
+                  <Text
+                    fontSize={{ base: '1rem', md: '1.2rem' }}
+                    fontWeight="700"
+                    color={isScrolledPastHero ? 'gray.900' : 'white'}
+                    fontFamily="'Playfair Display', serif"
+                    letterSpacing="0.05em"
+                    lineHeight="1.1"
+                    textTransform="uppercase"
+                    sx={{
+                      textShadow: isScrolledPastHero ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                      fontFeatureSettings: '"liga" 1, "kern" 1',
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale',
+                      transform: 'scaleY(1.2)',
+                      display: 'inline-block',
+                    }}
+                    _hover={{ opacity: 0.9 }}
+                    cursor="pointer"
+                    transition="color 0.3s ease"
+                  >
+                    Sowparnika Properties
+                  </Text>
+                </Link>
+              </Box>
+            </HStack>
+
+            {/* Center: Logo (Mobile) / Search Bar (Desktop) */}
+            <Box 
+              flex={1} 
+              display="flex" 
+              justifyContent="center" 
+              alignItems="center"
+              position={{ base: 'absolute', md: 'static' }}
+              left="50%"
+              transform={{ base: 'translateX(-50%)', md: 'none' }}
+              maxW={{ base: 'calc(100% - 80px)', md: '400px', lg: '500px' }}
+              width={{ base: 'auto', md: 'auto' }}
+            >
+              {/* Mobile: Logo */}
+              <Box 
+                display={{ base: 'block', md: 'none' }}
+                whiteSpace="nowrap"
+                overflow="visible"
+              >
+                <Link href="/">
+                  <Text
+                    fontSize={{ base: '0.85rem', sm: '0.95rem', md: '1rem' }}
+                    fontWeight="700"
+                    color={isScrolledPastHero ? 'gray.900' : 'white'}
+                    fontFamily="'Playfair Display', serif"
+                    letterSpacing={{ base: '0.02em', sm: '0.03em', md: '0.05em' }}
+                    lineHeight="1.1"
+                    textTransform="uppercase"
+                    textAlign="center"
+                    whiteSpace="nowrap"
+                    sx={{
+                      textShadow: isScrolledPastHero ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                      fontFeatureSettings: '"liga" 1, "kern" 1',
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale',
+                      transform: 'scaleY(1.2)',
+                      display: 'inline-block',
+                    }}
+                    _hover={{ opacity: 0.9 }}
+                    cursor="pointer"
+                    transition="color 0.3s ease"
+                  >
+                    Sowparnika Properties
+                  </Text>
+                </Link>
+              </Box>
+              {/* Desktop: Search Bar */}
+              <Box display={{ base: 'none', md: 'block' }} width="100%">
+                <form onSubmit={handleSearch}>
+                  <InputGroup size="md">
+                    <InputLeftElement pointerEvents="none">
+                      <FiSearch color="gray.500" size={18} />
+                    </InputLeftElement>
+                    <Input
+                      placeholder="Search Properties"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      bg="white"
+                      borderColor="gray.200"
+                      color="gray.800"
+                      _placeholder={{ color: 'gray.500' }}
+                      _hover={{
+                        borderColor: 'gray.300',
+                      }}
+                      _focus={{
+                        borderColor: 'blue.500',
+                        boxShadow: '0 0 0 1px blue.500',
+                      }}
+                      fontFamily="'Playfair Display', serif"
+                      fontSize="sm"
+                      borderRadius="full"
+                      pl={10}
+                    />
+                  </InputGroup>
+                </form>
+              </Box>
+            </Box>
+
+            {/* Right Side: Spacer (Mobile) / Desktop Navigation (Desktop) */}
+            <Box 
+              w={{ base: '40px', md: 'auto' }}
+              display="flex"
+              justifyContent="flex-end"
+            >
+              <HStack
+                gap={{ base: '4', md: '8' }}
+                alignItems="center"
+                fontWeight="medium"
+                color={isScrolledPastHero ? 'gray.900' : 'white'}
+                display={{ base: 'none', md: 'flex' }}
+                flexShrink={0}
                 sx={{
-                  textShadow: isScrolled 
-                    ? 'none' 
-                    : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                  textShadow: isScrolledPastHero ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                }}
+                transition="color 0.3s ease"
+              >
+                {navigationLinks.map((item) => (
+                  <Link key={item.title} href={item.link}>
+                    <Text
+                      _hover={{ color: isScrolledPastHero ? 'blue.600' : 'blue.200' }}
+                      transition="color 0.2s"
+                      cursor="pointer"
+                      fontWeight="600"
+                      fontSize="sm"
+                      fontFamily="'Playfair Display', serif"
+                      color={isScrolledPastHero ? 'gray.900' : 'white'}
+                    >
+                      {item.title}
+                    </Text>
+                  </Link>
+                ))}
+                {mounted && !isLoading && !isAuthenticated && (
+                  <Link href="/login">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      borderRadius="full"
+                      px={6}
+                      fontSize="sm"
+                      fontFamily="'Playfair Display', serif"
+                      fontWeight="600"
+                      color={isScrolledPastHero ? 'gray.900' : 'white'}
+                      borderColor={isScrolledPastHero ? 'gray.900' : 'white'}
+                      _hover={{
+                        bg: isScrolledPastHero ? 'gray.50' : 'rgba(255, 255, 255, 0.2)',
+                        transform: 'scale(1.05)',
+                      }}
+                      transition="all 0.3s ease"
+                    >
+                      LOGIN
+                    </Button>
+                  </Link>
+                )}
+              </HStack>
+            </Box>
+          </Flex>
+          </Box>
+        </Box>
+
+        {/* Property Types Navigation Bar - Single horizontal row */}
+        <Box
+          width="100%"
+          className={!showPropertyTypesBar ? 'property-types-bar-hidden' : ''}
+          sx={{
+            backdropFilter: 'blur(12px) saturate(150%)',
+            backgroundColor: isScrolledPastHero 
+              ? 'rgba(255, 255, 255, 0.95)' 
+              : 'rgba(255, 255, 255, 0.08)',
+            borderBottom: isScrolledPastHero 
+              ? '1px solid rgba(0, 0, 0, 0.1)' 
+              : '1px solid rgba(255, 255, 255, 0.15)',
+            transition: 'background-color 0.3s ease, border-color 0.3s ease',
+            '@media (max-width: 767px)': {
+              transition: 'opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease',
+              '&.property-types-bar-hidden': {
+                opacity: 0,
+                transform: 'translateY(-100%)',
+                maxHeight: 0,
+                overflow: 'hidden',
+                marginBottom: 0,
+              },
+            },
+          }}
+        >
+          <Box
+            paddingY={{ base: '0.4rem', md: '0.75rem' }}
+            paddingX={{ base: '1rem', md: '3rem' }}
+          >
+            <Flex alignItems="center" justifyContent="space-between" gap={4}>
+              <Box
+                overflowX="auto"
+                flex={1}
+                sx={{
+                  '&::-webkit-scrollbar': {
+                    display: 'none',
+                  },
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
                 }}
               >
-                Sowparnika Properties
-              </Text>
-            </Box>
-          </Link>
-          {/* Desktop Navigation */}
-          <HStack
-            gap={{ base: '4', md: '8' }}
-            alignItems="center"
-            fontWeight="medium"
-            color={isScrolled ? 'gray.800' : 'white'}
-            transition="color 0.3s"
-            display={{ base: 'none', md: 'flex' }}
-            sx={{
-              textShadow: isScrolled 
-                ? 'none' 
-                : '0 2px 8px rgba(0, 0, 0, 0.3)',
-            }}
-          >
-            {navigationLinks.map((item) => (
-              <Link key={item.title} href={item.link}>
-                <Text
-                  _hover={{ color: isScrolled ? 'blue.600' : 'blue.200' }}
-                  transition="color 0.2s"
-                  cursor="pointer"
-                  fontWeight="600"
-                  fontFamily="'Playfair Display', serif"
-                >
-                  {item.title}
-                </Text>
-              </Link>
-            ))}
-            {mounted && !isLoading && isAuthenticated && (
-              <Link href="/cpanel">
-                <Button
-                  size="sm"
-                  colorScheme="blue"
-                  borderRadius="full"
-                  px={6}
-                  _hover={{ transform: 'scale(1.05)' }}
-                  transition="all 0.2s"
-                >
-                  CPANEL
-                </Button>
-              </Link>
-            )}
-            {mounted && !isLoading && !isAuthenticated && (
-              <Link href="/login">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  borderRadius="full"
-                  px={6}
-                  color={isScrolled ? 'blue.600' : 'white'}
-                  borderColor={isScrolled ? 'blue.600' : 'white'}
-                  _hover={{
-                    bg: isScrolled ? 'blue.50' : 'rgba(255, 255, 255, 0.2)',
-                    transform: 'scale(1.05)',
+                <HStack
+                  gap={{ base: 4, md: 6 }}
+                  justifyContent="flex-start"
+                  minW="max-content"
+                  color={isScrolledPastHero ? 'gray.900' : 'white'}
+                  sx={{
+                    textShadow: isScrolledPastHero ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.3)',
                   }}
-                  transition="all 0.2s"
+                  transition="color 0.3s ease"
                 >
-                  LOGIN
-                </Button>
-              </Link>
-            )}
-          </HStack>
-
-          {/* Mobile Navigation */}
-          <Menu>
-            <MenuButton
-              as={IconButton}
-              aria-label="Menu"
-              icon={<HamburgerIcon />}
-              variant="ghost"
-              color={isScrolled ? 'gray.700' : 'white'}
-              display={{ base: 'block', md: 'none' }}
-            />
-            <MenuList bg="white" color="gray.800">
-              {navigationLinks.map((item) => (
-                <MenuItem key={item.title} as={Link} href={item.link}>
-                  {item.title}
-                </MenuItem>
-              ))}
-              {mounted && !isLoading && isAuthenticated && (
-                <MenuItem as={Link} href="/cpanel">
-                  CPANEL
-                </MenuItem>
-              )}
-              {mounted && !isLoading && !isAuthenticated && (
-                <MenuItem as={Link} href="/login">
-                  LOGIN
-                </MenuItem>
-              )}
-            </MenuList>
-          </Menu>
-        </Flex>
+                  {propertyTypes.map((item) => (
+                    <Link key={item.title} href={item.link}>
+                      <Text
+                        _hover={{ color: isScrolledPastHero ? 'blue.600' : 'blue.200' }}
+                        transition="color 0.2s"
+                        cursor="pointer"
+                        fontWeight="500"
+                        fontSize={{ base: 'xs', md: 'sm' }}
+                        fontFamily="'Playfair Display', serif"
+                        whiteSpace="nowrap"
+                        color={isScrolledPastHero ? 'gray.900' : 'white'}
+                        flexShrink={0}
+                      >
+                        {item.title}
+                      </Text>
+                    </Link>
+                  ))}
+                </HStack>
+              </Box>
+              <HStack spacing={3} display={{ base: 'none', md: 'flex' }}>
+                {mounted && !isLoading && isAuthenticated && (
+                  <Link href="/cpanel">
+                    <Button
+                      size="sm"
+                      bg={isScrolledPastHero ? 'gray.900' : 'white'}
+                      color={isScrolledPastHero ? 'white' : 'gray.900'}
+                      borderRadius="full"
+                      px={6}
+                      fontSize="sm"
+                      fontFamily="'Playfair Display', serif"
+                      fontWeight="600"
+                      _hover={{
+                        bg: isScrolledPastHero ? 'gray.800' : 'gray.100',
+                        transform: 'scale(1.05)',
+                      }}
+                      transition="all 0.3s ease"
+                      whiteSpace="nowrap"
+                    >
+                      CPANEL
+                    </Button>
+                  </Link>
+                )}
+                <Link href="/submit-listing">
+                  <Button
+                    size="sm"
+                    bg={isScrolledPastHero ? 'gray.900' : 'white'}
+                    color={isScrolledPastHero ? 'white' : 'gray.900'}
+                    borderRadius="full"
+                    px={6}
+                    fontSize="sm"
+                    fontFamily="'Playfair Display', serif"
+                    fontWeight="600"
+                    _hover={{
+                      bg: isScrolledPastHero ? 'gray.800' : 'gray.100',
+                      transform: 'scale(1.05)',
+                    }}
+                    transition="all 0.3s ease"
+                    whiteSpace="nowrap"
+                  >
+                    Sell With Us
+                  </Button>
+                </Link>
+              </HStack>
+            </Flex>
+          </Box>
         </Box>
-      </Box>
+      </VStack>
+
+      {/* Sidebar Drawer */}
+      <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="sm">
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader borderBottomWidth="1px" pb={4}>
+            <Text fontSize="xl" fontWeight="600" fontFamily="'Playfair Display', serif">
+              Menu
+            </Text>
+          </DrawerHeader>
+
+          <DrawerBody p={0}>
+            <VStack align="stretch" spacing={0} height="100%" justifyContent="space-between">
+              <Box flex="1">
+                {/* Main Navigation Links */}
+                <Box p={4} borderBottomWidth="1px">
+                  <VStack align="stretch" spacing={3}>
+                    {navigationLinks.map((item) => (
+                      <Link key={item.title} href={item.link} onClick={onClose}>
+                        <Text
+                          fontSize="md"
+                          fontWeight="600"
+                          fontFamily="'Playfair Display', serif"
+                          color="gray.900"
+                          _hover={{ color: 'blue.600' }}
+                          transition="color 0.2s"
+                          cursor="pointer"
+                        >
+                          {item.title}
+                        </Text>
+                      </Link>
+                    ))}
+                  </VStack>
+                </Box>
+
+                {/* All Property Types */}
+                <Box p={4}>
+                  <VStack align="stretch" spacing={3}>
+                    {propertyTypes.map((item) => (
+                      <Link key={item.title} href={item.link} onClick={onClose}>
+                        <Text
+                          fontSize="md"
+                          fontWeight="600"
+                          fontFamily="'Playfair Display', serif"
+                          color="gray.900"
+                          _hover={{ color: 'blue.600' }}
+                          transition="color 0.2s"
+                          cursor="pointer"
+                        >
+                          {item.title}
+                        </Text>
+                      </Link>
+                    ))}
+                  </VStack>
+                </Box>
+              </Box>
+
+              {/* All Buttons at the Bottom */}
+              <Box borderTopWidth="1px" p={4}>
+                <VStack align="stretch" spacing={3}>
+                  {/* Sign In / Register Button */}
+                  {mounted && !isLoading && !isAuthenticated && (
+                    <Link href="/login" onClick={onClose} style={{ width: '100%' }}>
+                      <Button
+                        leftIcon={<FiUser />}
+                        size="lg"
+                        width="100%"
+                        borderRadius="0"
+                        fontWeight="600"
+                        fontFamily="'Playfair Display', serif"
+                        bg="white"
+                        color="gray.900"
+                        border="1px solid"
+                        borderColor="gray.900"
+                        _hover={{ bg: 'gray.50' }}
+                        transition="all 0.2s"
+                      >
+                        Sign in / Register
+                      </Button>
+                    </Link>
+                  )}
+
+                  {/* CPANEL and Sell With Us Buttons */}
+                  {mounted && !isLoading && isAuthenticated && (
+                    <Link href="/cpanel" onClick={onClose} style={{ width: '100%' }}>
+                      <Button
+                        size="lg"
+                        bg="white"
+                        color="gray.900"
+                        border="1px solid"
+                        borderColor="gray.900"
+                        borderRadius="0"
+                        width="100%"
+                        fontWeight="600"
+                        fontFamily="'Playfair Display', serif"
+                        letterSpacing="0.1em"
+                        textTransform="uppercase"
+                        _hover={{ bg: 'gray.50' }}
+                        transition="all 0.2s"
+                      >
+                        CPANEL
+                      </Button>
+                    </Link>
+                  )}
+                  <Link href="/submit-listing" onClick={onClose} style={{ width: '100%' }}>
+                    <Button
+                      size="lg"
+                      bg="white"
+                      color="gray.900"
+                      border="1px solid"
+                      borderColor="gray.900"
+                      borderRadius="0"
+                      width="100%"
+                      fontWeight="600"
+                      fontFamily="'Playfair Display', serif"
+                      letterSpacing="0.1em"
+                      textTransform="uppercase"
+                      _hover={{ bg: 'gray.50' }}
+                      transition="all 0.2s"
+                    >
+                      Sell With Us
+                    </Button>
+                  </Link>
+
+                  {/* Logout Button - Only show when authenticated */}
+                  {mounted && !isLoading && isAuthenticated && (
+                    <Button
+                      leftIcon={<FiLogOut />}
+                      size="lg"
+                      width="100%"
+                      borderRadius="0"
+                      fontWeight="600"
+                      fontFamily="'Playfair Display', serif"
+                      bg="white"
+                      color="gray.900"
+                      border="1px solid"
+                      borderColor="gray.900"
+                      _hover={{ bg: 'gray.50' }}
+                      transition="all 0.2s"
+                      onClick={() => {
+                        onClose();
+                        logout();
+                      }}
+                    >
+                      Logout
+                    </Button>
+                  )}
+                </VStack>
+              </Box>
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Box>
   );
 };

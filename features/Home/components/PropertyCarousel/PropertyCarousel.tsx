@@ -86,47 +86,63 @@ const PropertyCarousel: React.FC<PropertyCarouselProps> = ({
           )}
         </Flex>
 
-        <Swiper
-          onSwiper={setSwiper}
-          modules={[Navigation, Autoplay]}
-          spaceBetween={24}
-          slidesPerView={1}
-          breakpoints={{
-            640: {
-              slidesPerView: 2,
-              spaceBetween: 20,
-            },
-            768: {
-              slidesPerView: 3,
-              spaceBetween: 24,
-            },
-            1024: {
-              slidesPerView: 4,
-              spaceBetween: 24,
-            },
-            1280: {
-              slidesPerView: 5,
-              spaceBetween: 24,
+        <Box
+          sx={{
+            '.property-carousel-swiper': {
+              width: '100%',
+              '& .swiper-slide': {
+                height: 'auto',
+                display: 'flex',
+              },
             },
           }}
-          autoplay={
-            autoplay
-              ? {
-                  delay: 3000,
-                  disableOnInteraction: false,
-                  pauseOnMouseEnter: true,
-                }
-              : false
-          }
-          loop={properties.length > 5}
-          navigation={false}
         >
-          {properties.map((property) => (
-            <SwiperSlide key={property.id || property.externalID}>
-              <PropertyCard {...property} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          <Swiper
+            onSwiper={setSwiper}
+            modules={[Navigation, Autoplay]}
+            spaceBetween={24}
+            slidesPerView={1}
+            breakpoints={{
+              640: {
+                slidesPerView: 2,
+                spaceBetween: 20,
+              },
+              768: {
+                slidesPerView: 3,
+                spaceBetween: 24,
+              },
+              1024: {
+                slidesPerView: 4,
+                spaceBetween: 24,
+              },
+              1280: {
+                slidesPerView: 5,
+                spaceBetween: 24,
+              },
+            }}
+            autoplay={
+              autoplay && properties.length > 1
+                ? {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true,
+                  }
+                : false
+            }
+            loop={properties.length > 5}
+            navigation={false}
+            className="property-carousel-swiper"
+          >
+            {properties.map((property, index) => {
+              const propertyId = property.id || property.externalID || `property-${index}`;
+              return (
+                <SwiperSlide key={propertyId} style={{ height: 'auto' }}>
+                  <PropertyCard {...property} />
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+        </Box>
       </Box>
     </Box>
   );

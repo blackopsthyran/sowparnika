@@ -29,8 +29,10 @@ const Marquee: React.FC<MarqueeProps> = ({
         overflow="hidden"
         bg="rgba(0, 0, 0, 0.03)"
         py={5}
-        borderY="1px solid"
+        borderTop="1px solid"
         borderColor="gray.200"
+        borderBottomLeftRadius="2xl"
+        borderBottomRightRadius="2xl"
       >
         <HStack spacing={16} px={8}>
           {items.slice(0, 6).map((item, index) => (
@@ -60,8 +62,10 @@ const Marquee: React.FC<MarqueeProps> = ({
       overflow="hidden"
       bg="rgba(0, 0, 0, 0.03)"
       py={5}
-      borderY="1px solid"
+      borderTop="1px solid"
       borderColor="gray.200"
+      borderBottomLeftRadius="2xl"
+      borderBottomRightRadius="2xl"
     >
       <Box
         display="flex"

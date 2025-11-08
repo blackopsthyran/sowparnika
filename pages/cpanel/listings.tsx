@@ -32,7 +32,7 @@ import {
   Flex,
   Image,
 } from '@chakra-ui/react';
-import { FiSearch, FiEdit, FiTrash2, FiEye } from 'react-icons/fi';
+import { FiSearch, FiEdit, FiTrash2, FiEye, FiHome } from 'react-icons/fi';
 import Link from 'next/link';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
 
@@ -180,103 +180,194 @@ const ManageListingsPage = () => {
 
   return (
     <DefaultLayout title="Manage Listings" description="Manage property listings">
-      <Box bg="gray.50" minH="100vh" py={8}>
+      <Box bg="white" minH="100vh" py={12} pb={{ base: 24, md: 12 }}>
         <Container maxW="container.xl">
-          <VStack spacing={6} align="stretch">
-            <Flex justify="space-between" align="center">
+          <VStack spacing={8} align="stretch">
+            <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
               <Box>
-                <Heading size="xl" mb={2} color="blue.700">
+                <Heading 
+                  size="xl" 
+                  mb={3} 
+                  color="gray.900"
+                  fontFamily="'Playfair Display', serif"
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                >
                   Manage Listings
                 </Heading>
-                <Text color="gray.600">Edit, update, or delete property listings</Text>
+                <Text color="gray.900" fontSize="sm" letterSpacing="0.1em">
+                  Edit, update, or delete property listings
+                </Text>
               </Box>
-              <Link href="/cpanel/create-listing">
-                <Button colorScheme="blue">Create New Listing</Button>
-              </Link>
+              <HStack spacing={3} flexWrap="wrap">
+                <Link href="/">
+                  <Button
+                    leftIcon={<FiHome />}
+                    variant="outline"
+                    borderColor="gray.900"
+                    color="gray.900"
+                    borderRadius="0"
+                    _hover={{
+                      bg: 'gray.900',
+                      color: 'white',
+                    }}
+                    fontFamily="'Playfair Display', serif"
+                    fontWeight="600"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Go to Home
+                  </Button>
+                </Link>
+                <Link href="/cpanel/create-listing">
+                  <Button 
+                    bg="gray.900"
+                    color="white"
+                    borderRadius="0"
+                    fontWeight="600"
+                    letterSpacing="0.1em"
+                    textTransform="uppercase"
+                    _hover={{
+                      bg: 'gray.800',
+                    }}
+                  >
+                    Create New Listing
+                  </Button>
+                </Link>
+              </HStack>
             </Flex>
 
             <InputGroup>
               <InputLeftElement pointerEvents="none">
-                <FiSearch color="gray.300" />
+                <FiSearch color="gray.500" />
               </InputLeftElement>
               <Input
                 placeholder="Search by title or city..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 bg="white"
+                borderColor="gray.300"
+                color="gray.900"
+                borderRadius="0"
+                _placeholder={{ color: 'gray.400' }}
+                _focus={{
+                  borderColor: 'gray.900',
+                  boxShadow: '0 0 0 1px gray.900',
+                }}
               />
             </InputGroup>
 
-            <Box bg="white" borderRadius="lg" shadow="sm" overflow="hidden">
+            <Box 
+              border="2px solid" 
+              borderColor="gray.900" 
+              borderRadius="0" 
+              bg="white" 
+              overflowX="auto"
+              overflowY="visible"
+              sx={{
+                '&::-webkit-scrollbar': {
+                  height: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  bg: 'gray.100',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  bg: 'gray.400',
+                  borderRadius: '4px',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  bg: 'gray.500',
+                },
+              }}
+            >
               {loading ? (
                 <Box p={8} textAlign="center">
-                  <Text>Loading properties...</Text>
+                  <Text color="gray.900">Loading properties...</Text>
                 </Box>
               ) : filteredProperties.length === 0 ? (
                 <Box p={8} textAlign="center">
-                  <Text color="gray.500">No properties found</Text>
+                  <Text color="gray.900">No properties found</Text>
                 </Box>
               ) : (
-                <Table variant="simple">
-                  <Thead bg="gray.50">
+                <Table variant="simple" minW={{ base: '800px', md: 'auto' }}>
+                  <Thead bg="gray.100" borderBottom="2px solid" borderColor="gray.900">
                     <Tr>
-                      <Th>Image</Th>
-                      <Th>Title</Th>
-                      <Th>Type</Th>
-                      <Th>Price</Th>
-                      <Th>City</Th>
-                      <Th>Status</Th>
-                      <Th>Actions</Th>
+                      <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Image</Th>
+                      <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Title</Th>
+                      <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Type</Th>
+                      <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Price</Th>
+                      <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">City</Th>
+                      <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Status</Th>
+                      <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Actions</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
                     {filteredProperties.map((property) => (
-                      <Tr key={property.id}>
-                        <Td>
+                      <Tr key={property.id} borderBottom="1px solid" borderColor="gray.200" _hover={{ bg: 'gray.50' }}>
+                        <Td py={4}>
                           {property.images && property.images.length > 0 ? (
                             <Image
                               src={property.images[0]}
                               alt={property.title}
                               boxSize="50px"
                               objectFit="cover"
-                              borderRadius="md"
+                              borderRadius="0"
                               fallbackSrc="https://placehold.co/50x50/e2e8f0/64748b?text=No+Image"
                             />
                           ) : (
                             <Box
                               boxSize="50px"
                               bg="gray.200"
-                              borderRadius="md"
+                              borderRadius="0"
                               display="flex"
                               alignItems="center"
                               justifyContent="center"
+                              border="1px solid"
+                              borderColor="gray.300"
                             >
-                              <Text fontSize="xs" color="gray.500">No Image</Text>
+                              <Text fontSize="xs" color="gray.900">No Image</Text>
                             </Box>
                           )}
                         </Td>
-                        <Td fontWeight="medium">{property.title}</Td>
-                        <Td>{property.property_type || 'N/A'}</Td>
-                        <Td>
+                        <Td fontWeight="600" color="gray.900" py={4}>{property.title}</Td>
+                        <Td color="gray.900" py={4}>{property.property_type || 'N/A'}</Td>
+                        <Td color="gray.900" fontWeight="600" py={4}>
                           {property.price
-                            ? `$${property.price.toLocaleString()}`
+                            ? `₹ ${property.price.toLocaleString('en-IN')}`
                             : 'N/A'}
                         </Td>
-                        <Td>{property.city || 'N/A'}</Td>
-                        <Td>
-                          <Badge colorScheme={getStatusColor(property.status)}>
+                        <Td color="gray.900" py={4}>{property.city || 'N/A'}</Td>
+                        <Td py={4}>
+                          <Badge 
+                            borderRadius="0"
+                            px={2}
+                            py={1}
+                            bg="gray.900"
+                            color="white"
+                            fontWeight="600"
+                            fontSize="xs"
+                            textTransform="uppercase"
+                            letterSpacing="0.05em"
+                          >
                             {property.status || 'active'}
                           </Badge>
                         </Td>
-                        <Td>
+                        <Td py={4}>
                           <HStack spacing={2}>
                             <Link href={`/properties/${property.id}`}>
                               <IconButton
                                 aria-label="View"
                                 icon={<FiEye />}
                                 size="sm"
-                                variant="ghost"
-                                colorScheme="blue"
+                                variant="outline"
+                                borderColor="gray.900"
+                                color="gray.900"
+                                borderRadius="0"
+                                _hover={{
+                                  bg: 'gray.900',
+                                  color: 'white',
+                                }}
                               />
                             </Link>
                             <Link href={`/cpanel/edit-listing?id=${property.id}`}>
@@ -284,16 +375,29 @@ const ManageListingsPage = () => {
                                 aria-label="Edit"
                                 icon={<FiEdit />}
                                 size="sm"
-                                variant="ghost"
-                                colorScheme="green"
+                                variant="outline"
+                                borderColor="gray.900"
+                                color="gray.900"
+                                borderRadius="0"
+                                _hover={{
+                                  bg: 'gray.900',
+                                  color: 'white',
+                                }}
                               />
                             </Link>
                             <IconButton
                               aria-label="Delete"
                               icon={<FiTrash2 />}
                               size="sm"
-                              variant="ghost"
-                              colorScheme="red"
+                              variant="outline"
+                              borderColor="gray.900"
+                              color="gray.900"
+                              borderRadius="0"
+                              _hover={{
+                                bg: 'red.600',
+                                color: 'white',
+                                borderColor: 'red.600',
+                              }}
                               onClick={() => openDeleteModal(property.id)}
                             />
                           </HStack>
@@ -309,18 +413,47 @@ const ManageListingsPage = () => {
       </Box>
 
       <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Delete Property</ModalHeader>
-          <ModalCloseButton />
+        <ModalOverlay bg="blackAlpha.800" />
+        <ModalContent borderRadius="0" border="2px solid" borderColor="gray.900">
+          <ModalHeader 
+            fontFamily="'Playfair Display', serif" 
+            fontWeight="700"
+            color="gray.900"
+            letterSpacing="0.05em"
+            textTransform="uppercase"
+          >
+            Delete Property
+          </ModalHeader>
+          <ModalCloseButton color="gray.900" />
           <ModalBody>
-            <Text>Are you sure you want to delete this property? This action cannot be undone.</Text>
+            <Text color="gray.900" fontFamily="'Playfair Display', serif">
+              Are you sure you want to delete this property? This action cannot be undone.
+            </Text>
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
+            <Button 
+              variant="outline" 
+              mr={3} 
+              onClick={onClose}
+              borderColor="gray.900"
+              color="gray.900"
+              borderRadius="0"
+              _hover={{
+                bg: 'gray.900',
+                color: 'white',
+              }}
+            >
               Cancel
             </Button>
-            <Button colorScheme="red" onClick={confirmDelete}>
+            <Button 
+              bg="gray.900"
+              color="white"
+              borderRadius="0"
+              onClick={confirmDelete}
+              _hover={{
+                bg: 'red.600',
+              }}
+            >
               Delete
             </Button>
           </ModalFooter>

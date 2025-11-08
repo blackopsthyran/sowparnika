@@ -74,7 +74,7 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
   };
 
   const displayText = value && value !== '0-10000000' 
-    ? `₹ ${minPrice || 'No Min'} - ₹ ${maxPrice || 'No Max'}`
+    ? `${minPrice || 'No Min'} - ${maxPrice || 'No Max'}`
     : 'Any price';
 
   return (
@@ -85,9 +85,9 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
         w="full"
         px={4}
         py={3}
-        bg="rgba(255, 255, 255, 0.95)"
-        backdropFilter="blur(10px) saturate(180%)"
-        border="1px solid rgba(255, 255, 255, 0.3)"
+        bg="rgba(250, 248, 245, 0.95)"
+        backdropFilter="blur(24px) saturate(200%)"
+        border="1px solid rgba(220, 215, 210, 0.6)"
         borderRadius="lg"
         cursor="pointer"
         transition="all 0.2s ease"
@@ -95,8 +95,8 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
         alignItems="center"
         justifyContent="space-between"
         _hover={{
-          bg: 'rgba(255, 255, 255, 1)',
-          borderColor: 'rgba(59, 130, 246, 0.5)',
+          bg: 'rgba(250, 248, 245, 1)',
+          borderColor: 'rgba(220, 215, 210, 0.8)',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         }}
         _active={{
@@ -106,14 +106,13 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
         boxShadow="0 2px 8px rgba(0, 0, 0, 0.05)"
       >
         <Flex align="center" gap={2} flex={1}>
-          <Box color="gray.500" fontSize="sm">
-            <FiDollarSign />
-          </Box>
           <Text
-            fontSize="sm"
+            fontSize="15px"
             fontWeight="500"
-            color={value && value !== '0-10000000' ? 'gray.800' : 'gray.500'}
+            color={value && value !== '0-10000000' ? 'gray.900' : 'gray.500'}
             noOfLines={1}
+            fontFamily="'Playfair Display', serif"
+            letterSpacing="0.01em"
           >
             {displayText}
           </Text>
@@ -122,9 +121,9 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
           as={ChevronDownIcon}
           w={4}
           h={4}
-          color="gray.500"
+          color="gray.600"
           transform={isOpen ? 'rotate(180deg)' : 'rotate(0deg)'}
-          transition="transform 0.2s ease"
+          transition="transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
         />
       </Box>
 

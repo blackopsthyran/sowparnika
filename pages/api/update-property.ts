@@ -43,6 +43,7 @@ export default async function handler(
       content,
       propertyType,
       bhk,
+      baths,
       sellingType,
       price,
       areaSize,
@@ -61,12 +62,23 @@ export default async function handler(
       return res.status(400).json({ error: 'Property ID is required' });
     }
 
+    // Property types that don't require bedrooms/bathrooms
+    const landPropertyTypes = ['plot', 'land', 'commercial land'];
+    const isLandType = propertyType && landPropertyTypes.includes(propertyType.toLowerCase());
+    const requiresBedroomsBathrooms = !isLandType;
+
     // Prepare update data
     const updateData: any = {};
     if (title !== undefined) updateData.title = title;
     if (content !== undefined) updateData.content = content;
     if (propertyType !== undefined) updateData.property_type = propertyType;
-    if (bhk !== undefined) updateData.bhk = bhk ? parseInt(bhk) : null;
+    if (bhk !== undefined) {
+      updateData.bhk = requiresBedroomsBathrooms && bhk ? parseInt(bhk) : null;
+    }
+    // Only include baths if provided (will be added after migration)
+    if (baths !== undefined && requiresBedroomsBathrooms && baths) {
+      updateData.baths = parseInt(baths);
+    }
     if (sellingType !== undefined) updateData.selling_type = sellingType;
     if (price !== undefined) updateData.price = price ? parseFloat(price) : null;
     if (areaSize !== undefined) updateData.area_size = areaSize ? parseFloat(areaSize) : null;
@@ -77,7 +89,7 @@ export default async function handler(
     if (ownerName !== undefined) updateData.owner_name = ownerName;
     if (ownerNumber !== undefined) updateData.owner_number = ownerNumber;
     if (amenities !== undefined) {
-      updateData.amenities = Array.isArray(amenities) ? amenities : [];
+      updateData.amenities = requiresBedroomsBathrooms ? (Array.isArray(amenities) ? amenities : []) : [];
     }
     if (images !== undefined) {
       updateData.images = Array.isArray(images) ? images : [];
@@ -97,11 +109,27 @@ export default async function handler(
     }
 
     // Update in Supabase
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('properties')
       .update(updateData)
       .eq('id', id)
       .select();
+
+    // If error is due to missing 'baths' column, retry without it
+    if (error && error.message && error.message.includes('baths')) {
+      console.warn('Baths column not found, retrying without baths field');
+      const updateDataWithoutBaths = { ...updateData };
+      delete updateDataWithoutBaths.baths;
+      
+      const retryResult = await supabase
+        .from('properties')
+        .update(updateDataWithoutBaths)
+        .eq('id', id)
+        .select();
+      
+      data = retryResult.data;
+      error = retryResult.error;
+    }
 
     if (error) {
       console.error('Supabase update error:', error);

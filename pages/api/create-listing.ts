@@ -45,6 +45,7 @@ export default async function handler(
       content,
       propertyType,
       bhk,
+      baths,
       sellingType,
       price,
       areaSize,
@@ -59,20 +60,33 @@ export default async function handler(
       status,
     } = req.body;
 
+    // Property types that don't require bedrooms/bathrooms
+    const landPropertyTypes = ['plot', 'land', 'commercial land'];
+    const isLandType = propertyType && landPropertyTypes.includes(propertyType.toLowerCase());
+    const requiresBedroomsBathrooms = !isLandType;
+
     // Validate required fields
-    if (!title || !propertyType || !bhk || !price || !city || !address || !ownerName || !ownerNumber) {
+    const missingFields: any = {
+      title: !title,
+      propertyType: !propertyType,
+      price: !price,
+      city: !city,
+      address: !address,
+      ownerName: !ownerName,
+      ownerNumber: !ownerNumber,
+    };
+
+    // Only require BHK and baths for non-land types
+    if (requiresBedroomsBathrooms) {
+      missingFields.bhk = !bhk;
+      missingFields.baths = !baths;
+    }
+
+    const hasMissingFields = Object.values(missingFields).some(Boolean);
+    if (hasMissingFields) {
       return res.status(400).json({ 
         error: 'Missing required fields',
-        details: {
-          title: !title,
-          propertyType: !propertyType,
-          bhk: !bhk,
-          price: !price,
-          city: !city,
-          address: !address,
-          ownerName: !ownerName,
-          ownerNumber: !ownerNumber,
-        }
+        details: missingFields
       });
     }
 
@@ -81,7 +95,7 @@ export default async function handler(
       title,
       content: content || '',
       property_type: propertyType,
-      bhk: bhk ? parseInt(bhk) : null,
+      bhk: requiresBedroomsBathrooms && bhk ? parseInt(bhk) : null,
       selling_type: sellingType || 'Sale',
       price: price ? parseFloat(price) : null,
       area_size: areaSize ? parseFloat(areaSize) : null,
@@ -91,12 +105,17 @@ export default async function handler(
       state: state || '',
       owner_name: ownerName,
       owner_number: ownerNumber,
-      amenities: amenities || [],
+      amenities: requiresBedroomsBathrooms ? (amenities || []) : [],
       images: images || [],
       status: status || 'active',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+
+    // Only include baths if provided (will be added after migration)
+    if (requiresBedroomsBathrooms && baths) {
+      insertData.baths = parseInt(baths);
+    }
 
     console.log('Attempting to insert:', { ...insertData, owner_number: '***' });
 
@@ -111,7 +130,18 @@ export default async function handler(
     }
 
     // Insert into Supabase
-    const { data, error } = await supabase.from('properties').insert([insertData]).select();
+    let { data, error } = await supabase.from('properties').insert([insertData]).select();
+
+    // If error is due to missing 'baths' column, retry without it
+    if (error && error.message && error.message.includes('baths')) {
+      console.warn('Baths column not found, retrying without baths field');
+      const insertDataWithoutBaths = { ...insertData };
+      delete insertDataWithoutBaths.baths;
+      
+      const retryResult = await supabase.from('properties').insert([insertDataWithoutBaths]).select();
+      data = retryResult.data;
+      error = retryResult.error;
+    }
 
     if (error) {
       console.error('Supabase error:', error);

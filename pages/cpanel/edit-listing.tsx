@@ -27,7 +27,7 @@ import DefaultLayout from '@/features/Layout/DefaultLayout';
 import { useDropzone } from 'react-dropzone';
 import dynamic from 'next/dynamic';
 import {
-  FiHome,
+  FiHome as FiHomeIcon,
   FiDollarSign,
   FiMapPin,
   FiUser,
@@ -35,6 +35,7 @@ import {
   FiImage,
   FiX,
   FiUpload,
+  FiHome,
 } from 'react-icons/fi';
 import Link from 'next/link';
 
@@ -52,17 +53,22 @@ const EditListingPage = () => {
     content: '',
     propertyType: '',
     bhk: '',
+    baths: '',
     sellingType: 'Sale',
     price: '',
     areaSize: '',
     areaUnit: 'Sq. Ft.',
     city: '',
     address: '',
-    state: '',
+    state: 'Kerala',
     ownerName: '',
     ownerNumber: '',
     status: '',
   });
+
+  // Property types that don't require bedrooms/bathrooms
+  const landPropertyTypes = ['plot', 'land', 'commercial land'];
+  const showBedroomsBathrooms = formData.propertyType && !landPropertyTypes.includes(formData.propertyType.toLowerCase());
 
   const [amenities, setAmenities] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -105,13 +111,14 @@ const EditListingPage = () => {
           content: property.content || '',
           propertyType: property.property_type || '',
           bhk: property.bhk?.toString() || '',
+          baths: property.baths?.toString() || '',
           sellingType: property.selling_type || 'Sale',
           price: property.price?.toString() || '',
           areaSize: property.area_size?.toString() || '',
           areaUnit: property.area_unit || 'Sq. Ft.',
           city: property.city || '',
           address: property.address || '',
-          state: property.state || '',
+          state: property.state || 'Kerala',
           ownerName: property.owner_name || '',
           ownerNumber: property.owner_number || '',
           status: property.status || 'active',
@@ -220,8 +227,11 @@ const EditListingPage = () => {
         body: JSON.stringify({
           id,
           ...formData,
-          amenities,
+          amenities: showBedroomsBathrooms ? amenities : [],
           images: allImages,
+          // Clear BHK and baths for land types
+          bhk: showBedroomsBathrooms ? formData.bhk : '',
+          baths: showBedroomsBathrooms ? formData.baths : '',
         }),
       });
 
@@ -266,19 +276,64 @@ const EditListingPage = () => {
 
   return (
     <DefaultLayout title="Edit Listing" description="Edit property listing">
-      <Box bg="gray.50" minH="100vh" py={8}>
+      <Box bg="white" minH="100vh" py={12}>
         <Container maxW="container.xl">
           <VStack spacing={6} align="stretch">
-            <Flex justify="space-between" align="center">
+            <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
               <Box>
-                <Heading size="xl" mb={2} color="blue.700">
+                <Heading 
+                  size="xl" 
+                  mb={3} 
+                  color="gray.900"
+                  fontFamily="'Playfair Display', serif"
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                >
                   Edit Listing
                 </Heading>
-                <Text color="gray.600">Update property information</Text>
+                <Text color="gray.900" fontSize="sm" letterSpacing="0.1em">
+                  Update property information
+                </Text>
               </Box>
-              <Link href="/cpanel/listings">
-                <Button variant="outline">Back to Listings</Button>
-              </Link>
+              <HStack spacing={3} flexWrap="wrap">
+                <Link href="/">
+                  <Button
+                    leftIcon={<FiHome />}
+                    variant="outline"
+                    borderColor="gray.900"
+                    color="gray.900"
+                    borderRadius="0"
+                    _hover={{
+                      bg: 'gray.900',
+                      color: 'white',
+                    }}
+                    fontFamily="'Playfair Display', serif"
+                    fontWeight="600"
+                    letterSpacing="0.05em"
+                    textTransform="uppercase"
+                  >
+                    Go to Home
+                  </Button>
+                </Link>
+                <Link href="/cpanel/listings">
+                  <Button 
+                    variant="outline"
+                    borderColor="gray.900"
+                    color="gray.900"
+                    borderRadius="0"
+                    fontWeight="600"
+                    letterSpacing="0.1em"
+                    textTransform="uppercase"
+                    _hover={{
+                      bg: 'gray.900',
+                      color: 'white',
+                    }}
+                  >
+                    Back to Listings
+                  </Button>
+                </Link>
+              </HStack>
             </Flex>
 
             <form onSubmit={handleSubmit}>
@@ -310,19 +365,35 @@ const EditListingPage = () => {
                       </FormControl>
 
                       <FormControl isRequired>
-                        <FormLabel>Property Type</FormLabel>
+                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                          Property Type
+                        </FormLabel>
                         <Select
                           name="propertyType"
                           value={formData.propertyType}
                           onChange={handleInputChange}
+                          bg="white"
+                          borderColor="gray.300"
+                          color="gray.900"
+                          borderRadius="0"
+                          _focus={{
+                            borderColor: 'gray.900',
+                            boxShadow: '0 0 0 1px gray.900',
+                          }}
                         >
                           <option value="">Select Type</option>
                           <option value="Apartment">Apartment</option>
                           <option value="House">House</option>
                           <option value="Villa">Villa</option>
+                          <option value="Flat">Flat</option>
                           <option value="Studio">Studio</option>
                           <option value="Penthouse">Penthouse</option>
                           <option value="Townhouse">Townhouse</option>
+                          <option value="Plot">Plot</option>
+                          <option value="Land">Land</option>
+                          <option value="Commercial Land">Commercial Land</option>
+                          <option value="Warehouse">Warehouse</option>
+                          <option value="Commercial Building">Commercial Building</option>
                         </Select>
                       </FormControl>
 
@@ -373,23 +444,54 @@ const EditListingPage = () => {
                       </FormControl>
 
                       <FormControl isRequired>
-                        <FormLabel>Area Size</FormLabel>
-                        <HStack>
+                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                          Area Size
+                        </FormLabel>
+                        <HStack spacing={2}>
                           <Input
                             name="areaSize"
                             type="number"
                             value={formData.areaSize}
                             onChange={handleInputChange}
+                            placeholder="Enter area"
+                            bg="white"
+                            borderColor="gray.300"
+                            color="gray.900"
+                            borderRadius="0"
+                            _placeholder={{ color: 'gray.400' }}
+                            _focus={{
+                              borderColor: 'gray.900',
+                              boxShadow: '0 0 0 1px gray.900',
+                            }}
+                            flex="1"
+                            minW="0"
                           />
                           <Select
                             name="areaUnit"
                             value={formData.areaUnit}
                             onChange={handleInputChange}
-                            width="140px"
+                            bg="white"
+                            borderColor="gray.300"
+                            color="gray.900"
+                            borderRadius="0"
+                            _focus={{
+                              borderColor: 'gray.900',
+                              boxShadow: '0 0 0 1px gray.900',
+                            }}
+                            flex="1"
+                            minW="0"
                           >
                             <option value="Sq. Ft.">Sq. Ft.</option>
                             <option value="Sq. M.">Sq. M.</option>
                             <option value="Sq. Yd.">Sq. Yd.</option>
+                            <option value="Acre">Acre</option>
+                            <option value="Acres">Acres</option>
+                            <option value="Cent">Cent</option>
+                            <option value="Cents">Cents</option>
+                            <option value="Ground">Ground</option>
+                            <option value="Grounds">Grounds</option>
+                            <option value="Gunta">Gunta</option>
+                            <option value="Guntas">Guntas</option>
                           </Select>
                         </HStack>
                       </FormControl>

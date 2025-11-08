@@ -4,14 +4,13 @@ import dynamic from 'next/dynamic';
 import HeroSection from '@/features/Home/components/HeroSection/HeroSection';
 import Marquee from '@/features/Home/components/Marquee/Marquee';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
+import FeatureHighlights from '@/features/Home/components/FeatureHighlights/FeatureHighlights';
+import WeeklyHighlight from '@/features/Home/components/WeeklyHighlight/WeeklyHighlight';
+import PopularSearches from '@/features/Home/components/PopularSearches/PopularSearches';
 
 // Lazy load heavy components
 const PropertyCarousel = dynamic(() => import('@/features/Home/components/PropertyCarousel/PropertyCarousel'), {
   loading: () => <Box p={8} textAlign="center">Loading properties...</Box>,
-  ssr: false,
-});
-
-const MeetTheTeam = dynamic(() => import('@/features/Home/components/MeetTheTeam'), {
   ssr: false,
 });
 
@@ -27,6 +26,7 @@ export default function Home() {
   const [trendingProperties, setTrendingProperties] = useState<any[]>([]);
   const [newProperties, setNewProperties] = useState<any[]>([]);
   const [popularProperties, setPopularProperties] = useState<any[]>([]);
+  const [featuredProperty, setFeaturedProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,6 +70,11 @@ export default function Home() {
         }));
         setPopularProperties(transformed);
       }
+
+      // Set featured property for weekly highlight (use first trending property)
+      if (trendingResponse.ok && trendingData.properties && trendingData.properties.length > 0) {
+        setFeaturedProperty(trendingData.properties[0]);
+      }
     } catch (error) {
       console.error('Error fetching properties:', error);
     } finally {
@@ -104,6 +109,9 @@ export default function Home() {
           speed={40}
           direction="left"
         />
+
+        {/* Feature Highlights */}
+        <FeatureHighlights />
         
         {/* Trending Properties */}
         {!loading && trendingProperties.length > 0 && (
@@ -144,8 +152,18 @@ export default function Home() {
           </Box>
         )}
 
-        <MeetTheTeam />
+        {/* Weekly Highlight */}
+        {!loading && featuredProperty && (
+          <WeeklyHighlight property={featuredProperty} />
+        )}
+
+        {/* Popular Searches */}
+        <PopularSearches />
+
+        {/* Partners */}
         <Partners />
+        
+        {/* Testimonials */}
         <Testimonials />
       </Box>
     </DefaultLayout>

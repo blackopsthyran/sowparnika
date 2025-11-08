@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
-import { Box, Container, SimpleGrid, Card, CardBody, Heading, Text, Button, VStack, HStack, Icon, Stat, StatLabel, StatNumber, StatHelpText } from '@chakra-ui/react';
-import { FaHome, FaPlus, FaEdit, FaTrash, FaCog, FaChartBar } from 'react-icons/fa';
+import { Box, Container, SimpleGrid, Card, CardBody, Heading, Text, Button, VStack, HStack, Icon, Stat, StatLabel, StatNumber, StatHelpText, Flex } from '@chakra-ui/react';
+import { FaPlus, FaEdit, FaTrash, FaCog, FaChartBar } from 'react-icons/fa';
+import { FiHome } from 'react-icons/fi';
 import Link from 'next/link';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
 
@@ -40,28 +41,99 @@ const DashboardStats = () => {
   };
 
   return (
-    <Card>
-      <CardBody>
-        <Heading size="md" mb={4}>Quick Stats</Heading>
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-          <Stat>
-            <StatLabel>Total Properties</StatLabel>
-            <StatNumber>{loading ? '...' : stats.total}</StatNumber>
-            <StatHelpText>All listings</StatHelpText>
-          </Stat>
-          <Stat>
-            <StatLabel>Active Listings</StatLabel>
-            <StatNumber>{loading ? '...' : stats.active}</StatNumber>
-            <StatHelpText>Currently available</StatHelpText>
-          </Stat>
-          <Stat>
-            <StatLabel>Sold/Rented</StatLabel>
-            <StatNumber>{loading ? '...' : stats.sold + stats.rented}</StatNumber>
-            <StatHelpText>Completed transactions</StatHelpText>
-          </Stat>
-        </SimpleGrid>
-      </CardBody>
-    </Card>
+    <Box
+      border="2px solid"
+      borderColor="gray.900"
+      borderRadius="0"
+      bg="white"
+      p={8}
+    >
+      <Heading 
+        size="md" 
+        mb={6}
+        color="gray.900"
+        fontFamily="'Playfair Display', serif"
+        fontWeight="700"
+        letterSpacing="0.05em"
+        textTransform="uppercase"
+      >
+        Quick Stats
+      </Heading>
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8}>
+        <Box>
+          <Text 
+            fontSize="xs" 
+            color="gray.900" 
+            fontWeight="600" 
+            letterSpacing="0.1em" 
+            textTransform="uppercase"
+            mb={2}
+          >
+            Total Properties
+          </Text>
+          <Text 
+            fontSize="3xl" 
+            color="gray.900" 
+            fontWeight="700"
+            fontFamily="'Playfair Display', serif"
+            mb={1}
+          >
+            {loading ? '...' : stats.total}
+          </Text>
+          <Text fontSize="xs" color="gray.900" letterSpacing="0.05em">
+            All listings
+          </Text>
+        </Box>
+        <Box>
+          <Text 
+            fontSize="xs" 
+            color="gray.900" 
+            fontWeight="600" 
+            letterSpacing="0.1em" 
+            textTransform="uppercase"
+            mb={2}
+          >
+            Active Listings
+          </Text>
+          <Text 
+            fontSize="3xl" 
+            color="gray.900" 
+            fontWeight="700"
+            fontFamily="'Playfair Display', serif"
+            mb={1}
+          >
+            {loading ? '...' : stats.active}
+          </Text>
+          <Text fontSize="xs" color="gray.900" letterSpacing="0.05em">
+            Currently available
+          </Text>
+        </Box>
+        <Box>
+          <Text 
+            fontSize="xs" 
+            color="gray.900" 
+            fontWeight="600" 
+            letterSpacing="0.1em" 
+            textTransform="uppercase"
+            mb={2}
+          >
+            Sold/Rented
+          </Text>
+          <Text 
+            fontSize="3xl" 
+            color="gray.900" 
+            fontWeight="700"
+            fontFamily="'Playfair Display', serif"
+            mb={1}
+          >
+            {loading ? '...' : stats.sold + stats.rented}
+          </Text>
+          <Text fontSize="xs" color="gray.900" letterSpacing="0.05em">
+            Completed transactions
+          </Text>
+        </Box>
+      </SimpleGrid>
+    </Box>
   );
 };
 
@@ -115,40 +187,79 @@ const CpanelDashboard = () => {
 
   return (
     <DefaultLayout title="Control Panel" description="Admin control panel">
-      <Box bg="gray.50" minH="100vh" py={8}>
+      <Box bg="white" minH="100vh" py={12}>
         <Container maxW="container.xl">
-          <VStack spacing={8} align="stretch">
-            <Box>
-              <Heading size="xl" mb={2} color="blue.700">
-                Control Panel
-              </Heading>
-              <Text color="gray.600">Manage your real estate website</Text>
-            </Box>
+          <VStack spacing={10} align="stretch">
+            <Flex justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
+              <Box>
+                <Heading 
+                  size="xl" 
+                  mb={3} 
+                  color="gray.900"
+                  fontFamily="'Playfair Display', serif"
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                >
+                  Control Panel
+                </Heading>
+                <Text color="gray.900" fontSize="sm" letterSpacing="0.1em">
+                  Manage your real estate website
+                </Text>
+              </Box>
+              <Link href="/">
+                <Button
+                  leftIcon={<FiHome />}
+                  variant="outline"
+                  borderColor="gray.900"
+                  color="gray.900"
+                  borderRadius="0"
+                  _hover={{
+                    bg: 'gray.900',
+                    color: 'white',
+                  }}
+                  fontFamily="'Playfair Display', serif"
+                  fontWeight="600"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                >
+                  Go to Home
+                </Button>
+              </Link>
+            </Flex>
 
             <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
               {menuItems.map((item) => (
                 <Link key={item.link} href={item.link}>
-                  <Card
+                  <Box
                     as="a"
                     cursor="pointer"
-                    _hover={{ transform: 'translateY(-4px)', shadow: 'lg' }}
-                    transition="all 0.2s"
+                    border="2px solid"
+                    borderColor="gray.900"
+                    borderRadius="0"
+                    bg="white"
+                    p={6}
                     height="100%"
+                    transition="all 0.2s"
+                    _hover={{ 
+                      transform: 'translateY(-4px)',
+                      bg: 'gray.50',
+                    }}
+                    display="flex"
+                    flexDirection="column"
                   >
-                    <CardBody>
-                      <VStack spacing={4} align="stretch">
-                        <Icon as={item.icon} boxSize={10} color={`${item.color}.500`} />
-                        <Box>
-                          <Heading size="md" mb={2} color="gray.800">
-                            {item.title}
-                          </Heading>
-                          <Text fontSize="sm" color="gray.600">
-                            {item.description}
-                          </Text>
-                        </Box>
-                      </VStack>
-                    </CardBody>
-                  </Card>
+                    <VStack spacing={4} align="stretch" height="100%">
+                      <Icon as={item.icon} boxSize={10} color="gray.900" />
+                      <Box>
+                        <Heading size="md" mb={2} color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700">
+                          {item.title}
+                        </Heading>
+                        <Text fontSize="sm" color="gray.900" fontFamily="'Playfair Display', serif">
+                          {item.description}
+                        </Text>
+                      </Box>
+                    </VStack>
+                  </Box>
                 </Link>
               ))}
             </SimpleGrid>

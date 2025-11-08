@@ -7,11 +7,21 @@ import Head from 'next/head';
 import { AuthProvider } from '@/contexts/AuthContext';
 import theme from '@/lib/theme';
 import Preloader from '@/components/Preloader/Preloader';
+import '@/styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Configure NProgress to match old money theme
+    NProgress.configure({
+      showSpinner: false,
+      trickleSpeed: 100,
+      minimum: 0.08,
+      easing: 'ease',
+      speed: 400,
+    });
+
     Router.events.on('routeChangeStart', () => {
       NProgress.start();
     });

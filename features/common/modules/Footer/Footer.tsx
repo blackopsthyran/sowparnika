@@ -31,13 +31,13 @@ const Footer = () => {
                 as="img"
                 src="/logo.png"
                 alt="Sowparnika Properties"
-                height="70px"
+                height={{ base: '100px', md: '140px', lg: '180px' }}
                 width="auto"
                 objectFit="contain"
                 mb={3}
                 loading="eager"
               />
-              <Text fontSize="sm" color="gray.400" lineHeight="tall" mb={4} fontFamily="'Playfair Display', serif">
+              <Text fontSize="sm" color="white" lineHeight="tall" mb={4} fontFamily="'Playfair Display', serif">
                 Your trusted gateway to real estate in Kakkanad, Kochi. We offer verified properties, expert consultation, and full-service support.
               </Text>
               <HStack spacing={4} mt={4}>
@@ -105,7 +105,7 @@ const Footer = () => {
           p={6}
           mb="2rem"
         >
-          <Text fontSize="md" fontWeight="600" mb={4} fontFamily="'Playfair Display', serif">
+          <Text fontSize="md" fontWeight="600" mb={4} fontFamily="'Playfair Display', serif" color="white">
             Work With Us
           </Text>
           <SimpleGrid columns={{ base: 2, md: 3, lg: 5 }} gap={3}>
@@ -164,8 +164,8 @@ const FooterLink = ({ link, name }: { link: string; name: string }) => {
     <Link href={link}>
       <Text
         fontSize="sm"
-        color="gray.400"
-        _hover={{ color: 'white', transform: 'translateX(4px)' }}
+        color="white"
+        _hover={{ color: 'whiteAlpha.800', transform: 'translateX(4px)' }}
         transition="all 0.2s"
         cursor="pointer"
         fontFamily="'Playfair Display', serif"
@@ -186,9 +186,9 @@ const FooterHeader = ({ title }: { title: string }) => {
 
 const ContactInfo = ({ icon, text }: { icon: any; text: string }) => {
   return (
-    <HStack spacing={2} mb={2} color="gray.400" fontSize="sm">
-      <Icon as={icon} />
-      <Text fontFamily="'Playfair Display', serif">{text}</Text>
+    <HStack spacing={2} mb={2} color="white" fontSize="sm">
+      <Icon as={icon} color="white" />
+      <Text fontFamily="'Playfair Display', serif" color="white">{text}</Text>
     </HStack>
   );
 };

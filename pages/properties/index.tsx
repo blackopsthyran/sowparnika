@@ -16,9 +16,10 @@ import {
   Badge,
   IconButton,
 } from '@chakra-ui/react';
-import { FiSearch, FiX } from 'react-icons/fi';
+import { FiSearch, FiX, FiHome } from 'react-icons/fi';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
 import PropertyCard from '@/features/common/modules/PropertyCard';
+import Link from 'next/link';
 
 interface Property {
   id: string;
@@ -226,6 +227,27 @@ const Properties = () => {
     >
       <Box backgroundColor="#f7f8f9" minH="100vh" py="3rem">
         <Container maxW="1400px">
+          {/* Home Link */}
+          <Box mb={6}>
+            <Link href="/">
+              <Button
+                leftIcon={<FiHome />}
+                variant="outline"
+                borderColor="gray.900"
+                color="gray.900"
+                borderRadius="lg"
+                _hover={{
+                  bg: 'gray.900',
+                  color: 'white',
+                }}
+                fontFamily="'Playfair Display', serif"
+                fontWeight="600"
+              >
+                Go to Home
+              </Button>
+            </Link>
+          </Box>
+
           {/* Search and Filter Bar */}
           <Box
             bg="white"
@@ -404,7 +426,12 @@ const Properties = () => {
               </Text>
             </Box>
           ) : (
-            <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing={8}>
+                <SimpleGrid 
+              columns={{ base: 1, sm: 2, lg: 3 }} 
+              spacing={4}
+              gap={4}
+              minChildWidth="300px"
+            >
               {transformedProperties.map((property) => (
                 <PropertyCard key={property.id} {...property} />
               ))}

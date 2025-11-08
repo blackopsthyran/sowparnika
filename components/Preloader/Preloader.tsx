@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Flex, Text, Image, keyframes } from '@chakra-ui/react';
+import { Box, Flex, Text, keyframes } from '@chakra-ui/react';
 
 interface PreloaderProps {
   onComplete: () => void;
@@ -40,6 +40,37 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
     to { opacity: 0; }
   `;
 
+  const slideIn = keyframes`
+    from { 
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  `;
+
+  const lineDraw = keyframes`
+    from { 
+      width: 0;
+      opacity: 0;
+    }
+    to { 
+      width: 100%;
+      opacity: 1;
+    }
+  `;
+
+  const shimmer = keyframes`
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  `;
+
   return (
     <>
       {isVisible && (
@@ -50,184 +81,249 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
           right={0}
           bottom={0}
           zIndex={9999}
-          bgGradient="linear(135deg, #1a202c 0%, #2d3748 50%, #1a202c 100%)"
+          bg="gray.900"
           display="flex"
           alignItems="center"
           justifyContent="center"
           animation={!isVisible ? `${fadeOut} 0.5s ease-out forwards` : 'none'}
+          overflow="hidden"
         >
+          {/* Geometric Background Pattern - Subtle Grid */}
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            opacity={0.03}
+            sx={{
+              backgroundImage: `
+                linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+            }}
+          />
+
+          {/* Diagonal Lines - Edgy Design Element */}
+          <Box
+            position="absolute"
+            top="0"
+            left="0"
+            width="100%"
+            height="100%"
+            opacity={0.05}
+            sx={{
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255, 255, 255, 0.1) 2px, rgba(255, 255, 255, 0.1) 4px)',
+            }}
+          />
+
+          {/* Main Content Container */}
           <Box
             position="relative"
             width="100%"
-            height="100%"
+            maxW="600px"
+            px={8}
             display="flex"
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
-            overflow="hidden"
+            zIndex={10}
           >
-            {/* Animated Background Pattern */}
-            <Box
-              position="absolute"
-              width="200%"
-              height="200%"
-              top="-50%"
-              left="-50%"
-              backgroundImage="radial-gradient(circle, rgba(59, 130, 246, 0.1) 1px, transparent 1px)"
-              backgroundSize="50px 50px"
-              animation="float 20s ease-in-out infinite"
-              sx={{
-                '@keyframes float': {
-                  '0%, 100%': { transform: 'translate(0, 0) rotate(0deg)' },
-                  '50%': { transform: 'translate(-20px, -20px) rotate(180deg)' },
-                },
-              }}
-            />
-
-            {/* Logo Animation */}
-            <Box
-              mb={8}
-              position="relative"
-              sx={{
-                animation: 'logoFadeIn 0.8s ease-out',
-                '@keyframes logoFadeIn': {
-                  '0%': { opacity: 0, transform: 'scale(0.8)' },
-                  '100%': { opacity: 1, transform: 'scale(1)' },
-                },
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: '-20px',
-                  left: '-20px',
-                  right: '-20px',
-                  bottom: '-20px',
-                  borderRadius: '50%',
-                  border: '2px solid rgba(59, 130, 246, 0.3)',
-                  animation: 'pulse 2s ease-in-out infinite',
-                },
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  top: '-40px',
-                  left: '-40px',
-                  right: '-40px',
-                  bottom: '-40px',
-                  borderRadius: '50%',
-                  border: '1px solid rgba(59, 130, 246, 0.2)',
-                  animation: 'pulse 2s ease-in-out infinite 0.5s',
-                },
-                '@keyframes pulse': {
-                  '0%, 100%': { opacity: 0.3, transform: 'scale(1)' },
-                  '50%': { opacity: 0.6, transform: 'scale(1.1)' },
-                },
-              }}
-            >
-              <Image
-                src="/logo.png"
-                alt="Sowparnika Properties"
-                height="120px"
-                width="auto"
-                objectFit="contain"
-                filter="drop-shadow(0 0 30px rgba(59, 130, 246, 0.5))"
-              />
-            </Box>
-
-            {/* Company Name */}
+            {/* Company Name - Large, Bold, High Contrast */}
             <Text
-              fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }}
-              fontWeight="bold"
+              fontSize={{ base: '3xl', md: '5xl', lg: '6xl' }}
+              fontWeight="700"
               color="white"
-              mb={12}
+              mb={16}
               fontFamily="'Playfair Display', serif"
-              letterSpacing="0.1em"
+              letterSpacing="0.15em"
               textAlign="center"
-              textShadow="0 0 20px rgba(59, 130, 246, 0.5)"
+              textTransform="uppercase"
+              lineHeight="1.1"
               sx={{
-                animation: 'textFadeIn 0.8s ease-out 0.3s both',
-                '@keyframes textFadeIn': {
-                  '0%': { opacity: 0, transform: 'translateY(20px)' },
-                  '100%': { opacity: 1, transform: 'translateY(0)' },
-                },
+                animation: `${slideIn} 0.8s ease-out`,
+                transform: 'scaleY(1.2)',
+                display: 'inline-block',
+                textShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+                fontFeatureSettings: '"liga" 1, "kern" 1',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
               }}
             >
-              SOWPARNIKA PROPERTIES
+              Sowparnika Properties
             </Text>
 
-            {/* Progress Bar */}
-            <Box width={{ base: '80%', md: '400px' }} mb={4}>
+            {/* Sharp, Edgy Progress Bar Container */}
+            <Box width="100%" maxW="400px" mb={6}>
+              {/* Progress Bar Background - Sharp corners */}
               <Box
-                height="2px"
+                height="3px"
                 bg="rgba(255, 255, 255, 0.1)"
-                borderRadius="full"
+                borderRadius="0"
                 overflow="hidden"
                 position="relative"
+                border="1px solid"
+                borderColor="rgba(255, 255, 255, 0.2)"
               >
+                {/* Progress Fill - Sharp, crisp */}
                 <Box
                   height="100%"
                   width={`${progress}%`}
-                  bgGradient="linear(90deg, #3b82f6 0%, #60a5fa 50%, #3b82f6 100%)"
-                  borderRadius="full"
-                  boxShadow="0 0 10px rgba(59, 130, 246, 0.8)"
-                  transition="width 0.3s ease-out"
-                />
-                <Box
-                  position="absolute"
-                  top="50%"
-                  left={`${progress}%`}
-                  transform="translate(-50%, -50%)"
-                  width="12px"
-                  height="12px"
-                  borderRadius="full"
                   bg="white"
-                  boxShadow="0 0 15px rgba(59, 130, 246, 1)"
-                  transition="left 0.3s ease-out"
+                  borderRadius="0"
+                  transition="width 0.3s ease-out"
+                  position="relative"
                   sx={{
-                    animation: 'glow 1.5s ease-in-out infinite',
-                    '@keyframes glow': {
-                      '0%, 100%': { boxShadow: '0 0 15px rgba(59, 130, 246, 1)' },
-                      '50%': { boxShadow: '0 0 25px rgba(59, 130, 246, 1), 0 0 35px rgba(59, 130, 246, 0.8)' },
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+                      animation: `${shimmer} 2s infinite`,
+                      backgroundSize: '200% 100%',
                     },
                   }}
                 />
               </Box>
+
+              {/* Sharp corner accent lines */}
+              <Flex justifyContent="space-between" mt={2} position="relative">
+                <Box
+                  width="20px"
+                  height="1px"
+                  bg="rgba(255, 255, 255, 0.3)"
+                  borderRadius="0"
+                />
+                <Box
+                  width="20px"
+                  height="1px"
+                  bg="rgba(255, 255, 255, 0.3)"
+                  borderRadius="0"
+                />
+              </Flex>
             </Box>
 
-            {/* Progress Percentage */}
+            {/* Progress Percentage - Elegant Typography */}
             <Text
-              fontSize="sm"
-              color="rgba(255, 255, 255, 0.7)"
+              fontSize={{ base: 'lg', md: 'xl' }}
+              color="white"
               fontFamily="'Playfair Display', serif"
-              letterSpacing="0.1em"
+              letterSpacing="0.2em"
+              fontWeight="600"
+              mb={8}
               sx={{
-                animation: 'fadeIn 0.8s ease-out 0.5s both',
-                '@keyframes fadeIn': {
-                  '0%': { opacity: 0 },
-                  '100%': { opacity: 1 },
-                },
+                animation: `${slideIn} 0.8s ease-out 0.3s both`,
+                opacity: 0.9,
               }}
             >
               {Math.round(progress)}%
             </Text>
 
-            {/* Loading Text */}
+            {/* Loading Text - Minimal, Elegant */}
             <Text
               fontSize="xs"
-              color="rgba(255, 255, 255, 0.5)"
-              mt={8}
-              fontFamily="'Playfair Display', serif"
-              letterSpacing="0.2em"
+              color="rgba(255, 255, 255, 0.6)"
+              fontFamily="'Inter', sans-serif"
+              letterSpacing="0.3em"
               textTransform="uppercase"
+              fontWeight="300"
               sx={{
-                animation: 'fadeIn 0.8s ease-out 0.7s both',
-                '@keyframes fadeIn': {
-                  '0%': { opacity: 0 },
-                  '100%': { opacity: 1 },
-                },
+                animation: `${slideIn} 0.8s ease-out 0.5s both`,
               }}
             >
-              Loading Excellence...
+              Loading Excellence
             </Text>
+
+            {/* Geometric Divider Lines - Edgy Design */}
+            <Flex
+              alignItems="center"
+              gap={4}
+              mt={12}
+              width="100%"
+              maxW="200px"
+              sx={{
+                animation: `${slideIn} 0.8s ease-out 0.7s both`,
+              }}
+            >
+              <Box
+                flex="1"
+                height="1px"
+                bg="rgba(255, 255, 255, 0.2)"
+                borderRadius="0"
+              />
+              <Box
+                width="4px"
+                height="4px"
+                bg="white"
+                borderRadius="0"
+                transform="rotate(45deg)"
+              />
+              <Box
+                flex="1"
+                height="1px"
+                bg="rgba(255, 255, 255, 0.2)"
+                borderRadius="0"
+              />
+            </Flex>
           </Box>
+
+          {/* Corner Accents - Sharp, Geometric */}
+          <Box
+            position="absolute"
+            top="40px"
+            left="40px"
+            width="60px"
+            height="60px"
+            border="1px solid"
+            borderColor="rgba(255, 255, 255, 0.1)"
+            borderRight="none"
+            borderBottom="none"
+            borderRadius="0"
+            opacity={0.3}
+          />
+          <Box
+            position="absolute"
+            top="40px"
+            right="40px"
+            width="60px"
+            height="60px"
+            border="1px solid"
+            borderColor="rgba(255, 255, 255, 0.1)"
+            borderLeft="none"
+            borderBottom="none"
+            borderRadius="0"
+            opacity={0.3}
+          />
+          <Box
+            position="absolute"
+            bottom="40px"
+            left="40px"
+            width="60px"
+            height="60px"
+            border="1px solid"
+            borderColor="rgba(255, 255, 255, 0.1)"
+            borderRight="none"
+            borderTop="none"
+            borderRadius="0"
+            opacity={0.3}
+          />
+          <Box
+            position="absolute"
+            bottom="40px"
+            right="40px"
+            width="60px"
+            height="60px"
+            border="1px solid"
+            borderColor="rgba(255, 255, 255, 0.1)"
+            borderLeft="none"
+            borderTop="none"
+            borderRadius="0"
+            opacity={0.3}
+          />
         </Box>
       )}
     </>
@@ -235,4 +331,3 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
 };
 
 export default Preloader;
-

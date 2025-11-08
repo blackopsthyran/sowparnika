@@ -150,23 +150,27 @@ const PropertyDetail = ({
 
                 {/* Property Stats */}
                 <Box mt={8} p={6} bg="gray.50" borderRadius="lg">
-                  <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={4}>
-                    <Box>
-                      <Text fontSize="xs" color="gray.600" mb={1}>
-                        Bedrooms
-                      </Text>
-                      <Text fontSize="xl" fontWeight="600">
-                        {rooms || 'N/A'}
-                      </Text>
-                    </Box>
-                    <Box>
-                      <Text fontSize="xs" color="gray.600" mb={1}>
-                        Bathrooms
-                      </Text>
-                      <Text fontSize="xl" fontWeight="600">
-                        {baths || 'N/A'}
-                      </Text>
-                    </Box>
+                  <SimpleGrid columns={{ base: 2, sm: rooms !== null && baths !== null ? 4 : 3 }} spacing={4}>
+                    {rooms !== null && rooms !== undefined && (
+                      <Box>
+                        <Text fontSize="xs" color="gray.600" mb={1}>
+                          Bedrooms
+                        </Text>
+                        <Text fontSize="xl" fontWeight="600">
+                          {rooms}
+                        </Text>
+                      </Box>
+                    )}
+                    {baths !== null && baths !== undefined && (
+                      <Box>
+                        <Text fontSize="xs" color="gray.600" mb={1}>
+                          Bathrooms
+                        </Text>
+                        <Text fontSize="xl" fontWeight="600">
+                          {baths}
+                        </Text>
+                      </Box>
+                    )}
                     <Box>
                       <Text fontSize="xs" color="gray.600" mb={1}>
                         Type

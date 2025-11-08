@@ -1,6 +1,6 @@
 import React from 'react';
 import { TbQuote } from 'react-icons/tb';
-import { Box, Flex, Image, Text } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 
 const TestimonialCard: React.FC<{
   name: string;
@@ -15,34 +15,28 @@ const TestimonialCard: React.FC<{
       display="flex"
       flexDirection="column"
       marginBottom={{ base: '1rem', sm: '0' }}
+      height="100%"
     >
       <Box>
-        <TbQuote size={40} color="#4299e1" />
+        <TbQuote size={40} color="#1a202c" />
       </Box>
-      <Text fontSize="lg" color="gray.500" marginY="1.8rem">
+      <Text fontSize="lg" color="gray.700" marginY="1.8rem" lineHeight="1.8" flex="1">
         {testimonial}
       </Text>
-      <Flex gap="1rem" alignItems="center">
-        <Image
-          src={image}
-          alt={name}
-          width="6rem"
-          height="6rem"
-          objectFit="cover"
-          borderRadius="full"
-        />
-        <Box>
-          by <Text as="span">{name}</Text>
-          <Text
-            fontSize="lg"
-            fontStyle="italic"
-            fontWeight="light"
-            color="gray.600"
-          >
-            company - {company}
-          </Text>
-        </Box>
-      </Flex>
+      <Box mt="auto">
+        <Text fontSize="md" fontWeight="600" color="gray.900" fontFamily="'Playfair Display', serif">
+          {name}
+        </Text>
+        <Text
+          fontSize="sm"
+          fontStyle="italic"
+          fontWeight="400"
+          color="gray.600"
+          mt={1}
+        >
+          {company}, Kerala
+        </Text>
+      </Box>
     </Box>
   );
 };

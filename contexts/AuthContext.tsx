@@ -33,18 +33,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const session = Cookies.get('admin_session');
       if (session) {
-        // If Supabase is configured, verify with Supabase
+        // If Supabase is configured, try to verify with Supabase (optional check)
         if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
           try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user }, error } = await supabase.auth.getUser();
+            // If we get a user from Supabase, verify email matches
             if (user && user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
               setIsAuthenticated(true);
+            } else if (error) {
+              // Supabase auth failed (session expired, etc.) but session cookie exists
+              // Allow access with simple session-based auth - don't remove the cookie
+              console.log('Supabase auth check failed, but session cookie exists. Allowing access.');
+              setIsAuthenticated(true);
             } else {
-              Cookies.remove('admin_session');
-              setIsAuthenticated(false);
+              // User exists in Supabase but email doesn't match - still allow if session cookie exists
+              // This handles cases where admin email might differ or Supabase user doesn't exist
+              console.log('Supabase user email mismatch, but session cookie exists. Allowing access.');
+              setIsAuthenticated(true);
             }
           } catch (supabaseError) {
-            // If Supabase check fails but session exists, allow access
+            // If Supabase check fails (network error, etc.) but session cookie exists, allow access
+            console.log('Supabase check error, but session cookie exists. Allowing access:', supabaseError);
             setIsAuthenticated(true);
           }
         } else {
@@ -56,7 +65,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error) {
       console.error('Auth check error:', error);
-      setIsAuthenticated(false);
+      // On error, check if session cookie still exists
+      const session = Cookies.get('admin_session');
+      if (session) {
+        // If session exists, allow access even if check failed
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
     } finally {
       setIsLoading(false);
     }

@@ -42,65 +42,122 @@ const LoginPage = () => {
 
   return (
     <DefaultLayout title="Admin Login" description="Admin login page">
-      <Container maxW="md" py="8rem">
-        <Box
-          p={8}
-          borderWidth={1}
-          borderRadius="lg"
-          boxShadow="lg"
-          backgroundColor="white"
-        >
-          <VStack spacing={6}>
-            <Heading size="lg" color="blue.600">
-              Admin Login
-            </Heading>
-            <Text color="gray.600">
-              Please login to access the admin panel
-            </Text>
-
-            {error && (
-              <Alert status="error">
-                <AlertIcon />
-                {error}
-              </Alert>
-            )}
-
-            <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-              <VStack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com"
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                  />
-                </FormControl>
-
-                <Button
-                  type="submit"
-                  colorScheme="blue"
-                  width="full"
-                  isLoading={isLoading}
-                  loadingText="Logging in..."
+      <Box bg="white" minH="100vh" display="flex" alignItems="center" justifyContent="center" py={16}>
+        <Container maxW="md">
+          <Box
+            p={12}
+            borderWidth="2px"
+            borderColor="gray.900"
+            borderRadius="0"
+            backgroundColor="white"
+            sx={{
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: '-2px',
+                left: '-2px',
+                right: '-2px',
+                bottom: '-2px',
+                border: '1px solid',
+                borderColor: 'gray.300',
+                zIndex: -1,
+              },
+            }}
+          >
+            <VStack spacing={8} align="stretch">
+              <Box textAlign="center">
+                <Heading 
+                  size="xl" 
+                  color="gray.900"
+                  fontFamily="'Playfair Display', serif"
+                  fontWeight="700"
+                  letterSpacing="0.05em"
+                  textTransform="uppercase"
+                  mb={2}
                 >
-                  Login
-                </Button>
-              </VStack>
-            </form>
-          </VStack>
-        </Box>
-      </Container>
+                  Admin Login
+                </Heading>
+                <Text color="gray.900" fontSize="sm" letterSpacing="0.1em">
+                  Access the control panel
+                </Text>
+              </Box>
+
+              {error && (
+                <Alert status="error" borderRadius="0" border="1px solid" borderColor="red.500">
+                  <AlertIcon />
+                  <Text color="gray.900">{error}</Text>
+                </Alert>
+              )}
+
+              <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                <VStack spacing={6}>
+                  <FormControl isRequired>
+                    <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                      Email
+                    </FormLabel>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="admin@example.com"
+                      bg="white"
+                      borderColor="gray.300"
+                      color="gray.900"
+                      _placeholder={{ color: 'gray.400' }}
+                      _focus={{
+                        borderColor: 'gray.900',
+                        boxShadow: '0 0 0 1px gray.900',
+                      }}
+                      borderRadius="0"
+                    />
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
+                      Password
+                    </FormLabel>
+                    <Input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter password"
+                      bg="white"
+                      borderColor="gray.300"
+                      color="gray.900"
+                      _placeholder={{ color: 'gray.400' }}
+                      _focus={{
+                        borderColor: 'gray.900',
+                        boxShadow: '0 0 0 1px gray.900',
+                      }}
+                      borderRadius="0"
+                    />
+                  </FormControl>
+
+                  <Button
+                    type="submit"
+                    width="full"
+                    isLoading={isLoading}
+                    loadingText="Logging in..."
+                    bg="gray.900"
+                    color="white"
+                    borderRadius="0"
+                    fontWeight="600"
+                    letterSpacing="0.1em"
+                    textTransform="uppercase"
+                    _hover={{
+                      bg: 'gray.800',
+                    }}
+                    py={6}
+                  >
+                    Login
+                  </Button>
+                </VStack>
+              </form>
+            </VStack>
+          </Box>
+        </Container>
+      </Box>
     </DefaultLayout>
   );
 };

@@ -48,6 +48,10 @@ export default async function handler(
     } = req.query;
 
     let query = supabase.from('properties').select('*', { count: 'exact' });
+    
+    // Note: properties table no longer has request_status column
+    // All approved requests are moved to properties table and all pending/rejected are in property_requests table
+    // So we don't need to filter by request_status here
 
     // Search filter - search in title, content, address, city, state
     if (search && typeof search === 'string') {
