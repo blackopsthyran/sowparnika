@@ -148,10 +148,12 @@ const WeeklyHighlight: React.FC<WeeklyHighlightProps> = ({ property }) => {
             <Box
               position="relative"
               width="100%"
-              aspectRatio="4/3"
               borderRadius="lg"
               overflow="hidden"
               bg="gray.200"
+              sx={{
+                aspectRatio: '4/3',
+              }}
             >
               <Box
                 as="img"
