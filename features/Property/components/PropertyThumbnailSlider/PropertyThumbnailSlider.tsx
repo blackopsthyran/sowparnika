@@ -27,11 +27,6 @@ const PropertyThumbnailSlider = ({ photos }: { photos: string[] }) => {
   // If no valid photos, use placeholder
   const displayPhotos = validPhotos.length > 0 ? validPhotos : ['https://placehold.co/800x600/e2e8f0/64748b?text=No+Image'];
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log('PropertyThumbnailSlider - photos received:', photos);
-    console.log('PropertyThumbnailSlider - displayPhotos:', displayPhotos);
-  }
-
   return (
     <Box>
       <Box
@@ -91,18 +86,7 @@ const PropertyThumbnailSlider = ({ photos }: { photos: string[] }) => {
               loading={index === 0 ? 'eager' : 'lazy'}
               decoding="async"
               onError={(e) => {
-                console.error('Image failed to load:', photo);
-                console.error('Error details:', {
-                  src: (e.target as HTMLImageElement).src,
-                  naturalWidth: (e.target as HTMLImageElement).naturalWidth,
-                  naturalHeight: (e.target as HTMLImageElement).naturalHeight,
-                });
                 (e.target as HTMLImageElement).src = 'https://placehold.co/800x600/e2e8f0/64748b?text=Image+Error';
-              }}
-              onLoad={() => {
-                if (process.env.NODE_ENV === 'development') {
-                  console.log('Image loaded successfully:', photo);
-                }
               }}
             />
             </SwiperSlide>

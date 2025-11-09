@@ -58,19 +58,6 @@ export default async function handler(
       limit = '20',
     } = req.query;
 
-    // Debug logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('API received query params:', {
-        search,
-        propertyType,
-        sellingType,
-        city,
-        bhk,
-        status,
-        sortBy,
-        sortOrder,
-      });
-    }
 
     // Use optimized column selection instead of select('*')
     let query = supabase.from('properties').select(PROPERTY_SELECT_COLUMNS, { count: 'exact' });
@@ -142,29 +129,16 @@ export default async function handler(
       // Normalize the input: lowercase and trim
       const normalizedType = propertyType.toLowerCase().trim();
       
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Processing propertyType filter:', propertyType, '-> normalized:', normalizedType);
-      }
-      
       // Special case: "plot" should show only Plot and Land (not Commercial Land)
       if (normalizedType === 'plot') {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Applying plot filter: Plot and Land only');
-        }
         query = query.in('property_type', ['Plot', 'Land']);
       }
       // Special case: "land" should show Plot, Land, and Commercial Land
       else if (normalizedType === 'land') {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Applying land filter: Plot, Land, Commercial Land');
-        }
         query = query.in('property_type', ['Plot', 'Land', 'Commercial Land']);
       }
       // Special case: "commercial land" should show only Commercial Land
       else if (normalizedType === 'commercial land' || normalizedType === 'commercial lands') {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Applying commercial land filter: Commercial Land only');
-        }
         query = query.eq('property_type', 'Commercial Land');
       }
       // For other property types, use the mapping
@@ -199,15 +173,9 @@ export default async function handler(
             .join(' ');
         }
         
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Applying propertyType filter:', dbPropertyType);
-        }
-        
         // Use exact match with the normalized database value
         query = query.eq('property_type', dbPropertyType);
       }
-    } else if (process.env.NODE_ENV === 'development') {
-      console.log('No propertyType filter applied');
     }
 
     // Selling type filter

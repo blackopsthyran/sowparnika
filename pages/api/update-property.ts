@@ -117,8 +117,6 @@ export default async function handler(
     if (featured !== undefined) updateData.featured = featured === true || featured === 'true';
     updateData.updated_at = new Date().toISOString();
 
-    console.log('Attempting to update property:', id, updateData);
-
     // Check if Supabase is configured
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       return res.status(200).json({
@@ -137,7 +135,6 @@ export default async function handler(
 
     // If error is due to missing 'baths' or 'floors' column, retry without it
     if (error && error.message && (error.message.includes('baths') || error.message.includes('floors'))) {
-      console.warn('Baths or floors column not found, retrying without these fields');
       const updateDataWithoutOptional = { ...updateData };
       if (error.message.includes('baths')) {
         delete updateDataWithoutOptional.baths;
@@ -161,7 +158,6 @@ export default async function handler(
       return res.status(500).json({ error: error.message });
     }
 
-    console.log('Successfully updated property:', data);
     return res.status(200).json({ success: true, data });
   } catch (error: any) {
     console.error('Update property error:', error);

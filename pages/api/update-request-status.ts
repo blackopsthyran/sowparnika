@@ -51,7 +51,6 @@ export default async function handler(
       return res.status(400).json({ error: 'Invalid request_status. Must be pending, approved, or rejected' });
     }
 
-    console.log('Attempting to update request status:', id, request_status);
 
     // Check if Supabase is configured
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -112,8 +111,6 @@ export default async function handler(
       delete propertyData.request_status;
       delete propertyData.user_email;
 
-      console.log('Inserting approved request into properties table:', { ...propertyData, owner_number: '***' });
-
       // Insert into properties table
       const { data: insertedProperty, error: insertError } = await supabase
         .from('properties')
@@ -124,7 +121,6 @@ export default async function handler(
         console.error('Error inserting into properties:', insertError);
         // If baths column doesn't exist, retry without it
         if (insertError.message && insertError.message.includes('baths')) {
-          console.warn('Baths column not found in properties table, retrying without baths');
           delete propertyData.baths;
           const retryResult = await supabase
             .from('properties')
@@ -147,11 +143,7 @@ export default async function handler(
 
       if (deleteError) {
         console.error('Error deleting from property_requests:', deleteError);
-        // Even if delete fails, the property was approved, so return success
-        console.warn('Warning: Request was approved but could not be deleted from property_requests table');
       }
-
-      console.log('Successfully approved and moved request to properties table');
       return res.status(200).json({
         success: true,
         message: 'Request approved and moved to properties table',
@@ -170,7 +162,6 @@ export default async function handler(
         return res.status(500).json({ error: 'Failed to reject request', details: deleteError.message });
       }
 
-      console.log('Successfully rejected and deleted request');
       return res.status(200).json({
         success: true,
         message: 'Request rejected and deleted',

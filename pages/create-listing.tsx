@@ -22,12 +22,12 @@ import {
   Flex,
   Image,
   IconButton,
-  Progress,
 } from '@chakra-ui/react';
 import { useAuth } from '@/contexts/AuthContext';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
 import { useDropzone } from 'react-dropzone';
 import dynamic from 'next/dynamic';
+import ImageReorder from '@/components/ImageReorder';
 import {
   FiHome,
   FiDollarSign,
@@ -120,6 +120,10 @@ const CreateListingPage = () => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const reorderImages = (newOrder: (File | string)[]) => {
+    setImages(newOrder as File[]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -134,8 +138,6 @@ const CreateListingPage = () => {
         const formData = new FormData();
         formData.append('file', image);
 
-        console.log(`Uploading image ${i + 1} of ${images.length}...`);
-
         const uploadResponse = await fetch('/api/upload-image', {
           method: 'POST',
           body: formData,
@@ -143,41 +145,16 @@ const CreateListingPage = () => {
 
         if (uploadResponse.ok) {
           const result = await uploadResponse.json();
-          console.log(`Image ${i + 1} upload result:`, result);
-          
           if (result.url) {
             imageUrls.push(result.url);
-            // Check if it's a Supabase Storage URL or placeholder
-            if (result.url.includes('supabase.co') || result.url.includes('storage.googleapis.com')) {
-              console.log(`✓ Image ${i + 1} uploaded to Supabase Storage:`, result.url);
-            } else if (result.url.includes('imagedelivery.net')) {
-              console.log(`✓ Image ${i + 1} uploaded to Cloudflare:`, result.url);
-            } else {
-              console.warn(`⚠ Image ${i + 1} using placeholder (upload may have failed):`, result.url);
-              // Log the error details if available
-              if (result.error) {
-                console.error(`Upload error details:`, result.error);
-                console.error(`Error details:`, result.details);
-                if (result.help) {
-                  console.info(`💡 Help:`, result.help);
-                }
-              }
-            }
           } else {
             uploadErrors.push(`Image ${i + 1}: No URL returned`);
           }
         } else {
           const errorData = await uploadResponse.json().catch(() => ({ error: 'Unknown error' }));
-          console.error(`Image ${i + 1} upload failed with status ${uploadResponse.status}:`, errorData);
           uploadErrors.push(`Image ${i + 1}: ${errorData.error || 'Upload failed'}`);
         }
       }
-
-      if (uploadErrors.length > 0) {
-        console.warn('Some images failed to upload:', uploadErrors);
-      }
-
-      console.log('Total images uploaded:', imageUrls.length, 'of', images.length);
 
       // Save to database
       const response = await fetch('/api/create-listing', {
@@ -711,45 +688,12 @@ const CreateListingPage = () => {
                       </Box>
                       {images.length > 0 && (
                         <Box mt={6}>
-                          <Text fontSize="sm" color="gray.600" mb={3} fontWeight="medium">
-                            {images.length} image{images.length !== 1 ? 's' : ''} selected
-                          </Text>
-                          <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 5 }} spacing={4}>
-                            {images.map((image, index) => (
-                              <Box
-                                key={index}
-                                position="relative"
-                                borderRadius="lg"
-                                overflow="hidden"
-                                border="2px"
-                                borderColor="gray.200"
-                                _hover={{ borderColor: 'blue.400' }}
-                                transition="all 0.2s"
-                              >
-                                <Image
-                                  src={URL.createObjectURL(image)}
-                                  alt={`Preview ${index + 1}`}
-                                  w="100%"
-                                  h="150px"
-                                  objectFit="cover"
-                                />
-                                <IconButton
-                                  aria-label="Remove image"
-                                  icon={<FiX />}
-                                  size="sm"
-                                  colorScheme="red"
-                                  position="absolute"
-                                  top={2}
-                                  right={2}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeImage(index);
-                                  }}
-                                  borderRadius="full"
-                                />
-                              </Box>
-                            ))}
-                          </SimpleGrid>
+                          <ImageReorder
+                            images={images}
+                            onRemove={removeImage}
+                            onReorder={reorderImages}
+                            isExisting={false}
+                          />
                         </Box>
                       )}
                     </FormControl>

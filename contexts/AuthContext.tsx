@@ -123,7 +123,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           Cookies.set('admin_session', 'authenticated', { expires: 7 });
         }
         
-        console.log('Login successful:', data.user.username);
         return true;
       } else {
         console.error('Login failed:', data.error);
@@ -156,7 +155,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // Store user session in cookie
         Cookies.set('user_session', JSON.stringify(data.user), { expires: 7 });
         
-        console.log('Registration successful:', data.user.username);
         return { success: true };
       } else {
         console.error('Registration failed:', data.error);

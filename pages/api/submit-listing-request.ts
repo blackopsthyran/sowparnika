@@ -100,11 +100,8 @@ export default async function handler(
       insertData.baths = parseInt(baths);
     }
 
-    console.log('Attempting to insert listing request:', { ...insertData, owner_number: '***', user_email: '***' });
-
     // Check if Supabase is configured
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.log('Supabase not configured, returning success for demo');
       return res.status(200).json({
         success: true,
         message: 'Listing request submitted (database not configured - demo mode)',
@@ -118,7 +115,6 @@ export default async function handler(
     
     // If property_requests table doesn't exist, fall back to properties table
     if (error && (error.message.includes('relation') || error.message.includes('does not exist'))) {
-      console.warn('property_requests table not found, falling back to properties table');
       // Remove request_status and user_email for fallback
       const fallbackData = { ...insertData };
       delete fallbackData.request_status;
@@ -130,7 +126,6 @@ export default async function handler(
 
     // If error is due to missing 'baths' column, retry without it
     if (error && error.message && error.message.includes('baths')) {
-      console.warn('Baths column not found, retrying without baths field');
       const insertDataWithoutBaths = { ...insertData };
       delete insertDataWithoutBaths.baths;
       
@@ -141,7 +136,6 @@ export default async function handler(
 
     if (error) {
       console.error('Supabase error:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
       
       // If table doesn't exist, return helpful message
       if (error.message.includes('relation') || error.message.includes('does not exist')) {
@@ -160,11 +154,9 @@ export default async function handler(
       });
     }
 
-    console.log('Successfully created listing request:', data);
     return res.status(200).json({ success: true, data, message: 'Listing request submitted successfully' });
   } catch (error: any) {
     console.error('Submit listing request error:', error);
-    console.error('Error stack:', error.stack);
     return res.status(500).json({ 
       error: 'Failed to submit listing request',
       message: error.message || 'Unknown error occurred',

@@ -127,11 +127,6 @@ const Properties = () => {
     
     const { search, bhk, minPrice, maxPrice, propertyType, city, status, sellingType, featured, sortBy: urlSortBy, sortOrder: urlSortOrder } = router.query;
     
-    // Debug logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔄 Reading URL params:', { search, propertyType, city, status, sellingType, bhk });
-    }
-    
     // Update search query from URL
     const newSearchQuery = search && typeof search === 'string' ? decodeURIComponent(search) : '';
     setSearchQuery(newSearchQuery);
@@ -150,10 +145,6 @@ const Properties = () => {
     
     // Update ref immediately for synchronous access (before state update)
     filtersRef.current = newFilters;
-    
-    if (process.env.NODE_ENV === 'development' && newFilters.propertyType) {
-      console.log('✅ Setting propertyType filter from URL:', newFilters.propertyType);
-    }
     
     // Update sort from URL
     if (urlSortBy && typeof urlSortBy === 'string') {
@@ -174,10 +165,6 @@ const Properties = () => {
     // Mark as initialized immediately (filters are in ref, so fetch can use them)
     setHasInitializedFromUrl(true);
     setIsUpdatingFromUrl(false);
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log('✅ URL params processed, filters set:', newFilters);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, router.query]);
 
@@ -301,40 +288,19 @@ const Properties = () => {
         params.append('maxPrice', currentFilters.maxPrice);
       }
 
-      // Debug logging
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🚀 Fetching properties with params:', params.toString());
-        console.log('📋 Current filters from ref:', currentFilters);
-        console.log('📋 Current filters from state:', filters);
-        console.log('🔍 Search query:', currentSearchQuery || debouncedSearchQuery);
-      }
-
       const response = await fetch(`/api/get-properties?${params.toString()}`);
       const data = await response.json();
 
       if (response.ok) {
         const propertiesData = data.properties || [];
-        
-        // Debug logging
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ Received ${propertiesData.length} properties (total: ${data.total})`);
-          if (propertiesData.length > 0) {
-            console.log('First property:', {
-              id: propertiesData[0].id,
-              title: propertiesData[0].title,
-              property_type: propertiesData[0].property_type,
-            });
-          }
-        }
-        
         setProperties(propertiesData);
         setTotal(data.total || 0);
         setTotalPages(data.totalPages || 1);
       } else {
-        console.error('❌ Error fetching properties:', data.error);
+        console.error('Error fetching properties:', data.error);
       }
     } catch (error) {
-      console.error('❌ Error fetching properties:', error);
+      console.error('Error fetching properties:', error);
     } finally {
       setLoading(false);
     }
@@ -347,9 +313,6 @@ const Properties = () => {
     // 3. Not currently updating from URL
     // This prevents the glitch where it shows all properties first
     if (router.isReady && hasInitializedFromUrl && !isUpdatingFromUrl) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🚀 Fetching properties with filters:', filters);
-      }
       fetchProperties();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

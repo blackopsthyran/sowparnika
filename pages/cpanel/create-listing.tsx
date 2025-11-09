@@ -27,8 +27,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
 import { useDropzone } from 'react-dropzone';
 import dynamic from 'next/dynamic';
+import ImageReorder from '@/components/ImageReorder';
 import {
-  FiHome as FiHomeIcon,
   FiDollarSign,
   FiMapPin,
   FiUser,
@@ -144,6 +144,10 @@ const CreateListingPage = () => {
 
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const reorderImages = (newOrder: (File | string)[]) => {
+    setImages(newOrder as File[]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -838,37 +842,14 @@ const CreateListingPage = () => {
                         </VStack>
                       </Box>
                       {images.length > 0 && (
-                        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mt={6}>
-                          {images.map((image, index) => (
-                            <Box key={index} position="relative" border="2px solid" borderColor="gray.300" borderRadius="0" overflow="hidden">
-                              <Image
-                                src={URL.createObjectURL(image)}
-                                alt={`Preview ${index + 1}`}
-                                width="100%"
-                                height="200px"
-                                objectFit="cover"
-                              />
-                              <IconButton
-                                aria-label="Remove"
-                                icon={<FiX />}
-                                size="sm"
-                                position="absolute"
-                                top={2}
-                                right={2}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeImage(index);
-                                }}
-                                bg="red.600"
-                                color="white"
-                                borderRadius="0"
-                                _hover={{
-                                  bg: 'red.700',
-                                }}
-                              />
-                            </Box>
-                          ))}
-                        </SimpleGrid>
+                        <Box mt={6}>
+                          <ImageReorder
+                            images={images}
+                            onRemove={removeImage}
+                            onReorder={reorderImages}
+                            isExisting={false}
+                          />
+                        </Box>
                       )}
                     </FormControl>
 

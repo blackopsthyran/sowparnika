@@ -82,8 +82,6 @@ export default async function handler(
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    console.log('User logged in successfully:', user.username);
-
     return res.status(200).json({
       success: true,
       user: {

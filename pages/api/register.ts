@@ -112,8 +112,6 @@ export default async function handler(
       return res.status(500).json({ error: 'Failed to create user', details: insertError.message });
     }
 
-    console.log('User registered successfully:', newUser?.username);
-
     return res.status(201).json({
       success: true,
       message: 'User registered successfully',

@@ -5,13 +5,10 @@ export default function Document() {
     <Html lang="en">
       <Head>
         {/* Preconnect to external domains for performance */}
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="dns-prefetch" href="https://www.google.com" />
         <link rel="dns-prefetch" href="https://www.gstatic.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* eslint-disable-next-line @next/next/google-font-preconnect */}
         <link
           href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@100;200;300;400;500;600;700&family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant:wght@300;400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,9..96,400..900;1,9..96,400..900&display=swap"
           rel="stylesheet"

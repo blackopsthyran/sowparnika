@@ -26,8 +26,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
 import { useDropzone } from 'react-dropzone';
 import dynamic from 'next/dynamic';
+import ImageReorder from '@/components/ImageReorder';
 import {
-  FiHome as FiHomeIcon,
   FiDollarSign,
   FiMapPin,
   FiUser,
@@ -209,6 +209,14 @@ const EditListingPage = () => {
 
   const removeNewImage = (index: number) => {
     setNewImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const reorderExistingImages = (newOrder: (File | string)[]) => {
+    setExistingImages(newOrder as string[]);
+  };
+
+  const reorderNewImages = (newOrder: (File | string)[]) => {
+    setNewImages(newOrder as File[]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -645,32 +653,23 @@ const EditListingPage = () => {
                 <Card>
                   <CardBody>
                     <Heading size="md" mb={4}>Images</Heading>
-                    <VStack spacing={4} align="stretch">
+                    <VStack spacing={6} align="stretch">
                       {existingImages.length > 0 && (
                         <Box>
-                          <Text mb={2} fontWeight="medium">Existing Images</Text>
-                          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
-                            {existingImages.map((imageUrl, index) => (
-                              <Box key={index} position="relative">
-                                <Image
-                                  src={imageUrl}
-                                  alt={`Existing ${index + 1}`}
-                                  borderRadius="md"
-                                  fallbackSrc="https://placehold.co/200x150/e2e8f0/64748b?text=No+Image"
-                                />
-                                <IconButton
-                                  aria-label="Remove"
-                                  icon={<FiX />}
-                                  size="sm"
-                                  position="absolute"
-                                  top={2}
-                                  right={2}
-                                  onClick={() => removeExistingImage(index)}
-                                  colorScheme="red"
-                                />
-                              </Box>
-                            ))}
-                          </SimpleGrid>
+                          <Flex align="center" justify="space-between" mb={3}>
+                            <Text fontWeight="medium" fontSize="sm" color="gray.700">
+                              Existing Images
+                            </Text>
+                            <Text fontSize="xs" color="gray.500" fontStyle="italic">
+                              First image will be the thumbnail
+                            </Text>
+                          </Flex>
+                          <ImageReorder
+                            images={existingImages}
+                            onRemove={removeExistingImage}
+                            onReorder={reorderExistingImages}
+                            isExisting={true}
+                          />
                         </Box>
                       )}
 
@@ -680,41 +679,40 @@ const EditListingPage = () => {
                           {...getRootProps()}
                           border="2px dashed"
                           borderColor={isDragActive ? 'blue.500' : 'gray.300'}
-                          borderRadius="md"
+                          borderRadius="0"
                           p={8}
                           textAlign="center"
                           cursor="pointer"
+                          bg={isDragActive ? 'gray.50' : 'white'}
+                          transition="all 0.2s"
+                          _hover={{
+                            borderColor: 'gray.900',
+                            bg: 'gray.50',
+                          }}
                         >
                           <input {...getInputProps()} />
-                          <VStack spacing={2}>
-                            <Icon as={FiUpload} boxSize={8} />
-                            <Text>
-                              {isDragActive ? 'Drop images here' : 'Drag & drop or click to upload'}
+                          <VStack spacing={3}>
+                            <Icon as={FiUpload} boxSize={10} color="gray.900" />
+                            <Text color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="500">
+                              {isDragActive ? 'Drop images here' : 'Drag & drop or click to upload images'}
+                            </Text>
+                            <Text fontSize="xs" color="gray.500">
+                              PNG, JPG, JPEG up to 10MB each
                             </Text>
                           </VStack>
                         </Box>
                         {newImages.length > 0 && (
-                          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mt={4}>
-                            {newImages.map((image, index) => (
-                              <Box key={index} position="relative">
-                                <Image
-                                  src={URL.createObjectURL(image)}
-                                  alt={`New ${index + 1}`}
-                                  borderRadius="md"
-                                />
-                                <IconButton
-                                  aria-label="Remove"
-                                  icon={<FiX />}
-                                  size="sm"
-                                  position="absolute"
-                                  top={2}
-                                  right={2}
-                                  onClick={() => removeNewImage(index)}
-                                  colorScheme="red"
-                                />
-                              </Box>
-                            ))}
-                          </SimpleGrid>
+                          <Box mt={6}>
+                            <Text mb={3} fontWeight="medium" fontSize="sm" color="gray.700">
+                              New Images
+                            </Text>
+                            <ImageReorder
+                              images={newImages}
+                              onRemove={removeNewImage}
+                              onReorder={reorderNewImages}
+                              isExisting={false}
+                            />
+                          </Box>
                         )}
                       </FormControl>
 
