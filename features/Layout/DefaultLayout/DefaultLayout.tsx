@@ -3,6 +3,7 @@ import Navigation from '@/features/common/modules/Navigation';
 import Head from 'next/head';
 import React from 'react';
 import { useRouter } from 'next/router';
+import Chatbot from '@/components/Chatbot/Chatbot';
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -95,6 +96,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
       <Navigation />
       {children}
       <Footer />
+      <Chatbot />
     </>
   );
 };

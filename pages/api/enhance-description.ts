@@ -63,28 +63,46 @@ Please provide an enhanced title that:
 
 Return only the enhanced title, no explanations, no HTML tags, just plain text.`;
     } else {
-      enhancementPrompt = `Please enhance the following property description to make it more engaging, professional, and appealing to potential buyers or renters. 
+      enhancementPrompt = `You are a professional real estate copywriter. Transform this basic property description into a BRIEF, eye-catching listing with bullet points.
 
 ${context.length > 0 ? `Property Details:\n${context.join('\n')}\n\n` : ''}Original Description:
 ${plainText}
 
-Please provide an enhanced version that:
-1. Is more descriptive and engaging
-2. Highlights key features and benefits
-3. Uses professional real estate language
-4. Is well-structured and easy to read
-5. Maintains the original information but presents it better
-6. Is formatted in HTML with appropriate paragraphs and emphasis
+CRITICAL REQUIREMENTS:
+- Keep it BRIEF and CONCISE - maximum 150-200 words total
+- Use BULLET POINTS (•) for key features and highlights
+- Make it EYE-CATCHING and engaging, not lengthy
+- Use professional but punchy real estate language
+- Keep ALL factual information (location, size, price, distances, measurements)
+- Format in HTML with <p> for opening/closing, <ul><li> for bullet points, and <strong> for emphasis
 
-Return only the enhanced description in HTML format, no explanations or additional text.`;
+The enhanced description should:
+1. Start with ONE engaging sentence (max 20 words) highlighting the main appeal
+2. Use BULLET POINTS to list key features:
+   • Location advantages
+   • Nearby amenities/landmarks
+   • Property specifications (size, price, etc.)
+   • Key benefits
+3. End with ONE closing sentence (max 15 words) if needed
+4. Keep it SHORT - aim for 5-7 bullet points maximum
+5. Make each bullet point concise (10-15 words each)
+
+IMPORTANT: 
+- Do NOT write long paragraphs
+- Do NOT make it verbose or wordy
+- Use bullet points (•) format
+- Keep total length under 200 words
+- Make it scannable and easy to read quickly
+
+Return ONLY the enhanced HTML description. Format: <p>Opening sentence</p><ul><li>Bullet point 1</li><li>Bullet point 2</li>...</ul><p>Closing sentence (optional)</p>`;
     }
 
-    // Check if OpenAI API key is configured
-    const openAiKey = process.env.OPENAI_API_KEY;
+    // Check if Gemini API key is configured
+    const geminiApiKey = process.env.GEMINI_API_KEY;
 
-    if (!openAiKey) {
+    if (!geminiApiKey) {
       // Fallback: Simple text enhancement without AI
-      // This provides basic improvements if OpenAI is not configured
+      // This provides basic improvements if Gemini is not configured
       const enhanced = isTitle 
         ? enhanceTitleSimple(plainText, context)
         : enhanceTextSimple(plainText, context);
@@ -94,34 +112,56 @@ Return only the enhanced description in HTML format, no explanations or addition
       });
     }
 
-    // Use OpenAI API for enhancement
+    // Use Gemini API for enhancement
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openAiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a professional real estate copywriter specializing in creating engaging property descriptions.'
+      console.log('[Enhance Description] Calling Gemini API...');
+      console.log('[Enhance Description] Input text length:', plainText.length);
+      console.log('[Enhance Description] Type:', isTitle ? 'title' : 'description');
+      
+      const systemInstruction = 'You are a professional real estate copywriter specializing in creating engaging property descriptions. Make the text significantly better, more professional, and more appealing. Do not just return the same text.';
+      const fullPrompt = `${systemInstruction}\n\n${enhancementPrompt}`;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: fullPrompt
+                  }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.8,
+              topP: 0.95,
+              candidateCount: 1,
+              maxOutputTokens: isTitle ? 200 : 1500,
             },
-            {
-              role: 'user',
-              content: enhancementPrompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 1000,
-        }),
-      });
+          }),
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('OpenAI API error:', errorData);
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: { message: errorText } };
+        }
+        
+        console.error('[Enhance Description] ❌ Gemini API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
         
         // Fallback to simple enhancement
         const enhanced = isTitle 
@@ -129,24 +169,70 @@ Return only the enhanced description in HTML format, no explanations or addition
           : enhanceTextSimple(plainText, context);
         return res.status(200).json({ 
           enhancedText: enhanced,
-          method: 'simple'
+          method: 'simple',
+          error: errorData.error?.message || `HTTP ${response.status}`,
         });
       }
 
       const data = await response.json();
-      let enhancedText = data.choices?.[0]?.message?.content?.trim() || plainText;
+      
+      console.log('[Enhance Description] Gemini API response received');
+      console.log('[Enhance Description] Response structure:', JSON.stringify(data).substring(0, 500));
+      
+      // Improved response parsing - handles different response shapes
+      const cand = data?.candidates?.[0];
+      let enhancedText = '';
+      
+      if (cand) {
+        const content = cand.content ?? cand;
+        const parts = content.parts ?? content?.content?.parts;
+        if (Array.isArray(parts) && parts.length > 0) {
+          enhancedText = parts.map((p: any) => p.text ?? p).join('\n').trim();
+        } else if (typeof content.text === 'string') {
+          enhancedText = content.text.trim();
+        } else if (typeof cand.text === 'string') {
+          enhancedText = cand.text.trim();
+        }
+      }
+      
+      console.log('[Enhance Description] Extracted text length:', enhancedText.length);
+      console.log('[Enhance Description] Original text length:', plainText.length);
+      
+      // If we got a response but it's empty or same as original, log it
+      if (!enhancedText || enhancedText.length === 0) {
+        console.warn('[Enhance Description] ⚠️ Gemini returned empty response, using fallback');
+        const enhanced = isTitle 
+          ? enhanceTitleSimple(plainText, context)
+          : enhanceTextSimple(plainText, context);
+        return res.status(200).json({ 
+          enhancedText: enhanced,
+          method: 'simple',
+          warning: 'Gemini returned empty response, used simple enhancement'
+        });
+      }
       
       // For titles, remove any HTML tags that might have been returned
       if (isTitle) {
         enhancedText = enhancedText.replace(/<[^>]*>/g, '').trim();
       }
+      
+      // Check if enhanced text is significantly different from original
+      const isSignificantlyDifferent = enhancedText.toLowerCase() !== plainText.toLowerCase() && 
+                                       enhancedText.length > plainText.length * 0.8;
+      
+      if (!isSignificantlyDifferent && enhancedText.length < plainText.length * 1.2) {
+        console.warn('[Enhance Description] ⚠️ Enhanced text is too similar to original, may need improvement');
+      }
 
+      console.log('[Enhance Description] ✅ Gemini enhancement successful');
       return res.status(200).json({ 
         enhancedText: enhancedText,
-        method: 'openai'
+        method: 'gemini',
+        originalLength: plainText.length,
+        enhancedLength: enhancedText.length,
       });
     } catch (apiError: any) {
-      console.error('OpenAI API request error:', apiError);
+      console.error('Gemini API request error:', apiError);
       
       // Fallback to simple enhancement
       const enhanced = isTitle 
@@ -237,4 +323,3 @@ function enhanceTextSimple(text: string, context: string[]): string {
 
   return enhanced;
 }
-

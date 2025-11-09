@@ -85,7 +85,6 @@ const CreateListingPage = () => {
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
-  const [isEnhancingTitle, setIsEnhancingTitle] = useState(false);
 
   const amenityOptions = [
     'Balcony',
@@ -140,66 +139,6 @@ const CreateListingPage = () => {
 
   const handleContentChange = (value: string) => {
     setFormData((prev) => ({ ...prev, content: value }));
-  };
-
-  const handleEnhanceTitle = async () => {
-    if (!formData.title || formData.title.trim().length === 0) {
-      toast({
-        title: 'No text to enhance',
-        description: 'Please enter a title first',
-        status: 'warning',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    setIsEnhancingTitle(true);
-    try {
-      const response = await fetch('/api/enhance-description', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: formData.title,
-          propertyType: formData.propertyType,
-          city: formData.city,
-          price: formData.price,
-          bhk: formData.bhk,
-          baths: formData.baths,
-          areaSize: formData.areaSize,
-          areaUnit: formData.areaUnit,
-          type: 'title',
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.enhancedText) {
-        setFormData((prev) => ({ ...prev, title: data.enhancedText }));
-        toast({
-          title: 'Title enhanced',
-          description: 'Your title has been improved using AI',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        throw new Error(data.error || 'Failed to enhance title');
-      }
-    } catch (error: any) {
-      console.error('Enhancement error:', error);
-      toast({
-        title: 'Enhancement failed',
-        description: error.message || 'Failed to enhance title. Please try again.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setIsEnhancingTitle(false);
-    }
   };
 
   const handleEnhanceDescription = async () => {
@@ -461,52 +400,27 @@ const CreateListingPage = () => {
                   </Heading>
                     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                       <FormControl isRequired gridColumn={{ base: '1', md: '1 / -1' }}>
-                        <Flex justify="space-between" align="center" mb={2}>
-                          <FormLabel 
-                            color="gray.900" 
-                            fontWeight="600" 
-                            fontSize="sm" 
-                            letterSpacing="0.05em" 
-                            textTransform="uppercase"
-                            mb={0}
-                          >
-                            Property Title
-                          </FormLabel>
-                          <Button
-                            size="sm"
-                            leftIcon={<FiZap />}
-                            onClick={handleEnhanceTitle}
-                            isLoading={isEnhancingTitle}
-                            loadingText="Enhancing..."
-                            variant="outline"
-                            borderColor="gray.300"
-                            color="gray.700"
-                            _hover={{
-                              borderColor: 'blue.400',
-                              color: 'blue.600',
-                              bg: 'blue.50',
-                            }}
-                            fontSize="xs"
-                            fontWeight="600"
-                            borderRadius="0"
-                          >
-                            Enhance with AI
-                          </Button>
-                        </Flex>
+                        <FormLabel 
+                          color="gray.900" 
+                          fontWeight="600" 
+                          fontSize="sm" 
+                          letterSpacing="0.05em" 
+                          textTransform="uppercase"
+                          mb={2}
+                        >
+                          Property Title
+                        </FormLabel>
                         <Input
                           name="title"
                           value={formData.title}
                           onChange={handleInputChange}
-                          placeholder="e.g., Luxury 3BHK Apartment... Click 'Enhance with AI' to improve"
+                          placeholder="e.g., Luxury 3BHK Apartment in Kochi"
                           bg="white"
                           borderColor="gray.300"
                           color="gray.900"
                           borderRadius="0"
                           _placeholder={{ color: 'gray.400' }}
                         />
-                        <Text fontSize="xs" color="gray.500" mt={1}>
-                          Tip: Write a basic title and click &ldquo;Enhance with AI&rdquo; to make it more attractive
-                        </Text>
                       </FormControl>
 
                       <FormControl isRequired gridColumn={{ base: '1', md: '1 / -1' }}>
