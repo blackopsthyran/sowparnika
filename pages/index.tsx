@@ -140,22 +140,7 @@ export default function Home() {
           bg="linear-gradient(to right, transparent, luxury.200, luxury.300, luxury.200, transparent)"
         />
 
-        {/* New To The Market - Lazy Loaded */}
-        <Box 
-          bg="linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%)"
-          position="relative"
-        >
-          <LazyPropertyCarousel
-            title="New To The Market"
-            fetchUrl="/api/get-properties?status=active&sortBy=created_at&sortOrder=desc"
-            viewAllLink="/properties?sortBy=created_at&sortOrder=desc"
-            initialLimit={6}
-            loadMoreLimit={6}
-            autoplay={false}
-          />
-        </Box>
-
-        {/* Homes You'll Love - Lazy Loaded */}
+        {/* Properties that You'll Love - Lazy Loaded */}
         <Box 
           bg="white"
           position="relative"
@@ -170,7 +155,7 @@ export default function Home() {
           }}
         >
           <LazyPropertyCarousel
-            title="Homes You'll Love"
+            title="Properties that You'll Love"
             fetchUrl="/api/get-properties?status=active"
             viewAllLink="/properties"
             initialLimit={6}
