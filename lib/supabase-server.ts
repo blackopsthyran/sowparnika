@@ -28,6 +28,7 @@ export function createServerSupabaseClient() {
 export const PROPERTY_SELECT_COLUMNS = `
   id,
   title,
+  content,
   property_type,
   bhk,
   baths,
@@ -39,6 +40,9 @@ export const PROPERTY_SELECT_COLUMNS = `
   city,
   address,
   state,
+  owner_name,
+  owner_number,
+  amenities,
   images,
   status,
   featured,

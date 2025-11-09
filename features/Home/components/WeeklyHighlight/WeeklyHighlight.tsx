@@ -95,7 +95,7 @@ const WeeklyHighlight: React.FC<WeeklyHighlightProps> = ({ property }) => {
               fontSize="lg"
               color="gray.600"
               mb={6}
-              fontFamily="'Inter', sans-serif"
+              fontFamily="'Playfair Display', serif"
             >
               {address || title}
             </Text>
@@ -105,7 +105,7 @@ const WeeklyHighlight: React.FC<WeeklyHighlightProps> = ({ property }) => {
               color="gray.700"
               lineHeight="tall"
               mb={6}
-              fontFamily="'Inter', sans-serif"
+              fontFamily="'Playfair Display', serif"
             >
               {truncatedDescription}
             </Text>
@@ -113,11 +113,11 @@ const WeeklyHighlight: React.FC<WeeklyHighlightProps> = ({ property }) => {
             <ChakraLink
               as={Link}
               href={`/properties/${externalID}`}
-              color="blue.600"
+              color="gray.700"
               fontWeight="600"
               fontSize="md"
-              _hover={{ color: 'blue.700', textDecoration: 'underline' }}
-              fontFamily="'Inter', sans-serif"
+              _hover={{ color: 'gray.900', textDecoration: 'underline' }}
+              fontFamily="'Playfair Display', serif"
             >
               Read more →
             </ChakraLink>
@@ -133,7 +133,7 @@ const WeeklyHighlight: React.FC<WeeklyHighlightProps> = ({ property }) => {
                 {price || 'Price on request'}
               </Text>
               
-              <HStack spacing={4} color="gray.600" fontSize="md" fontFamily="'Inter', sans-serif">
+              <HStack spacing={4} color="gray.600" fontSize="md" fontFamily="'Playfair Display', serif">
                 <Text>{rooms || 0} Beds</Text>
                 <Text>·</Text>
                 <Text>{baths || 0} Baths</Text>

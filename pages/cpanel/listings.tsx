@@ -75,7 +75,10 @@ const ManageListingsPage = () => {
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/get-properties?limit=100');
+      // Add cache: 'no-store' to prevent stale data
+      const response = await fetch('/api/get-properties?limit=100', {
+        cache: 'no-store',
+      });
       const data = await response.json();
       if (response.ok) {
         setProperties(data.properties || []);
@@ -146,19 +149,26 @@ const ManageListingsPage = () => {
     try {
       const response = await fetch(`/api/delete-property?id=${id}`, {
         method: 'DELETE',
+        cache: 'no-store', // Prevent caching
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        // Optimistically remove from UI immediately
+        setProperties((prev) => prev.filter((p) => p.id !== id));
+        onClose();
+        setPropertyToDelete(null);
+        
         toast({
           title: 'Success',
           description: 'Property deleted successfully',
           status: 'success',
           duration: 3000,
         });
+        
+        // Refetch to ensure data is in sync
         fetchProperties();
-        onClose();
       } else {
         toast({
           title: 'Error',

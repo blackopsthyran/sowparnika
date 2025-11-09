@@ -9,6 +9,12 @@ export default async function handler(
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // Set cache headers - reduced cache time to prevent stale data after updates/deletions
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=30, max-age=10'
+  );
 
   // Handle preflight request
   if (req.method === 'OPTIONS') {

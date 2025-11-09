@@ -349,17 +349,33 @@ const PropertyCard = memo((property: Object) => {
             {price || 'Price on request'}
           </Text>
 
+          {/* Title */}
+          {title && (
+            <Text 
+              fontWeight="600" 
+              fontSize="md" 
+              color="gray.800" 
+              noOfLines={2}
+              lineHeight="1.4"
+              fontFamily="'Playfair Display', serif"
+            >
+              {title}
+            </Text>
+          )}
+
           {/* Location */}
-          <Text 
-            fontWeight="400" 
-            fontSize="sm" 
-            color="gray.600" 
-            noOfLines={2}
-            lineHeight="1.4"
-            minH="auto"
-          >
-            {address || title}
-          </Text>
+          {address && (
+            <Text 
+              fontWeight="400" 
+              fontSize="sm" 
+              color="gray.600" 
+              noOfLines={2}
+              lineHeight="1.4"
+              minH="auto"
+            >
+              {address}
+            </Text>
+          )}
 
           {/* Property Features - Bedrooms, Bathrooms (if applicable), Square Footage */}
           <HStack 

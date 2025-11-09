@@ -11,10 +11,10 @@ export default async function handler(
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // Set cache headers for performance (ISR-like caching)
-  // Cache for 60 seconds, allow stale-while-revalidate for 5 minutes
+  // Reduced cache time to prevent stale data after deletions/updates
   res.setHeader(
     'Cache-Control',
-    'public, s-maxage=60, stale-while-revalidate=300, max-age=60'
+    'public, s-maxage=10, stale-while-revalidate=30, max-age=10'
   );
 
   // Handle preflight request

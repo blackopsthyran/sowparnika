@@ -37,6 +37,7 @@ import {
   FiX,
   FiUpload,
   FiHome,
+  FiZap,
 } from 'react-icons/fi';
 import Link from 'next/link';
 
@@ -61,12 +62,12 @@ const CreateListingPage = () => {
     price: '',
     areaSize: '',
     areaUnit: 'Sq. Ft.',
-    city: '',
+    city: 'Kochi',
     address: '',
     state: 'Kerala',
     ownerName: '',
     ownerNumber: '',
-    status: '',
+    status: 'active',
   });
 
   // Property types that don't require bedrooms/bathrooms
@@ -83,6 +84,8 @@ const CreateListingPage = () => {
   const [amenities, setAmenities] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isEnhancingTitle, setIsEnhancingTitle] = useState(false);
 
   const amenityOptions = [
     'Balcony',
@@ -117,13 +120,18 @@ const CreateListingPage = () => {
     const { name, value } = e.target;
     
     // If property type changes, clear BHK, baths, and floors to prevent stale data
+    // Also set areaUnit to 'Cent' for land/plot/commercial building types
     if (name === 'propertyType') {
+      const landAndCommercialTypes = ['Plot', 'Land', 'Commercial Land', 'Commercial Building'];
+      const shouldUseCent = landAndCommercialTypes.includes(value);
+      
       setFormData((prev) => ({ 
         ...prev, 
         [name]: value,
         bhk: '',
         baths: '',
         floors: '',
+        areaUnit: shouldUseCent ? 'Cent' : 'Sq. Ft.',
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -132,6 +140,126 @@ const CreateListingPage = () => {
 
   const handleContentChange = (value: string) => {
     setFormData((prev) => ({ ...prev, content: value }));
+  };
+
+  const handleEnhanceTitle = async () => {
+    if (!formData.title || formData.title.trim().length === 0) {
+      toast({
+        title: 'No text to enhance',
+        description: 'Please enter a title first',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsEnhancingTitle(true);
+    try {
+      const response = await fetch('/api/enhance-description', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: formData.title,
+          propertyType: formData.propertyType,
+          city: formData.city,
+          price: formData.price,
+          bhk: formData.bhk,
+          baths: formData.baths,
+          areaSize: formData.areaSize,
+          areaUnit: formData.areaUnit,
+          type: 'title',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.enhancedText) {
+        setFormData((prev) => ({ ...prev, title: data.enhancedText }));
+        toast({
+          title: 'Title enhanced',
+          description: 'Your title has been improved using AI',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        throw new Error(data.error || 'Failed to enhance title');
+      }
+    } catch (error: any) {
+      console.error('Enhancement error:', error);
+      toast({
+        title: 'Enhancement failed',
+        description: error.message || 'Failed to enhance title. Please try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsEnhancingTitle(false);
+    }
+  };
+
+  const handleEnhanceDescription = async () => {
+    if (!formData.content || formData.content.trim().length === 0) {
+      toast({
+        title: 'No text to enhance',
+        description: 'Please enter some description text first',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsEnhancing(true);
+    try {
+      const response = await fetch('/api/enhance-description', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: formData.content,
+          propertyType: formData.propertyType,
+          city: formData.city,
+          price: formData.price,
+          bhk: formData.bhk,
+          baths: formData.baths,
+          areaSize: formData.areaSize,
+          areaUnit: formData.areaUnit,
+          type: 'description',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.enhancedText) {
+        setFormData((prev) => ({ ...prev, content: data.enhancedText }));
+        toast({
+          title: 'Description enhanced',
+          description: 'Your description has been improved using AI',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        throw new Error(data.error || 'Failed to enhance description');
+      }
+    } catch (error: any) {
+      console.error('Enhancement error:', error);
+      toast({
+        title: 'Enhancement failed',
+        description: error.message || 'Failed to enhance description. Please try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
   };
 
   const handleAmenityChange = (amenity: string) => {
@@ -333,34 +461,99 @@ const CreateListingPage = () => {
                   </Heading>
                     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                       <FormControl isRequired gridColumn={{ base: '1', md: '1 / -1' }}>
-                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
-                          Property Title
-                        </FormLabel>
+                        <Flex justify="space-between" align="center" mb={2}>
+                          <FormLabel 
+                            color="gray.900" 
+                            fontWeight="600" 
+                            fontSize="sm" 
+                            letterSpacing="0.05em" 
+                            textTransform="uppercase"
+                            mb={0}
+                          >
+                            Property Title
+                          </FormLabel>
+                          <Button
+                            size="sm"
+                            leftIcon={<FiZap />}
+                            onClick={handleEnhanceTitle}
+                            isLoading={isEnhancingTitle}
+                            loadingText="Enhancing..."
+                            variant="outline"
+                            borderColor="gray.300"
+                            color="gray.700"
+                            _hover={{
+                              borderColor: 'blue.400',
+                              color: 'blue.600',
+                              bg: 'blue.50',
+                            }}
+                            fontSize="xs"
+                            fontWeight="600"
+                            borderRadius="0"
+                          >
+                            Enhance with AI
+                          </Button>
+                        </Flex>
                         <Input
                           name="title"
                           value={formData.title}
                           onChange={handleInputChange}
-                          placeholder="e.g., Luxury 3BHK Apartment"
+                          placeholder="e.g., Luxury 3BHK Apartment... Click 'Enhance with AI' to improve"
                           bg="white"
                           borderColor="gray.300"
                           color="gray.900"
                           borderRadius="0"
                           _placeholder={{ color: 'gray.400' }}
                         />
+                        <Text fontSize="xs" color="gray.500" mt={1}>
+                          Tip: Write a basic title and click &ldquo;Enhance with AI&rdquo; to make it more attractive
+                        </Text>
                       </FormControl>
 
                       <FormControl isRequired gridColumn={{ base: '1', md: '1 / -1' }}>
-                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
-                          Description
-                        </FormLabel>
+                        <Flex justify="space-between" align="center" mb={2}>
+                          <FormLabel 
+                            color="gray.900" 
+                            fontWeight="600" 
+                            fontSize="sm" 
+                            letterSpacing="0.05em" 
+                            textTransform="uppercase"
+                            mb={0}
+                          >
+                            Description
+                          </FormLabel>
+                          <Button
+                            size="sm"
+                            leftIcon={<FiZap />}
+                            onClick={handleEnhanceDescription}
+                            isLoading={isEnhancing}
+                            loadingText="Enhancing..."
+                            variant="outline"
+                            borderColor="gray.300"
+                            color="gray.700"
+                            _hover={{
+                              borderColor: 'blue.400',
+                              color: 'blue.600',
+                              bg: 'blue.50',
+                            }}
+                            fontSize="xs"
+                            fontWeight="600"
+                            borderRadius="0"
+                          >
+                            Enhance with AI
+                          </Button>
+                        </Flex>
                         <Box border="1px" borderColor="gray.300" borderRadius="0" overflow="hidden">
                           <ReactQuill
                             theme="snow"
                             value={formData.content}
                             onChange={handleContentChange}
                             style={{ minHeight: '200px' }}
+                            placeholder="Enter property description... Click 'Enhance with AI' to improve your text"
                           />
                         </Box>
+                        <Text fontSize="xs" color="gray.500" mt={1}>
+                          Tip: Write a basic description and click &ldquo;Enhance with AI&rdquo; to make it more engaging and professional
+                        </Text>
                       </FormControl>
 
                       <FormControl isRequired>
