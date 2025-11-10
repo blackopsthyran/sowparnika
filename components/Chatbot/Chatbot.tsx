@@ -144,17 +144,17 @@ const Chatbot: React.FC = () => {
       {!isOpen && (
         <Box
           position="fixed"
-          bottom="24px"
-          right="24px"
+          bottom={{ base: '16px', md: '24px' }}
+          right={{ base: '16px', md: '24px' }}
           zIndex={1000}
         >
           <Box
             as="button"
             onClick={() => setIsOpen(true)}
             borderRadius="full"
-            px={6}
-            py={6}
-            fontSize="md"
+            px={{ base: 3, md: 6 }}
+            py={{ base: 3, md: 6 }}
+            fontSize={{ base: 'xs', md: 'md' }}
             fontWeight="600"
             color="white"
             bg="rgba(59, 130, 246, 0.9)"
@@ -164,7 +164,7 @@ const Chatbot: React.FC = () => {
             cursor="pointer"
             display="flex"
             alignItems="center"
-            gap={2}
+            gap={{ base: 1.5, md: 2 }}
             transition="all 0.3s ease"
             _hover={{
               bg: 'rgba(37, 99, 235, 0.95)',
@@ -179,8 +179,10 @@ const Chatbot: React.FC = () => {
               WebkitBackdropFilter: 'blur(10px)',
             }}
           >
-            <FiMessageCircle style={{ fontSize: '20px' }} />
-            Chat with us
+            <FiMessageCircle style={{ fontSize: 'clamp(16px, 4vw, 20px)' }} />
+            <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+              Chat with us
+            </Text>
           </Box>
         </Box>
       )}
