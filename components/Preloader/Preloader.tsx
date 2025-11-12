@@ -130,30 +130,20 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
             justifyContent="center"
             zIndex={10}
           >
-            {/* Company Name - Large, Bold, High Contrast */}
-            <Text
-              fontSize={{ base: '1.5rem', md: '2.5rem', lg: '3rem' }}
-              fontWeight="700"
-              color="gray.900"
+            {/* Logo */}
+            <Box
+              as="img"
+              src="/logo.png"
+              alt="Sowparnika Properties"
+              height={{ base: '120px', md: '160px', lg: '200px' }}
+              width="auto"
+              objectFit="contain"
+              loading="eager"
               mb={16}
-              fontFamily="'Playfair Display', serif"
-              letterSpacing={{ base: '0.1em', md: '0.15em' }}
-              textAlign="center"
-              textTransform="uppercase"
-              lineHeight="1.1"
-              whiteSpace="nowrap"
-              px={4}
               sx={{
                 animation: `${slideIn} 0.8s ease-out`,
-                transform: 'scaleY(1.2)',
-                display: 'inline-block',
-                fontFeatureSettings: '"liga" 1, "kern" 1',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale',
               }}
-            >
-              Sowparnika Properties
-            </Text>
+            />
 
             {/* Sharp, Edgy Progress Bar Container */}
             <Box width="100%" maxW="400px" mb={6}>
@@ -210,7 +200,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
 
             {/* Progress Percentage - Elegant Typography */}
             <Text
-              fontSize={{ base: 'lg', md: 'xl' }}
+              fontSize={{ base: 'md', md: 'lg' }}
               color="gray.900"
               fontFamily="'Playfair Display', serif"
               letterSpacing="0.2em"
@@ -236,7 +226,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
                 animation: `${slideIn} 0.8s ease-out 0.5s both`,
               }}
             >
-              Loading Excellence
+              Finding Your Dream Property
             </Text>
 
             {/* Geometric Divider Lines - Edgy Design */}
