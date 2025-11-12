@@ -1,7 +1,13 @@
 # robots.txt for Sowparnika Properties
+# Optimized for Google Search Engine
 
 User-agent: *
 Allow: /
+Allow: /properties
+Allow: /contact
+Allow: /about
+
+# Disallow admin and private pages
 Disallow: /cpanel/
 Disallow: /api/
 Disallow: /favorites
@@ -10,9 +16,16 @@ Disallow: /register
 Disallow: /_next/
 Disallow: /admin/
 
-# Sitemap
+# Allow Googlebot full access
+User-agent: Googlebot
+Allow: /
+Allow: /properties
+Allow: /contact
+Allow: /about
+
+# Sitemap location
 Sitemap: https://sowparnikaproperties.com/sitemap.xml
 
-# Crawl-delay (optional)
+# Crawl-delay (be respectful to server)
 Crawl-delay: 1
 

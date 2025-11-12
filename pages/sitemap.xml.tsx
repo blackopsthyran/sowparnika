@@ -31,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sowparnikaproperties.com';
   const currentDate = new Date().toISOString().split('T')[0];
 
-  // Static pages
+  // Static pages - Focus on main pages for SEO
   const staticPages = [
     {
       url: `${siteUrl}/`,
@@ -46,15 +46,9 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
       priority: '0.9',
     },
     {
-      url: `${siteUrl}/about`,
-      lastmod: currentDate,
-      changefreq: 'monthly',
-      priority: '0.8',
-    },
-    {
       url: `${siteUrl}/contact`,
       lastmod: currentDate,
-      changefreq: 'monthly',
+      changefreq: 'weekly',
       priority: '0.8',
     },
   ];

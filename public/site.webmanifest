@@ -1,0 +1,24 @@
+{
+  "name": "Sowparnika Properties - Premium Real Estate in Kakkanad, Kochi",
+  "short_name": "Sowparnika Properties",
+  "description": "Your trusted gateway to real estate in Kakkanad, Kochi. Find verified properties, expert consultation, and full-service support.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "portrait-primary"
+}
+

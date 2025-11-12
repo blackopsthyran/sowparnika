@@ -45,8 +45,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
         <meta name="revisit-after" content="7 days" />
         <meta name="theme-color" content="#000000" />
         <link rel="canonical" href={canonicalUrl} />
-        <link rel="icon" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/logo.png" />
 
         {/* Open Graph / Facebook */}
         <meta property="og:type" content={type} />
@@ -77,6 +75,21 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
         <meta name="copyright" content="Sowparnika Properties" />
         <meta name="distribution" content="global" />
         <meta name="rating" content="general" />
+        <meta name="format-detection" content="telephone=yes" />
+        <meta name="HandheldFriendly" content="true" />
+        <meta name="MobileOptimized" content="320" />
+        
+        {/* Business/Organization Schema */}
+        <meta name="business.contact_data.street_address" content="Door No: 6 / 754 H, Vallathol Junction, Seaport - Airport Rd" />
+        <meta name="business.contact_data.locality" content="Kakkanad" />
+        <meta name="business.contact_data.region" content="Kochi, Kerala" />
+        <meta name="business.contact_data.postal_code" content="682021" />
+        <meta name="business.contact_data.country_name" content="India" />
+        <meta name="business.contact_data.phone_number" content="+91 9446211417" />
+        
+        {/* Verification tags - Add your verification codes here when you get them */}
+        {/* <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE" /> */}
+        {/* <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE" /> */}
 
         {/* Mobile Optimization */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />

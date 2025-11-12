@@ -30,6 +30,16 @@ export default function Document() {
         <link rel="preload" as="font" type="font/woff2" crossOrigin="anonymous" href="https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtY.woff2" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://placehold.co" />
+        
+        {/* Favicon and App Icons */}
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        
+        {/* SEO - Sitemap and Robots */}
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
       </Head>
       <body>
         <Main />
