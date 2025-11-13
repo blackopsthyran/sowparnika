@@ -116,7 +116,7 @@ const LiquidGlassNavbar = () => {
             paddingX={{ base: '1.5rem', md: '2.5rem', lg: '3rem' }}
             position="relative"
           >
-          <Flex alignItems="center" justifyContent="space-between" gap={4}>
+          <Flex alignItems="center" gap={4} w="100%">
             {/* Left Side: Hamburger Menu (Mobile) / Hamburger + Logo (Desktop) */}
             <HStack 
               gap={{ base: '0', md: '4', lg: '8' }} 
@@ -164,18 +164,16 @@ const LiquidGlassNavbar = () => {
               </Box>
             </HStack>
 
-            {/* Center: Logo (Mobile) / Search Bar (Desktop) */}
+            {/* Center: Logo (Mobile) / Search Bar (Desktop) - Auto-adjusts width */}
             <Box 
-              position="absolute"
-              left="50%"
-              transform="translateX(-50%)"
+              flex={{ base: 0, xl: 1 }}
               display="flex" 
               justifyContent="center" 
               alignItems="center"
-              maxW={{ base: 'calc(100% - 80px)', md: '350px', lg: '400px', xl: '500px' }}
-              width={{ base: 'auto', md: '350px', lg: '400px', xl: '500px' }}
+              minW={0}
+              mx={{ base: 'auto', xl: 4 }}
             >
-              {/* Mobile: Logo */}
+              {/* Mobile: Logo - Only show on mobile, hide when left logo appears (md+) */}
               <Box 
                 display={{ base: 'block', md: 'none' }}
                 whiteSpace="nowrap"
@@ -209,8 +207,13 @@ const LiquidGlassNavbar = () => {
                   </Text>
                 </Link>
               </Box>
-              {/* Desktop: Search Bar - Hide on iPad, show on larger screens */}
-              <Box display={{ base: 'none', lg: 'block' }} width="100%">
+              {/* Desktop: Search Bar - Auto-adjusts width, hides on small screens */}
+              <Box 
+                display={{ base: 'none', xl: 'block' }} 
+                width="100%"
+                maxW="500px"
+                minW="200px"
+              >
                 <form onSubmit={handleSearch}>
                   <InputGroup size="md">
                     <InputLeftElement pointerEvents="none">
@@ -464,9 +467,20 @@ const LiquidGlassNavbar = () => {
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader borderBottomWidth="1px" pb={4}>
-            <Text fontSize="xl" fontWeight="600" fontFamily="'Playfair Display', serif">
-              Menu
-            </Text>
+            <Flex alignItems="center" gap={3}>
+              <Box
+                as="img"
+                src="/logo.png"
+                alt="Sowparnika Properties"
+                height="40px"
+                width="auto"
+                objectFit="contain"
+                loading="eager"
+              />
+              <Text fontSize="xl" fontWeight="600" fontFamily="'Playfair Display', serif">
+                Menu
+              </Text>
+            </Flex>
           </DrawerHeader>
 
           <DrawerBody p={0}>
