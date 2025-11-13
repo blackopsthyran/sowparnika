@@ -21,6 +21,7 @@ import { FiSearch, FiX, FiHome, FiArrowUp, FiArrowDown, FiChevronLeft, FiChevron
 import DefaultLayout from '@/features/Layout/DefaultLayout';
 import PropertyCard from '@/features/common/modules/PropertyCard';
 import SleekDropdown from '@/features/Home/components/SleekDropdown/SleekDropdown';
+import PriceRangeSelector from '@/features/Home/components/PriceRangeSelector/PriceRangeSelector';
 import Link from 'next/link';
 
 interface Property {
@@ -54,7 +55,7 @@ const Properties = () => {
     minPrice: '',
     maxPrice: '',
   });
-  const [priceRange, setPriceRange] = useState([0, 10000000]);
+  const [priceRange, setPriceRange] = useState([0, 20000000]); // Max 2 Crore
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [total, setTotal] = useState(0);
@@ -371,7 +372,7 @@ const Properties = () => {
       maxPrice: '',
     });
     setSearchQuery('');
-    setPriceRange([0, 10000000]);
+    setPriceRange([0, 20000000]); // Max 2 Crore
   };
 
   const hasActiveFilters = Object.values(filters).some(
@@ -500,7 +501,7 @@ const Properties = () => {
               </Box>
 
               {/* Quick Filters */}
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={{ base: 4, md: 5, lg: 6 }}>
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 5 }} spacing={{ base: 4, md: 5, lg: 6 }}>
                 <Box>
                   <Text 
                     fontSize="xs" 
@@ -567,6 +568,31 @@ const Properties = () => {
                       { value: '', label: 'All Cities' },
                       ...uniqueCities.map((city) => ({ value: city, label: city }))
                     ]}
+                    maxW="100%"
+                  />
+                </Box>
+
+                <Box>
+                  <Text 
+                    fontSize="xs" 
+                    fontWeight="600" 
+                    color="gray.500" 
+                    mb={2}
+                    textTransform="uppercase"
+                    letterSpacing="0.05em"
+                  >
+                    Price Range
+                  </Text>
+                  <PriceRangeSelector
+                    value={`${filters.minPrice || '0'}-${filters.maxPrice || '20000000'}`}
+                    onChange={(value) => {
+                      const [min, max] = value.split('-').map(Number);
+                      setFilters({
+                        ...filters,
+                        minPrice: min === 0 ? '' : min.toString(),
+                        maxPrice: max === 20000000 ? '' : max.toString(),
+                      });
+                    }}
                     maxW="100%"
                   />
                 </Box>

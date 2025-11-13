@@ -9,7 +9,7 @@ interface PriceRangeSelectorProps {
   maxW?: string | object;
 }
 
-const MAX_PRICE = 10000000;
+const MAX_PRICE = 20000000; // 2 Crore
 const MIN_PRICE = 0;
 
 const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({
