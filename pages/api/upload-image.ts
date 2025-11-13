@@ -3,6 +3,7 @@ import formidable from 'formidable';
 import fs from 'fs';
 import { IncomingMessage } from 'http';
 import { supabase } from '@/lib/supabase';
+import { optimizeImage, isValidImage } from '@/lib/image-optimizer';
 
 export const config = {
   api: {
@@ -56,7 +57,9 @@ export default async function handler(
 
     if (!supabaseUrl || !supabaseKey) {
       console.warn('Supabase not configured, using placeholder');
-      const placeholderUrl = `https://placehold.co/800x600/e2e8f0/64748b?text=Image+${Date.now()}`;
+      // FIXED: Use static placeholder URL without timestamp to allow caching
+      // This prevents repeated Vercel image optimization for the same placeholder
+      const placeholderUrl = 'https://placehold.co/800x600/e2e8f0/64748b?text=Image+Not+Available';
       // Clean up temporary file
       if (file.filepath) {
         try {
@@ -65,34 +68,90 @@ export default async function handler(
           // Ignore cleanup errors
         }
       }
+      // Add cache headers for placeholder responses
+      res.setHeader('Cache-Control', 'public, s-maxage=31536000, stale-while-revalidate=86400');
       return res.status(200).json({ url: placeholderUrl });
     }
 
     // Read file buffer
-    const fileBuffer = fs.readFileSync(file.filepath);
+    const originalBuffer = fs.readFileSync(file.filepath);
     const filename = file.originalFilename || `image-${Date.now()}.jpg`;
-    const contentType = file.mimetype || 'image/jpeg';
+    const originalContentType = file.mimetype || 'image/jpeg';
+    
+    // Validate that it's a valid image
+    const isValid = await isValidImage(originalBuffer);
+    if (!isValid) {
+      // Clean up temporary file
+      if (file.filepath) {
+        try {
+          fs.unlinkSync(file.filepath);
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+      return res.status(400).json({ error: 'Invalid image file' });
+    }
+
+    // OPTIMIZE: Automatically optimize and reduce image size
+    console.log('Optimizing image:', {
+      originalSize: `${(originalBuffer.length / 1024).toFixed(2)} KB`,
+      filename: filename,
+    });
+
+    const optimizationResult = await optimizeImage(originalBuffer, {
+      maxWidth: 1920,
+      maxHeight: 1920,
+      quality: 85,
+      format: 'webp', // Use WebP for best compression
+    });
+
+    const optimizedBuffer = optimizationResult.buffer;
+    const optimizedSize = optimizationResult.optimizedSize;
+    const reductionPercent = optimizationResult.reductionPercent;
+
+    // Determine content type based on optimized format
+    const contentType = optimizationResult.format === 'webp' 
+      ? 'image/webp' 
+      : optimizationResult.format === 'png'
+      ? 'image/png'
+      : 'image/jpeg';
+
+    // Update file extension based on optimized format
+    const optimizedExtension = optimizationResult.format === 'webp' 
+      ? 'webp' 
+      : optimizationResult.format === 'png'
+      ? 'png'
+      : 'jpg';
     
     // Generate unique filename to avoid conflicts
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
-    const fileExtension = filename.split('.').pop() || 'jpg';
     // File path in the bucket (without bucket name prefix)
-    const uniqueFilename = `${timestamp}-${randomString}.${fileExtension}`;
+    const uniqueFilename = `${timestamp}-${randomString}.${optimizedExtension}`;
+
+    const originalSize = originalBuffer.length;
+
+    console.log('Image optimization complete:', {
+      originalSize: `${(originalSize / 1024).toFixed(2)} KB`,
+      optimizedSize: `${(optimizedSize / 1024).toFixed(2)} KB`,
+      reduction: `${reductionPercent}%`,
+      dimensions: `${optimizationResult.width}x${optimizationResult.height}`,
+      format: optimizationResult.format,
+    });
 
     console.log('Uploading to Supabase Storage:', {
       filename: uniqueFilename,
       contentType: contentType,
-      fileSize: fileBuffer.length,
+      fileSize: optimizedSize,
       originalFilename: filename,
       bucket: 'property-images',
     });
 
     try {
-      // Upload to Supabase Storage
+      // Upload optimized image to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('property-images') // Bucket name
-        .upload(uniqueFilename, fileBuffer, {
+        .upload(uniqueFilename, optimizedBuffer, {
           contentType: contentType,
           upsert: false, // Don't overwrite existing files
         });
@@ -111,15 +170,20 @@ export default async function handler(
         
         // If bucket doesn't exist, provide helpful error
         if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('The resource was not found')) {
+          // FIXED: Use static placeholder URL without timestamp to allow caching
+          const staticPlaceholderUrl = 'https://placehold.co/800x600/e2e8f0/64748b?text=Storage+Not+Configured';
+          res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
           return res.status(200).json({
-            url: `https://placehold.co/800x600/e2e8f0/64748b?text=Image+${Date.now()}`,
+            url: staticPlaceholderUrl,
             error: 'Storage bucket not found',
             details: 'Please create a bucket named "property-images" in your Supabase Storage',
             help: 'Go to Supabase Dashboard > Storage > Create Bucket > Name: "property-images" > Public: Yes',
           });
         }
 
-        const fallbackUrl = `https://placehold.co/800x600/e2e8f0/64748b?text=Image+${Date.now()}`;
+        // FIXED: Use static placeholder URL without timestamp to allow caching
+        const fallbackUrl = 'https://placehold.co/800x600/e2e8f0/64748b?text=Upload+Failed';
+        res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
         return res.status(200).json({
           url: fallbackUrl,
           error: 'Supabase upload failed',
@@ -129,7 +193,9 @@ export default async function handler(
 
       if (!uploadData) {
         console.error('No upload data returned from Supabase');
-        const fallbackUrl = `https://placehold.co/800x600/e2e8f0/64748b?text=Image+${Date.now()}`;
+        // FIXED: Use static placeholder URL without timestamp to allow caching
+        const fallbackUrl = 'https://placehold.co/800x600/e2e8f0/64748b?text=Upload+Error';
+        res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
         return res.status(200).json({
           url: fallbackUrl,
           error: 'No data returned from upload',
@@ -146,12 +212,29 @@ export default async function handler(
       console.log('✓ Image uploaded to Supabase Storage:', {
         path: uniqueFilename,
         publicUrl: imageUrl,
+        originalSize: `${(originalSize / 1024).toFixed(2)} KB`,
+        optimizedSize: `${(optimizedSize / 1024).toFixed(2)} KB`,
+        reduction: `${reductionPercent}%`,
       });
+      
+      // FIXED: Add cache headers for successful uploads
+      // Images from Supabase Storage should be cached as they're immutable
+      res.setHeader('Cache-Control', 'public, s-maxage=31536000, stale-while-revalidate=86400, immutable');
       
       return res.status(200).json({ 
         url: imageUrl,
         path: uniqueFilename,
         success: true,
+        optimization: {
+          originalSize,
+          optimizedSize,
+          reductionPercent,
+          format: optimizationResult.format,
+          dimensions: {
+            width: optimizationResult.width,
+            height: optimizationResult.height,
+          },
+        },
       });
     } catch (storageError: any) {
       console.error('Storage upload error:', storageError);
@@ -163,7 +246,9 @@ export default async function handler(
           // Ignore cleanup errors
         }
       }
-      const fallbackUrl = `https://placehold.co/800x600/e2e8f0/64748b?text=Image+${Date.now()}`;
+      // FIXED: Use static placeholder URL without timestamp to allow caching
+      const fallbackUrl = 'https://placehold.co/800x600/e2e8f0/64748b?text=Storage+Error';
+      res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
       return res.status(200).json({
         url: fallbackUrl,
         error: 'Storage upload failed',

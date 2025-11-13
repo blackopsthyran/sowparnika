@@ -32,15 +32,26 @@ export function getOptimizedImageUrl(
   }
 
   // If it's a Supabase Storage URL, add transformation parameters
+  // FIXED: Query parameters are stable based on input (width, quality, format)
+  // Same inputs = same URL, which allows proper caching by Vercel
+  // This prevents repeated image optimizations for the same image with same dimensions
+  // NOTE: If Supabase Storage doesn't support these query params, Next.js Image will handle optimization
   if (isSupabaseStorageUrl(url)) {
     const urlObj = new URL(url);
-    urlObj.searchParams.set('width', width.toString());
-    urlObj.searchParams.set('quality', quality.toString());
-    if (format) {
+    // Only add params if they don't already exist to avoid duplicate params
+    if (!urlObj.searchParams.has('width')) {
+      urlObj.searchParams.set('width', width.toString());
+    }
+    if (!urlObj.searchParams.has('quality')) {
+      urlObj.searchParams.set('quality', quality.toString());
+    }
+    if (format && !urlObj.searchParams.has('format')) {
       urlObj.searchParams.set('format', format);
     }
     // Enable automatic format selection (WebP/AVIF when supported)
-    urlObj.searchParams.set('transform', 'resize');
+    if (!urlObj.searchParams.has('transform')) {
+      urlObj.searchParams.set('transform', 'resize');
+    }
     return urlObj.toString();
   }
 
