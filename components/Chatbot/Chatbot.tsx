@@ -153,6 +153,50 @@ const Chatbot: React.FC = () => {
         zIndex={1002}
         spacing={2}
       >
+        {/* Logo Button - Scroll to Top */}
+        <Box
+          as="button"
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          w={{ base: '44px', md: '48px' }}
+          h={{ base: '44px', md: '48px' }}
+          borderRadius="full"
+          bg="rgba(255, 255, 255, 0.95)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          boxShadow="0 4px 16px 0 rgba(0, 0, 0, 0.2)"
+          border="2px solid"
+          borderColor="rgba(0, 0, 0, 0.1)"
+          cursor="pointer"
+          transition="all 0.3s ease"
+          overflow="hidden"
+          p={{ base: '4px', md: '5px' }}
+          _hover={{
+            bg: 'white',
+            transform: 'translateY(-4px) scale(1.1)',
+            boxShadow: '0 8px 24px 0 rgba(0, 0, 0, 0.3)',
+          }}
+          _active={{
+            transform: 'translateY(-2px) scale(1.05)',
+          }}
+          sx={{
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+          }}
+          aria-label="Scroll to top"
+        >
+          <Box
+            as="img"
+            src="/logo.png"
+            alt="Sowparnika Properties"
+            w="100%"
+            h="100%"
+            objectFit="contain"
+            loading="eager"
+          />
+        </Box>
         <Box
           as="a"
           href="https://www.youtube.com/@sowparnikaproperties"

@@ -13,28 +13,28 @@ const FeatureHighlights: React.FC = () => {
   const features: FeatureItem[] = [
     {
       iconComponent: FiHome,
-      title: "All The World's Luxury Listings",
+      title: "Luxury Homes Across Kerala",
       description: (
         <>
-          We work with <Text as="span" fontWeight="700">16,000</Text> leading luxury real estate offices globally to give you access to over <Text as="span" fontWeight="700">400,000</Text> of the finest listings.
+          We connect you with the most trusted premium real estate offices across the state, giving you access to <Text as="span" fontWeight="700">stunning coastal villas, serene backwater retreats, and elegant homes</Text> tucked between lush hills and heritage towns.
         </>
       ),
     },
     {
       iconComponent: TbRefresh,
-      title: "Personalised Discovery",
+      title: "Personalised Property Discovery",
       description: (
         <>
-          We personalise your property search and deliver tailored recommendations. Enjoy <Text as="span" fontWeight="700">custom search filters, wish lists, listing alerts, and personalised feeds</Text>.
+          Your search gets the full custom treatment — <Text as="span" fontWeight="700">curated recommendations, flexible filters, saved wish lists, instant alerts</Text>, and a feed that actually matches your vibe instead of throwing random stuff at you.
         </>
       ),
     },
     {
       iconComponent: TbUserCheck,
-      title: "Direct Market Contact",
+      title: "Direct Access to the Market",
       description: (
         <>
-          Our inventory is updated several times daily, allowing for <Text as="span" fontWeight="700">3,000</Text> new listings per day, <Text as="span" fontWeight="700">real time market prices and direct contact</Text> with listing agents.
+          Listings keep refreshing throughout the day, so you're always seeing what's new in the market. You can check <Text as="span" fontWeight="700">real-time pricing trends</Text> and reach out to agents directly without any hassle.
         </>
       ),
     },

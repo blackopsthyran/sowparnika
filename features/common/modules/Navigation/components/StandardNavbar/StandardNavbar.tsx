@@ -149,28 +149,40 @@ const StandardNavbar = () => {
                 />
                 <Box display={{ base: 'none', md: 'block' }}>
                   <Link href="/">
-                    <Text
-                      fontSize={{ base: '1rem', md: '1.2rem' }}
-                      fontWeight="700"
-                      color="gray.900"
-                      fontFamily="'Playfair Display', serif"
-                      letterSpacing="0.05em"
-                      lineHeight="1.1"
-                      textTransform="uppercase"
-                      sx={{
-                        fontFeatureSettings: '"liga" 1, "kern" 1',
-                        WebkitFontSmoothing: 'antialiased',
-                        MozOsxFontSmoothing: 'grayscale',
-                        transform: 'scaleY(1.2)',
-                        display: 'inline-block',
-                      }}
-                      _hover={{ opacity: 0.8 }}
-                      cursor="pointer"
-                      transition="opacity 0.2s"
-                      as="span"
-                    >
-                      <Box as="span" sx={{ fontSize: '1.25em', display: 'inline-block' }}>S</Box>OWPARNIKA <Box as="span" sx={{ fontSize: '1.25em', display: 'inline-block' }}>P</Box>ROPERTIES
-                    </Text>
+                    <Flex alignItems="center" gap={3}>
+                      <Box
+                        as="img"
+                        src="/logo.png"
+                        alt="Sowparnika Properties"
+                        height={{ base: '40px', md: '55px', lg: '60px' }}
+                        width="auto"
+                        objectFit="contain"
+                        loading="eager"
+                        _hover={{ opacity: 0.8 }}
+                        transition="opacity 0.2s"
+                      />
+                      <Text
+                        fontSize={{ base: '1rem', md: '1.2rem' }}
+                        fontWeight="700"
+                        color="gray.900"
+                        fontFamily="'Playfair Display', serif"
+                        letterSpacing="0.05em"
+                        lineHeight="1.1"
+                        textTransform="uppercase"
+                        sx={{
+                          fontFeatureSettings: '"liga" 1, "kern" 1',
+                          WebkitFontSmoothing: 'antialiased',
+                          MozOsxFontSmoothing: 'grayscale',
+                          transform: 'scaleY(1.2)',
+                          display: 'inline-block',
+                        }}
+                        _hover={{ opacity: 0.8 }}
+                        transition="opacity 0.2s"
+                        as="span"
+                      >
+                        <Box as="span" sx={{ fontSize: '1.25em', display: 'inline-block' }}>S</Box>OWPARNIKA <Box as="span" sx={{ fontSize: '1.25em', display: 'inline-block' }}>P</Box>ROPERTIES
+                      </Text>
+                    </Flex>
                   </Link>
                 </Box>
               </HStack>
@@ -221,8 +233,9 @@ const StandardNavbar = () => {
                 <Box 
                   display={{ base: 'none', xl: 'block' }} 
                   width="100%"
-                  maxW="500px"
-                  minW="200px"
+                  maxW="700px"
+                  minW="300px"
+                  mx="auto"
                 >
                   <form onSubmit={handleSearch}>
                     <InputGroup size="md">
@@ -463,20 +476,32 @@ const StandardNavbar = () => {
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader borderBottomWidth="1px" pb={4}>
-            <Flex alignItems="center" gap={3}>
-              <Box
-                as="img"
-                src="/logo.png"
-                alt="Sowparnika Properties"
-                height="40px"
-                width="auto"
-                objectFit="contain"
-                loading="eager"
-              />
+            <VStack alignItems="center" spacing={2}>
+              <Flex alignItems="center" gap={4} w="100%" justifyContent="center">
+                <Box
+                  as="img"
+                  src="/logo.png"
+                  alt="Sowparnika Properties"
+                  height={{ base: '80px', md: '100px' }}
+                  width="auto"
+                  objectFit="contain"
+                  loading="eager"
+                />
+                <Text 
+                  fontSize={{ base: 'lg', md: 'xl' }} 
+                  fontWeight="700" 
+                  fontFamily="'Playfair Display', serif"
+                  display={{ base: 'none', md: 'block' }}
+                  textTransform="uppercase"
+                  letterSpacing="0.05em"
+                >
+                  SOWPARNIKA PROPERTIES
+                </Text>
+              </Flex>
               <Text fontSize="xl" fontWeight="600" fontFamily="'Playfair Display', serif">
                 Menu
               </Text>
-            </Flex>
+            </VStack>
           </DrawerHeader>
 
           <DrawerBody p={0}>
