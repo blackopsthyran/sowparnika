@@ -71,7 +71,8 @@ export default function Home() {
     },
     priceRange: '$$',
     sameAs: [
-      // Add social media links here if available
+      'https://www.youtube.com/@sowparnikaproperties',
+      'https://www.instagram.com/sowparnika.properties/'
     ]
   };
 

@@ -12,7 +12,8 @@ import {
   Link,
   Image,
 } from '@chakra-ui/react';
-import { FiMessageCircle, FiX, FiSend } from 'react-icons/fi';
+import { FiMessageCircle, FiX, FiSend, FiInstagram } from 'react-icons/fi';
+import { FaYoutube } from 'react-icons/fa';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -140,6 +141,87 @@ const Chatbot: React.FC = () => {
 
   return (
     <>
+      {/* Social Media Floating Buttons */}
+      <VStack
+        position="fixed"
+        bottom={
+          isOpen
+            ? { base: 'calc(100vh - 48px + 120px)', md: '640px' }
+            : { base: '80px', md: '100px' }
+        }
+        right={{ base: '16px', md: '24px' }}
+        zIndex={1002}
+        spacing={2}
+      >
+        <Box
+          as="a"
+          href="https://www.youtube.com/@sowparnikaproperties"
+          target="_blank"
+          rel="noopener noreferrer"
+          w={{ base: '44px', md: '48px' }}
+          h={{ base: '44px', md: '48px' }}
+          borderRadius="full"
+          bg="rgba(255, 0, 0, 0.9)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          color="white"
+          boxShadow="0 4px 16px 0 rgba(255, 0, 0, 0.3)"
+          border="2px solid"
+          borderColor="rgba(255, 255, 255, 0.2)"
+          cursor="pointer"
+          transition="all 0.3s ease"
+          _hover={{
+            bg: 'rgba(255, 0, 0, 1)',
+            transform: 'translateY(-4px) scale(1.1)',
+            boxShadow: '0 8px 24px 0 rgba(255, 0, 0, 0.4)',
+          }}
+          _active={{
+            transform: 'translateY(-2px) scale(1.05)',
+          }}
+          sx={{
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+          }}
+          aria-label="YouTube"
+        >
+          <FaYoutube style={{ fontSize: 'clamp(18px, 4vw, 22px)' }} />
+        </Box>
+        <Box
+          as="a"
+          href="https://www.instagram.com/sowparnika.properties/"
+          target="_blank"
+          rel="noopener noreferrer"
+          w={{ base: '44px', md: '48px' }}
+          h={{ base: '44px', md: '48px' }}
+          borderRadius="full"
+          bg="linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          color="white"
+          boxShadow="0 4px 16px 0 rgba(225, 48, 108, 0.3)"
+          border="2px solid"
+          borderColor="rgba(255, 255, 255, 0.2)"
+          cursor="pointer"
+          transition="all 0.3s ease"
+          _hover={{
+            transform: 'translateY(-4px) scale(1.1)',
+            boxShadow: '0 8px 24px 0 rgba(225, 48, 108, 0.4)',
+          }}
+          _active={{
+            transform: 'translateY(-2px) scale(1.05)',
+          }}
+          sx={{
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+          }}
+          aria-label="Instagram"
+        >
+          <FiInstagram style={{ fontSize: 'clamp(18px, 4vw, 22px)' }} />
+        </Box>
+      </VStack>
+
       {/* Chat Button */}
       {!isOpen && (
         <Box

@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Box, Flex, Grid, GridItem, Text, VStack, HStack, Icon, Divider } from '@chakra-ui/react';
 import { FiMail, FiPhone, FiMapPin, FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from 'react-icons/fi';
+import { FaYoutube } from 'react-icons/fa';
 import {
   services,
   about,
@@ -232,24 +233,14 @@ const Footer = () => {
               {/* Social Media Icons */}
               <HStack spacing={3} mt={2}>
                 <IconButtonLink
-                  icon={FiFacebook}
-                  href="https://facebook.com"
-                  ariaLabel="Facebook"
-                />
-                <IconButtonLink
-                  icon={FiTwitter}
-                  href="https://twitter.com"
-                  ariaLabel="Twitter"
+                  icon={FaYoutube}
+                  href="https://www.youtube.com/@sowparnikaproperties"
+                  ariaLabel="YouTube"
                 />
                 <IconButtonLink
                   icon={FiInstagram}
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/sowparnika.properties/"
                   ariaLabel="Instagram"
-                />
-                <IconButtonLink
-                  icon={FiLinkedin}
-                  href="https://linkedin.com"
-                  ariaLabel="LinkedIn"
                 />
               </HStack>
             </VStack>
