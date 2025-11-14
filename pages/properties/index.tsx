@@ -16,8 +16,10 @@ import {
   IconButton,
   Icon,
   Divider,
+  Collapse,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { FiSearch, FiX, FiHome, FiArrowUp, FiArrowDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiSearch, FiX, FiHome, FiArrowUp, FiArrowDown, FiChevronLeft, FiChevronRight, FiFilter } from 'react-icons/fi';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
 import PropertyCard from '@/features/common/modules/PropertyCard';
 import SleekDropdown from '@/features/Home/components/SleekDropdown/SleekDropdown';
@@ -62,6 +64,9 @@ const Properties = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const propertiesPerPage = 9;
+  
+  // Mobile filters collapse state
+  const { isOpen: isFiltersOpen, onToggle: onToggleFilters } = useDisclosure();
   
   // Track if we've initialized from URL to prevent premature fetching
   const [hasInitializedFromUrl, setHasInitializedFromUrl] = useState(false);
@@ -500,8 +505,199 @@ const Properties = () => {
                 </InputGroup>
               </Box>
 
-              {/* Quick Filters */}
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 5 }} spacing={{ base: 4, md: 5, lg: 6 }}>
+              {/* Advanced Filtering Button - Mobile Only */}
+              <Box display={{ base: 'block', md: 'none' }}>
+                <Button
+                  leftIcon={<FiFilter />}
+                  onClick={onToggleFilters}
+                  variant="outline"
+                  width="100%"
+                  size="lg"
+                  border="2px solid"
+                  borderColor="gray.200"
+                  borderRadius="xl"
+                  bg="gray.50"
+                  color="gray.700"
+                  fontWeight="600"
+                  fontFamily="'Playfair Display', serif"
+                  transition="all 0.2s ease"
+                  _hover={{
+                    borderColor: 'gray.900',
+                    bg: 'gray.900',
+                    color: 'white',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                  }}
+                >
+                  {isFiltersOpen ? 'Hide Filters' : 'Advanced Filtering'}
+                </Button>
+              </Box>
+
+              {/* Quick Filters - Collapsible on Mobile, Always Visible on Desktop */}
+              <Collapse in={isFiltersOpen} animateOpacity>
+                <Box display={{ base: 'block', md: 'none' }}>
+                  <SimpleGrid columns={1} spacing={4} mt={4}>
+                    <Box>
+                      <Text 
+                        fontSize="xs" 
+                        fontWeight="600" 
+                        color="gray.500" 
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
+                        Property Type
+                      </Text>
+                      <SleekDropdown
+                        placeholder="All Property Types"
+                        value={filters.propertyType}
+                        onChange={(value) => setFilters({ ...filters, propertyType: value })}
+                        options={[
+                          { value: '', label: 'All Property Types' },
+                          ...uniquePropertyTypes.map((type) => ({ value: type, label: type }))
+                        ]}
+                        maxW="100%"
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text 
+                        fontSize="xs" 
+                        fontWeight="600" 
+                        color="gray.500" 
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
+                        Sale or Rent
+                      </Text>
+                      <SleekDropdown
+                        placeholder="Sale or Rent"
+                        value={filters.sellingType}
+                        onChange={(value) => setFilters({ ...filters, sellingType: value })}
+                        options={[
+                          { value: '', label: 'Sale or Rent' },
+                          { value: 'Sale', label: 'For Sale' },
+                          { value: 'Rent', label: 'For Rent' }
+                        ]}
+                        maxW="100%"
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text 
+                        fontSize="xs" 
+                        fontWeight="600" 
+                        color="gray.500" 
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
+                        City
+                      </Text>
+                      <SleekDropdown
+                        placeholder="All Cities"
+                        value={filters.city}
+                        onChange={(value) => setFilters({ ...filters, city: value })}
+                        options={[
+                          { value: '', label: 'All Cities' },
+                          ...uniqueCities.map((city) => ({ value: city, label: city }))
+                        ]}
+                        maxW="100%"
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text 
+                        fontSize="xs" 
+                        fontWeight="600" 
+                        color="gray.500" 
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
+                        Price Range
+                      </Text>
+                      <PriceRangeSelector
+                        value={`${filters.minPrice || '0'}-${filters.maxPrice || '20000000'}`}
+                        onChange={(value) => {
+                          const [min, max] = value.split('-').map(Number);
+                          setFilters({
+                            ...filters,
+                            minPrice: min === 0 ? '' : min.toString(),
+                            maxPrice: max === 20000000 ? '' : max.toString(),
+                          });
+                        }}
+                        maxW="100%"
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text 
+                        fontSize="xs" 
+                        fontWeight="600" 
+                        color="gray.500" 
+                        mb={2}
+                        textTransform="uppercase"
+                        letterSpacing="0.05em"
+                      >
+                        Sort By
+                      </Text>
+                      <HStack spacing={2}>
+                        <Box flex={1}>
+                          <SleekDropdown
+                            placeholder="Newest First"
+                            value={sortBy}
+                            onChange={(value) => setSortBy(value)}
+                            options={[
+                              { value: 'created_at', label: 'Newest First' },
+                              { value: 'price', label: 'Price' },
+                              { value: 'area_size', label: 'Area Size' },
+                              { value: 'title', label: 'Title' }
+                            ]}
+                            maxW="100%"
+                          />
+                        </Box>
+                        <IconButton
+                          aria-label="Toggle sort order"
+                          icon={<Icon as={sortOrder === 'asc' ? FiArrowUp : FiArrowDown} />}
+                          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                          variant="outline"
+                          size="lg"
+                          minW="56px"
+                          h="48px"
+                          border="2px solid"
+                          borderColor="gray.200"
+                          borderRadius="xl"
+                          bg="gray.50"
+                          color="gray.700"
+                          transition="all 0.2s ease"
+                          _hover={{
+                            borderColor: 'gray.900',
+                            bg: 'gray.900',
+                            color: 'white',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          }}
+                          _active={{
+                            transform: 'translateY(0)',
+                          }}
+                        />
+                      </HStack>
+                    </Box>
+                  </SimpleGrid>
+                </Box>
+              </Collapse>
+
+              {/* Quick Filters - Desktop View (Always Visible) */}
+              <SimpleGrid 
+                columns={{ base: 1, md: 2, lg: 3, xl: 5 }} 
+                spacing={{ base: 4, md: 5, lg: 6 }}
+                display={{ base: 'none', md: 'grid' }}
+              >
                 <Box>
                   <Text 
                     fontSize="xs" 
