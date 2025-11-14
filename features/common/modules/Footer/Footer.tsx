@@ -189,7 +189,7 @@ const Footer = () => {
               <Box>
                 <Box
                   as="img"
-                  src="/logo.png"
+                  src="/logesh.png"
                   alt="Sowparnika Properties"
                   height={{ base: '80px', md: '100px', lg: '120px' }}
                   width="auto"

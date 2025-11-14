@@ -150,7 +150,7 @@ const PropertyDetail = ({
   // SEO Meta Tags
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sowparnikaproperties.com';
   const propertyUrl = `${siteUrl}/properties/${propertyId}`;
-  const propertyImage = images && images.length > 0 ? images[0] : `${siteUrl}/logo.png`;
+  const propertyImage = images && images.length > 0 ? images[0] : `${siteUrl}/logesh.png`;
   const propertyPrice = parseFloat(price.replace(/[^0-9.]/g, '') || '0');
   const propertyDescription = description 
     ? description.replace(/<[^>]*>/g, '').substring(0, 160) 

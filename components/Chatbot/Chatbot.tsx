@@ -189,7 +189,7 @@ const Chatbot: React.FC = () => {
         >
           <Box
             as="img"
-            src="/logo.png"
+            src="/logesh.png"
             alt="Sowparnika Properties"
             w="100%"
             h="100%"

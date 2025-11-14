@@ -152,7 +152,7 @@ const StandardNavbar = () => {
                     <Flex alignItems="center" gap={3}>
                       <Box
                         as="img"
-                        src="/logo.png"
+                        src="/logesh.png"
                         alt="Sowparnika Properties"
                         height={{ base: '40px', md: '55px', lg: '60px' }}
                         width="auto"
@@ -480,7 +480,7 @@ const StandardNavbar = () => {
               <Flex alignItems="center" gap={4} w="100%" justifyContent="center">
                 <Box
                   as="img"
-                  src="/logo.png"
+                  src="/logesh.png"
                   alt="Sowparnika Properties"
                   height={{ base: '80px', md: '100px' }}
                   width="auto"

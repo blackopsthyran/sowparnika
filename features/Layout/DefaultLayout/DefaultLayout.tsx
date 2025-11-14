@@ -21,7 +21,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
   title = 'Sowparnika Properties - Premium Real Estate in Kakkanad, Kochi',
   description = 'Sowparnika Properties - Your trusted gateway to real estate in Kakkanad, Kochi. Find verified properties, expert consultation, and full-service support for buying, renting, or investing in quality real estate.',
   keywords = 'real estate, properties, Kakkanad, Kochi, houses, villas, flats, plots, land, commercial buildings, property for sale, property for rent, Sowparnika Properties',
-  image = '/logo.png',
+  image = '/logesh.png',
   type = 'website',
   noindex = false,
   structuredData,

@@ -34,7 +34,7 @@ const NavigationMovbile = () => {
           <Box display="flex" gap="2" alignItems="center">
             <Box
               as="img"
-              src="/logo.png"
+              src="/logesh.png"
               alt="Sowparnika Properties"
               height="50px"
               width="auto"

@@ -66,7 +66,7 @@ const FeatureHighlights: React.FC = () => {
         >
           <Box
             as="img"
-            src="/logo.png"
+            src="/logesh.png"
             alt="Sowparnika Properties"
             height={{ base: '40px', md: '120px', lg: '150px' }}
             width="auto"

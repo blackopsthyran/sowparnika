@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/logo.png" width="120px" alt="Sowparnika Properties logo"/>
+  <img src="/logesh.png" width="120px" alt="Sowparnika Properties logo"/>
 </p>
 
 ## Real Estate - Sowparnika Properties

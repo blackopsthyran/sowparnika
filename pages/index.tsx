@@ -55,8 +55,8 @@ export default function Home() {
     name: 'Sowparnika Properties',
     description: 'Your trusted gateway to real estate in Kakkanad, Kochi. Find verified properties, expert consultation, and full-service support for buying, renting, or investing in quality real estate.',
     url: siteUrl,
-    logo: `${siteUrl}/logo.png`,
-    image: `${siteUrl}/logo.png`,
+    logo: `${siteUrl}/logesh.png`,
+    image: `${siteUrl}/logesh.png`,
     telephone: '+91 9446211417',
     address: {
       '@type': 'PostalAddress',
@@ -81,7 +81,7 @@ export default function Home() {
       title="Sowparnika Properties - Premium Real Estate in Kakkanad, Kochi | Buy, Rent, Invest"
       description="Sowparnika Properties - Your trusted gateway to real estate in Kakkanad, Kochi. Find verified properties, expert consultation, and full-service support for buying, renting, or investing in quality real estate. Browse houses, villas, flats, plots, and commercial buildings."
       keywords="real estate Kakkanad, properties Kochi, houses for sale Kakkanad, villas Kochi, flats Kakkanad, plots for sale, land Kakkanad, commercial buildings Kochi, property dealers Kakkanad, real estate agents Kochi, Sowparnika Properties"
-      image="/logo.png"
+      image="/logesh.png"
       structuredData={structuredData}
     >
       <Box>

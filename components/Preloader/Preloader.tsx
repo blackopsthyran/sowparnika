@@ -133,7 +133,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
             {/* Logo */}
             <Box
               as="img"
-              src="/logo.png"
+              src="/logesh.png"
               alt="Sowparnika Properties"
               height={{ base: '120px', md: '160px', lg: '200px' }}
               width="auto"

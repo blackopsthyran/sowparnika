@@ -26,7 +26,7 @@ const NavigationDesktop = () => {
             <Box display="flex" gap="2" alignItems="center">
               <Box
                 as="img"
-                src="/logo.png"
+                src="/logesh.png"
                 alt="Sowparnika Properties"
                 height="60px"
                 width="auto"
