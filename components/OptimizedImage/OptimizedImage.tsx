@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Box, BoxProps } from '@chakra-ui/react';
-import { getOptimizedImageUrl, getImageSizes, getAspectRatio } from '@/lib/image-utils';
+import { getImageSizes, getAspectRatio } from '@/lib/image-utils';
+import cloudinaryLoader from '@/lib/cloudinary-loader';
 
 interface OptimizedImageProps extends Omit<BoxProps, 'as' | 'fill'> {
   src: string;
@@ -34,14 +35,6 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onError,
   ...boxProps
 }) => {
-  // Get optimized URL with Supabase CDN transformations
-  const optimizedSrc = getOptimizedImageUrl(
-    src,
-    width || 800,
-    quality,
-    'webp' // Prefer WebP for better compression
-  );
-
   // Get responsive sizes if not provided
   const imageSizes = sizes || getImageSizes(breakpoint);
 
@@ -51,20 +44,35 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Fallback placeholder
   const placeholderSrc = 'https://placehold.co/800x600/e2e8f0/64748b?text=No+Image';
+  
+  // Use original Supabase URL (Cloudinary loader will handle optimization)
+  const imageSrc = src || placeholderSrc;
+  
+  // For placeholder images, skip Cloudinary (use as-is)
+  const isPlaceholder = imageSrc.includes('placehold.co') || imageSrc.includes('via.placeholder.com');
+  const imageWidth = width || 800;
+  
+  // Generate Cloudinary URL if not a placeholder
+  // When unoptimized: true, loader is not called automatically, so we manually transform
+  const finalSrc = isPlaceholder 
+    ? imageSrc 
+    : cloudinaryLoader({ 
+        src: imageSrc, 
+        width: imageWidth, 
+        quality: quality 
+      });
 
   if (fill) {
     return (
       <Box position="relative" width="100%" height="100%" overflow="hidden" {...boxProps}>
         <Image
-          src={optimizedSrc || placeholderSrc}
+          src={finalSrc}
           alt={alt}
           fill
           priority={priority}
-          quality={quality}
           sizes={imageSizes}
           style={{ objectFit }}
           onError={onError}
-          unoptimized={optimizedSrc?.includes('placehold.co') || optimizedSrc?.includes('via.placeholder.com')}
         />
       </Box>
     );
@@ -73,16 +81,14 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   return (
     <Box position="relative" width={width} height={calculatedHeight} overflow="hidden" {...boxProps}>
       <Image
-        src={optimizedSrc || placeholderSrc}
+        src={finalSrc}
         alt={alt}
-        width={width || 800}
+        width={imageWidth}
         height={calculatedHeight || 600}
         priority={priority}
-        quality={quality}
         sizes={imageSizes}
         style={{ objectFit, width: '100%', height: '100%' }}
         onError={onError}
-        unoptimized={optimizedSrc?.includes('placehold.co') || optimizedSrc?.includes('via.placeholder.com')}
       />
     </Box>
   );

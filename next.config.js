@@ -3,11 +3,20 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   
-  // Optimize images
+  // Image configuration - Cloudinary fetch mode (disabled Vercel optimization)
   images: {
-    // FIXED: Migrated from deprecated 'domains' to 'remotePatterns' (Next.js 13+)
-    // This provides better security and prevents excessive image optimization
+    // Disable Vercel's built-in image optimization since we use Cloudinary fetch mode
+    // Setting unoptimized: true prevents Next.js from calling /_next/image endpoint
+    // Note: Even with unoptimized: true, Next.js still validates hostnames against remotePatterns
+    unoptimized: true,
+    // Allow external images from Supabase, Cloudinary, and placeholders
     remotePatterns: [
+      // Cloudinary CDN - must be first for fetch URLs
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**', // Allow all paths on Cloudinary domain
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
@@ -21,13 +30,11 @@ const nextConfig = {
         hostname: 'via.placeholder.com',
       },
       // Add Supabase storage domains dynamically
-      // FIXED: Support both supabase.co and supabase.com, and handle storage subdomains
       ...(process.env.NEXT_PUBLIC_SUPABASE_URL
         ? (() => {
             try {
               const supabaseUrl = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL);
               const baseHostname = supabaseUrl.hostname;
-              // Extract project ref from hostname (e.g., xyz.supabase.co -> xyz)
               const projectRef = baseHostname.split('.')[0];
               
               return [
@@ -36,9 +43,7 @@ const nextConfig = {
                   protocol: 'https',
                   hostname: baseHostname,
                 },
-                // Storage subdomain pattern (e.g., xyz.supabase.co/storage)
-                // Note: Next.js remotePatterns doesn't support pathname matching,
-                // but the hostname pattern will match storage URLs
+                // Storage subdomain patterns
                 {
                   protocol: 'https',
                   hostname: `${projectRef}.supabase.co`,
@@ -61,9 +66,6 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // FIXED: Increased minimumCacheTTL to reduce repeated optimizations
-    // Images will be cached for 1 year (31536000 seconds) to prevent re-optimization
-    minimumCacheTTL: 31536000,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Spinner } from '@chakra-ui/react';
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinary-loader';
 
 interface LazyImageProps {
   src: string;
@@ -60,6 +61,7 @@ const LazyImage: React.FC<LazyImageProps> = ({
           height={height || 600}
           style={{ objectFit }}
           className={className}
+          loader={undefined}
         />
       </Box>
     );
@@ -105,6 +107,16 @@ const LazyImage: React.FC<LazyImageProps> = ({
     );
   }
 
+  // Generate Cloudinary URL if not a placeholder
+  // When unoptimized: true, loader is not called automatically, so we manually transform
+  const finalSrc = imageSrc?.includes('placehold.co') || imageSrc?.includes('via.placeholder.com')
+    ? imageSrc
+    : cloudinaryLoader({
+        src: imageSrc,
+        width: width || 800,
+        quality: 80,
+      });
+
   return (
     <Box position="relative" width={width || '100%'} height={height || '100%'} borderRadius={borderRadius} overflow="hidden">
       {isLoading && (
@@ -124,7 +136,7 @@ const LazyImage: React.FC<LazyImageProps> = ({
         </Box>
       )}
       <Image
-        src={imageSrc}
+        src={finalSrc}
         alt={alt}
         width={width || 800}
         height={height || 600}

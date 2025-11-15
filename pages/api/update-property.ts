@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/lib/supabase';
 import Cookies from 'cookies';
+import { deleteImagesFromStorage } from '@/lib/image-cleanup';
 
 export default async function handler(
   req: NextApiRequest,
@@ -132,6 +133,34 @@ export default async function handler(
       });
     }
 
+    // If images are being updated, delete removed images from storage
+    let imageDeletionResult = { successCount: 0, errorCount: 0, errors: [] };
+    if (images !== undefined && Array.isArray(images)) {
+      // Get current property images
+      const { data: currentProperty } = await supabase
+        .from('properties')
+        .select('images')
+        .eq('id', id)
+        .single();
+
+      if (currentProperty?.images && Array.isArray(currentProperty.images)) {
+        // Find images that were removed
+        const removedImages = currentProperty.images.filter(
+          (oldImage: string) => !images.includes(oldImage)
+        );
+
+        if (removedImages.length > 0) {
+          console.log(`[UPDATE-PROPERTY] Deleting ${removedImages.length} removed images for property ${id}`);
+          imageDeletionResult = await deleteImagesFromStorage(
+            removedImages,
+            process.env.NEXT_PUBLIC_SUPABASE_URL,
+            process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+          );
+          console.log(`[UPDATE-PROPERTY] Image deletion result: ${imageDeletionResult.successCount} deleted, ${imageDeletionResult.errorCount} errors`);
+        }
+      }
+    }
+
     // Update in Supabase
     let { data, error } = await supabase
       .from('properties')
@@ -161,10 +190,19 @@ export default async function handler(
 
     if (error) {
       console.error('Supabase update error:', error);
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ 
+        error: error.message,
+        imagesDeleted: imageDeletionResult.successCount,
+        imageErrors: imageDeletionResult.errorCount > 0 ? imageDeletionResult.errors : undefined,
+      });
     }
 
-    return res.status(200).json({ success: true, data });
+    return res.status(200).json({ 
+      success: true, 
+      data,
+      imagesDeleted: imageDeletionResult.successCount,
+      imageErrors: imageDeletionResult.errorCount > 0 ? imageDeletionResult.errors : undefined,
+    });
   } catch (error: any) {
     console.error('Update property error:', error);
     return res.status(500).json({ error: 'Failed to update property', details: error?.message });

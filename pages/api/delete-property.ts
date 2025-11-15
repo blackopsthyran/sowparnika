@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/lib/supabase';
 import Cookies from 'cookies';
+import { deletePropertyImages } from '@/lib/image-cleanup';
 
 export default async function handler(
   req: NextApiRequest,
@@ -51,16 +52,49 @@ export default async function handler(
       });
     }
 
-    // Delete from Supabase
+    // First, get the property to retrieve image URLs before deleting
+    const { data: property, error: fetchError } = await supabase
+      .from('properties')
+      .select('images')
+      .eq('id', id)
+      .single();
+
+    if (fetchError && !fetchError.message.includes('not found')) {
+      console.error('Error fetching property:', fetchError);
+      // Continue with delete anyway - images will just remain in storage
+    }
+
+    // Delete images from Supabase Storage if property has images
+    let imageDeletionResult = { successCount: 0, errorCount: 0, errors: [] };
+    if (property?.images && Array.isArray(property.images) && property.images.length > 0) {
+      console.log(`[DELETE-PROPERTY] Deleting ${property.images.length} images for property ${id}`);
+      imageDeletionResult = await deletePropertyImages(
+        property.images,
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
+      console.log(`[DELETE-PROPERTY] Image deletion result: ${imageDeletionResult.successCount} deleted, ${imageDeletionResult.errorCount} errors`);
+    }
+
+    // Delete from Supabase database
     const { error } = await supabase.from('properties').delete().eq('id', id);
 
     if (error) {
       console.error('Supabase delete error:', error);
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ 
+        error: error.message,
+        imagesDeleted: imageDeletionResult.successCount,
+        imageErrors: imageDeletionResult.errorCount > 0 ? imageDeletionResult.errors : undefined,
+      });
     }
 
     console.log('Successfully deleted property:', id);
-    return res.status(200).json({ success: true, message: 'Property deleted successfully' });
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Property deleted successfully',
+      imagesDeleted: imageDeletionResult.successCount,
+      imageErrors: imageDeletionResult.errorCount > 0 ? imageDeletionResult.errors : undefined,
+    });
   } catch (error: any) {
     console.error('Delete property error:', error);
     return res.status(500).json({ error: 'Failed to delete property', details: error?.message });

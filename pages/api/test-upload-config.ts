@@ -136,35 +136,42 @@ export default async function handler(
   }
 
   // Check Sharp (image optimization library)
+  // Note: Sharp is optional - uploads work without it (just no optimization)
   try {
     const sharp = require('sharp');
     diagnostics.checks.sharp = {
       status: 'installed',
       version: sharp.versions?.sharp || 'unknown',
+      note: 'Image optimization enabled',
     };
   } catch (sharpError) {
     diagnostics.checks.sharp = {
-      status: 'error',
+      status: 'warning',
       error: 'Sharp not installed or not available',
+      note: 'Uploads will work but images won\'t be optimized. This is OK for functionality.',
     };
-    diagnostics.errors.push('Sharp library (for image optimization) is not available');
+    // Changed to warning instead of error since uploads can work without Sharp
+    diagnostics.warnings.push('Sharp library (for image optimization) is not available - uploads will work but without optimization');
   }
 
   // Summary
-  const hasErrors = diagnostics.errors.length > 0;
+  // Only critical errors (missing Supabase config or bucket) should block uploads
+  // Sharp missing is a warning, not an error
+  const hasCriticalErrors = diagnostics.errors.length > 0;
   const hasWarnings = diagnostics.warnings.length > 0;
 
-  return res.status(hasErrors ? 500 : 200).json({
+  return res.status(hasCriticalErrors ? 500 : 200).json({
     ...diagnostics,
     summary: {
-      status: hasErrors ? 'error' : hasWarnings ? 'warning' : 'ok',
-      message: hasErrors 
-        ? 'Configuration has errors that will prevent uploads'
+      status: hasCriticalErrors ? 'error' : hasWarnings ? 'warning' : 'ok',
+      message: hasCriticalErrors 
+        ? 'Configuration has critical errors that will prevent uploads (check Supabase setup)'
         : hasWarnings
-        ? 'Configuration has warnings but uploads may work'
-        : 'Configuration looks good',
+        ? 'Configuration has warnings but uploads should work (Sharp missing means no optimization)'
+        : 'Configuration looks good - all systems ready',
       errorCount: diagnostics.errors.length,
       warningCount: diagnostics.warnings.length,
+      uploadsWillWork: !hasCriticalErrors, // Uploads will work if no critical errors
     },
   });
 }
