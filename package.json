@@ -34,7 +34,7 @@
     "eslint-config-next": "13.2.3",
     "form-data": "^4.0.4",
     "formidable": "^3.5.4",
-    "framer-motion": "^10.0.1",
+    "framer-motion": "^12.23.24",
     "js-cookie": "^3.0.5",
     "next": "13.2.3",
     "quill": "^2.0.3",
