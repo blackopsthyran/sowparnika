@@ -228,7 +228,98 @@ const CreateListingPage = () => {
           body: formData,
         });
 
-        const result = await uploadResponse.json();
+        // Handle responses - check Content-Type first, then parse carefully
+        let result: any = {};
+        const contentType = uploadResponse.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        
+        // Read response as text first to handle truncation issues on Vercel
+        const responseText = await uploadResponse.text();
+        
+        if (!responseText || !responseText.trim()) {
+          // Empty response - likely a timeout or crash on Vercel
+          console.error(`[FRONTEND] Image ${i + 1} - Empty response from server (likely timeout)`);
+          result = {
+            error: 'Server timeout or error',
+            details: 'The server did not return a response. This may be due to a timeout or server error. Try uploading a smaller image or check Vercel logs.',
+            statusCode: uploadResponse.status || 500,
+          };
+        } else if (!isJson) {
+          // Response is not JSON
+          console.error(`[FRONTEND] Image ${i + 1} - Non-JSON response. Content-Type: ${contentType}, Length: ${responseText.length}`);
+          result = {
+            error: 'Invalid response format',
+            details: `Server returned non-JSON response (Content-Type: ${contentType}). Response length: ${responseText.length}`,
+            statusCode: uploadResponse.status,
+          };
+        } else {
+          // Try to parse JSON - handle truncation and malformed JSON
+          try {
+            // Trim whitespace and try to extract valid JSON if truncated
+            let jsonText = responseText.trim();
+            
+            // If response doesn't start with { or [, it might be truncated or have extra content
+            if (!jsonText.startsWith('{') && !jsonText.startsWith('[')) {
+              // Try to find the first { or [
+              const firstBrace = jsonText.indexOf('{');
+              const firstBracket = jsonText.indexOf('[');
+              if (firstBrace >= 0 && (firstBracket < 0 || firstBrace < firstBracket)) {
+                jsonText = jsonText.substring(firstBrace);
+              } else if (firstBracket >= 0) {
+                jsonText = jsonText.substring(firstBracket);
+              }
+            }
+            
+            // If response doesn't end with } or ], try to find the last complete object/array
+            if (!jsonText.endsWith('}') && !jsonText.endsWith(']')) {
+              // Try to find the last } or ] and extract up to that point
+              const lastBrace = jsonText.lastIndexOf('}');
+              const lastBracket = jsonText.lastIndexOf(']');
+              if (lastBrace > lastBracket) {
+                jsonText = jsonText.substring(0, lastBrace + 1);
+              } else if (lastBracket > 0) {
+                jsonText = jsonText.substring(0, lastBracket + 1);
+              }
+            }
+            
+            result = JSON.parse(jsonText);
+          } catch (parseError: any) {
+            console.error(`[FRONTEND] Image ${i + 1} - Failed to parse JSON response:`, parseError);
+            console.error(`[FRONTEND] Response text (first 500 chars):`, responseText.substring(0, 500));
+            console.error(`[FRONTEND] Response length:`, responseText.length);
+            
+            // Check if upload was successful by looking at response content
+            const hasUrl = responseText.includes('"url"') || responseText.includes('url:');
+            const hasSuccess = responseText.includes('"success":true') || responseText.includes('success:true');
+            
+            if (hasUrl && hasSuccess) {
+              // Partial JSON but seems successful - try to extract URL manually
+              const urlMatch = responseText.match(/"url"\s*:\s*"([^"]+)"/) || responseText.match(/url["']?\s*[:=]\s*["']([^"']+)["']/);
+              if (urlMatch && urlMatch[1]) {
+                console.log(`[FRONTEND] Image ${i + 1} - Extracted URL from truncated response:`, urlMatch[1]);
+                result = {
+                  url: urlMatch[1],
+                  success: true,
+                  warning: 'Response was truncated but upload appears successful',
+                };
+              } else {
+                result = {
+                  error: 'Partial response received',
+                  details: 'The server response was truncated but upload may have succeeded. Check your Supabase storage.',
+                  statusCode: uploadResponse.status,
+                  rawResponse: responseText.substring(0, 200),
+                };
+              }
+            } else {
+              result = {
+                error: 'Invalid response from server',
+                details: `The server returned a response that could not be parsed as JSON: ${parseError.message}`,
+                statusCode: uploadResponse.status,
+                rawResponse: responseText.substring(0, 200),
+              };
+            }
+          }
+        }
         
         if (uploadResponse.ok && result.url && !result.error && result.success) {
           imageUrls.push(result.url);
@@ -250,6 +341,7 @@ const CreateListingPage = () => {
             help: result.help,
             statusCode: result.statusCode,
             fullResponse: result,
+            responseTextLength: responseText?.length || 0,
           });
         }
       }

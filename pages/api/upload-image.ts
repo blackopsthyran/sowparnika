@@ -405,6 +405,8 @@ export default async function handler(
       // FIXED: Add cache headers for successful uploads
       // Images from Supabase Storage should be cached as they're immutable
       res.setHeader('Cache-Control', 'public, s-maxage=31536000, stale-while-revalidate=86400, immutable');
+      // Explicitly set Content-Type to ensure proper JSON parsing on Vercel
+      res.setHeader('Content-Type', 'application/json');
       
       return res.status(200).json({ 
         url: imageUrl,
