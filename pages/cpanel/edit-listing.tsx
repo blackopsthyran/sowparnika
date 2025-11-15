@@ -310,6 +310,8 @@ const EditListingPage = () => {
     try {
       // Upload new images
       const newImageUrls: string[] = [];
+      const uploadErrors: string[] = [];
+      
       for (let i = 0; i < newImages.length; i++) {
         const image = newImages[i];
         const formData = new FormData();
@@ -320,11 +322,46 @@ const EditListingPage = () => {
           body: formData,
         });
 
-        if (uploadResponse.ok) {
-          const result = await uploadResponse.json();
-          if (result.url) {
-            newImageUrls.push(result.url);
-          }
+        const result = await uploadResponse.json();
+        
+        if (uploadResponse.ok && result.url && !result.error && result.success) {
+          newImageUrls.push(result.url);
+          console.log(`[FRONTEND] Image ${i + 1} uploaded successfully:`, result.url);
+        } else {
+          // Handle error - check if it's a placeholder URL with error
+          const errorMessage = result.error || result.details || 'Upload failed';
+          const errorHelp = result.help || '';
+          const statusCode = uploadResponse.status || result.statusCode || 'unknown';
+          
+          uploadErrors.push(`Image ${i + 1}: ${errorMessage}${errorHelp ? ` - ${errorHelp}` : ''} (Status: ${statusCode})`);
+          
+          // Log detailed error for debugging
+          console.error(`[FRONTEND] Image ${i + 1} upload error:`, {
+            imageIndex: i + 1,
+            httpStatus: uploadResponse.status,
+            error: result.error,
+            details: result.details,
+            help: result.help,
+            statusCode: result.statusCode,
+            fullResponse: result,
+          });
+        }
+      }
+
+      // Show upload errors if any
+      if (uploadErrors.length > 0) {
+        toast({
+          title: 'Image Upload Errors',
+          description: uploadErrors.join('; '),
+          status: 'warning',
+          duration: 10000,
+          isClosable: true,
+        });
+        
+        // If no images were uploaded successfully, stop here
+        if (newImageUrls.length === 0 && newImages.length > 0) {
+          setIsSubmitting(false);
+          return;
         }
       }
 
