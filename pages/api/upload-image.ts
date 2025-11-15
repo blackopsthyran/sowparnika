@@ -76,6 +76,8 @@ export default async function handler(
       hasAnonKey,
       usingServiceRole: hasServiceRoleKey,
       url: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'missing',
+      environment: process.env.NODE_ENV,
+      isProduction: process.env.NODE_ENV === 'production',
     });
 
     if (!supabaseUrl || !supabaseKey) {
@@ -91,9 +93,15 @@ export default async function handler(
           // Ignore cleanup errors
         }
       }
+      const isProduction = process.env.NODE_ENV === 'production';
       return res.status(500).json({ 
         error: 'Storage not configured',
-        details: 'Supabase environment variables are missing. Please configure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)',
+        details: isProduction 
+          ? 'Supabase environment variables are missing in production. Please add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your hosting platform (Vercel/Netlify/etc.) and redeploy.'
+          : 'Supabase environment variables are missing. Please configure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY) in .env.local',
+        help: isProduction
+          ? 'Go to your hosting platform (Vercel/Netlify) → Settings → Environment Variables → Add the required variables → Redeploy'
+          : 'Add the variables to .env.local and restart your dev server',
       });
     }
 
@@ -291,18 +299,24 @@ export default async function handler(
           
           // Check if this might be a permission issue instead
           const mightBePermissionIssue = !hasServiceRoleKey;
+          const isProduction = process.env.NODE_ENV === 'production';
           
           return res.status(404).json({
             error: 'Storage bucket not found or inaccessible',
             details: mightBePermissionIssue 
-              ? 'Bucket exists but cannot be accessed. This is likely a permissions issue. Add SUPABASE_SERVICE_ROLE_KEY to your environment variables.'
+              ? isProduction
+                ? 'Bucket exists but cannot be accessed. SUPABASE_SERVICE_ROLE_KEY may not be loaded. Make sure you redeployed after adding it to Vercel environment variables.'
+                : 'Bucket exists but cannot be accessed. This is likely a permissions issue. Add SUPABASE_SERVICE_ROLE_KEY to your environment variables.'
               : uploadError.message || 'Bucket "property-images" does not exist or cannot be accessed',
             help: mightBePermissionIssue
-              ? 'Add SUPABASE_SERVICE_ROLE_KEY to .env.local and restart server. Get it from Supabase Dashboard > Settings > API > service_role key.'
+              ? isProduction
+                ? 'Go to Vercel → Deployments → Redeploy the latest deployment. Environment variables only load during build.'
+                : 'Add SUPABASE_SERVICE_ROLE_KEY to .env.local and restart server. Get it from Supabase Dashboard > Settings > API > service_role key.'
               : 'Verify the bucket exists in Supabase Dashboard > Storage and is set to Public. If it exists, add SUPABASE_SERVICE_ROLE_KEY to .env.local.',
             statusCode: 404,
             usingServiceRole: hasServiceRoleKey,
             actualError: uploadError.message,
+            environment: process.env.NODE_ENV,
           });
         }
 
@@ -312,14 +326,21 @@ export default async function handler(
             uploadError.message?.toLowerCase().includes('forbidden') ||
             errorStatusCode === '403' ||
             errorStatusCode === 403) {
-          console.error('[UPLOAD] Permission denied error. Using service role key:', hasServiceRoleKey);
+          const isProduction = process.env.NODE_ENV === 'production';
+          console.error('[UPLOAD] Permission denied error. Using service role key:', hasServiceRoleKey, 'Environment:', process.env.NODE_ENV);
           return res.status(403).json({
             error: 'Permission denied',
             details: uploadError.message || 'Upload to storage bucket is not allowed',
             help: hasServiceRoleKey 
-              ? 'Service role key is set but still getting permission error. Check bucket RLS policies.'
-              : 'Add SUPABASE_SERVICE_ROLE_KEY to your environment variables for server-side uploads, or configure RLS policies for the bucket.',
+              ? isProduction
+                ? 'Service role key is set but may not be loaded. Redeploy your application in Vercel after adding SUPABASE_SERVICE_ROLE_KEY. Also check bucket RLS policies in Supabase.'
+                : 'Service role key is set but still getting permission error. Check bucket RLS policies.'
+              : isProduction
+                ? 'Add SUPABASE_SERVICE_ROLE_KEY to Vercel environment variables and redeploy.'
+                : 'Add SUPABASE_SERVICE_ROLE_KEY to your environment variables for server-side uploads, or configure RLS policies for the bucket.',
             statusCode: 403,
+            usingServiceRole: hasServiceRoleKey,
+            environment: process.env.NODE_ENV,
           });
         }
 
