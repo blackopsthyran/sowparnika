@@ -205,7 +205,7 @@ export default async function handler(
         if (listError) {
           console.warn('[UPLOAD] Could not list buckets (this is OK, will try direct upload):', {
             message: listError.message,
-            statusCode: listError.statusCode,
+            statusCode: (listError as any).statusCode,
           });
           // Don't throw - we'll try direct upload instead
         } else {
@@ -244,8 +244,8 @@ export default async function handler(
         hasError: !!uploadError,
         error: uploadError ? {
           message: uploadError.message,
-          statusCode: uploadError.statusCode,
-          error: uploadError.error,
+          statusCode: (uploadError as any).statusCode,
+          error: (uploadError as any).error,
         } : null,
       });
 
@@ -259,12 +259,14 @@ export default async function handler(
       }
 
       if (uploadError) {
+        const errorStatusCode = (uploadError as any).statusCode;
+        const errorCode = (uploadError as any).error;
         console.error('[UPLOAD] ❌ Supabase Storage upload error:', {
           error: uploadError,
           message: uploadError.message,
-          statusCode: uploadError.statusCode,
-          errorCode: uploadError.error,
-          name: uploadError.name,
+          statusCode: errorStatusCode,
+          errorCode: errorCode,
+          name: (uploadError as any).name,
         });
         
         // Clean up temporary file
@@ -278,11 +280,12 @@ export default async function handler(
         
         // If bucket doesn't exist, provide helpful error
         // Note: This error can also occur if the service role key is missing or has wrong permissions
+        // errorStatusCode and errorCode are already defined above
         if (uploadError.message?.includes('Bucket not found') || 
             uploadError.message?.includes('The resource was not found') ||
             uploadError.message?.includes('does not exist') ||
-            uploadError.statusCode === '404' ||
-            uploadError.statusCode === 404) {
+            errorStatusCode === '404' ||
+            errorStatusCode === 404) {
           console.error('[UPLOAD] Bucket not found error (or permission issue)');
           console.error('[UPLOAD] Full error details:', JSON.stringify(uploadError, null, 2));
           
@@ -307,8 +310,8 @@ export default async function handler(
         if (uploadError.message?.includes('new row violates row-level security') ||
             uploadError.message?.includes('permission denied') ||
             uploadError.message?.toLowerCase().includes('forbidden') ||
-            uploadError.statusCode === '403' ||
-            uploadError.statusCode === 403) {
+            errorStatusCode === '403' ||
+            errorStatusCode === 403) {
           console.error('[UPLOAD] Permission denied error. Using service role key:', hasServiceRoleKey);
           return res.status(403).json({
             error: 'Permission denied',
@@ -325,8 +328,8 @@ export default async function handler(
         return res.status(500).json({
           error: 'Supabase upload failed',
           details: uploadError.message || 'Unknown upload error',
-          statusCode: uploadError.statusCode || 500,
-          errorCode: uploadError.error,
+          statusCode: errorStatusCode || 500,
+          errorCode: errorCode,
         });
       }
 

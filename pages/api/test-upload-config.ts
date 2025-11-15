@@ -66,7 +66,7 @@ export default async function handler(
           diagnostics.checks.bucketList = {
             status: 'error',
             error: listError.message,
-            statusCode: listError.statusCode,
+            statusCode: (listError as any).statusCode,
             note: 'Cannot list buckets - this is OK, will try direct upload',
           };
           diagnostics.warnings.push('Cannot list buckets (may be permission issue, but uploads might still work)');
@@ -100,15 +100,16 @@ export default async function handler(
           .list('', { limit: 1 });
 
         if (readError) {
+          const errorStatusCode = (readError as any).statusCode;
           diagnostics.checks.bucketAccess = {
             status: 'error',
             error: readError.message,
-            statusCode: readError.statusCode,
+            statusCode: errorStatusCode,
           };
           
-          if (readError.message?.includes('not found') || readError.statusCode === 404) {
+          if (readError.message?.includes('not found') || errorStatusCode === 404) {
             diagnostics.errors.push('Cannot access bucket "property-images" - it may not exist');
-          } else if (readError.statusCode === 403) {
+          } else if (errorStatusCode === 403) {
             diagnostics.errors.push('Permission denied accessing bucket - check RLS policies or use service role key');
           }
         } else {
