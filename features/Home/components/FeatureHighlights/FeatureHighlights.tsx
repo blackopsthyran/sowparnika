@@ -135,7 +135,7 @@ const FeatureHighlights: React.FC = () => {
                   </Box>
                   <Heading
                     as="h3"
-                    fontSize={{ base: 'sm', md: 'xl' }}
+                    fontSize={{ base: 'lg', md: 'xl' }}
                     fontWeight="700"
                     fontFamily="'Playfair Display', serif"
                     color="gray.900"
@@ -149,9 +149,9 @@ const FeatureHighlights: React.FC = () => {
                   </Heading>
                   <Box
                     as="div"
-                    fontSize={{ base: 'xs', md: 'md' }}
+                    fontSize={{ base: 'sm', md: 'md' }}
                     color="gray.700"
-                    lineHeight={{ base: '1.4', md: '1.7' }}
+                    lineHeight={{ base: '1.5', md: '1.7' }}
                     fontFamily="'Bodoni Moda', serif"
                     fontWeight="400"
                     maxW="400px"
