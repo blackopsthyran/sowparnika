@@ -16,6 +16,22 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
+// Helper function to convert price to lakhs/crores
+const formatPriceInLakhsCrores = (priceValue: number): string => {
+  if (!priceValue || priceValue === 0) return '';
+  
+  if (priceValue >= 10000000) {
+    // Convert to crores
+    const crores = priceValue / 10000000;
+    return `${crores.toFixed(2)} Cr`;
+  } else if (priceValue >= 100000) {
+    // Convert to lakhs
+    const lakhs = priceValue / 100000;
+    return `${lakhs.toFixed(2)} L`;
+  }
+  return '';
+};
+
 const PropertyCard = memo((property: Object) => {
   const { isAuthenticated } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -40,6 +56,13 @@ const PropertyCard = memo((property: Object) => {
   const propertyId = (property as any).id || externalID;
   const favorite = isFavorite(propertyId);
   const isFeatured = (property as any).featured === true;
+  const propertyTypeLower = propertyType?.toLowerCase() || '';
+  const isWarehouse = propertyTypeLower === 'warehouse';
+  const isHouseOrVilla = propertyTypeLower === 'house' || propertyTypeLower === 'villa';
+  
+  // Get raw price value for conversion
+  const rawPrice = (property as any).price;
+  const priceInLakhsCrores = rawPrice ? formatPriceInLakhsCrores(rawPrice) : '';
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -340,16 +363,38 @@ const PropertyCard = memo((property: Object) => {
           gap={{ base: 2, md: 2.5 }}
         >
           {/* Price */}
-          <Text 
-            fontSize="xl" 
-            fontWeight="700" 
-            color="gray.900" 
-            fontFamily="'Playfair Display', serif" 
-            lineHeight="shorter"
-            noOfLines={1}
-          >
-            {price || 'Price on request'}
-          </Text>
+          <Flex alignItems="center" justifyContent="space-between" gap={2}>
+            <Text 
+              fontSize="xl" 
+              fontWeight="700" 
+              color="gray.900" 
+              fontFamily="'Playfair Display', serif" 
+              lineHeight="shorter"
+              noOfLines={1}
+              flex="1"
+            >
+              {price || 'Price on request'}
+            </Text>
+            {priceInLakhsCrores && (
+              <Box
+                px={2}
+                py={1}
+                bg="gray.100"
+                borderRadius="md"
+                border="1px solid"
+                borderColor="gray.200"
+              >
+                <Text 
+                  fontSize="xs" 
+                  fontWeight="600" 
+                  color="gray.700"
+                  whiteSpace="nowrap"
+                >
+                  {priceInLakhsCrores}
+                </Text>
+              </Box>
+            )}
+          </Flex>
 
           {/* Title */}
           {title && (
@@ -401,40 +446,14 @@ const PropertyCard = memo((property: Object) => {
                 <Text>{baths}</Text>
               </Flex>
             )}
-            {/* Show area and land area for House and Villa, otherwise show regular area */}
-            {(landArea && (propertyType?.toLowerCase() === 'house' || propertyType?.toLowerCase() === 'villa')) ? (
-              <>
-                <Flex alignItems="center" gap={1.5}>
-                  <TbRuler size={16} />
-                  <Text>
-                    {sqSize && sqSize !== '0.00' 
-                      ? (parseFloat(sqSize) % 1 === 0 
-                          ? parseInt(sqSize).toLocaleString('en-IN') 
-                          : parseFloat(sqSize).toLocaleString('en-IN', { maximumFractionDigits: 0 }))
-                      : '0'}
-                  </Text>
-                  <Text as="span" fontSize="xs">{areaUnit || 'sq ft'}</Text>
-                </Flex>
-                <Flex alignItems="center" gap={1.5}>
-                  <TbRuler size={16} />
-                  <Text>
-                    {parseFloat(landArea) % 1 === 0 
-                      ? parseInt(landArea).toLocaleString('en-IN') 
-                      : parseFloat(landArea).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-                  </Text>
-                  <Text as="span" fontSize="xs">{landAreaUnit || 'Cent'}</Text>
-                  <Text as="span" fontSize="xs" color="gray.500"> (Land)</Text>
-                </Flex>
-              </>
-            ) : (
+            {/* Show area - land area is shown on property details page, not on tile */}
+            {sqSize && sqSize !== '0.00' && parseFloat(sqSize) > 0 && (
               <Flex alignItems="center" gap={1.5}>
                 <TbRuler size={16} />
                 <Text>
-                  {sqSize && sqSize !== '0.00' 
-                    ? (parseFloat(sqSize) % 1 === 0 
-                        ? parseInt(sqSize).toLocaleString('en-IN') 
-                        : parseFloat(sqSize).toLocaleString('en-IN', { maximumFractionDigits: 0 }))
-                    : '0'}
+                  {parseFloat(sqSize) % 1 === 0 
+                    ? parseInt(sqSize).toLocaleString('en-IN') 
+                    : parseFloat(sqSize).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                 </Text>
                 <Text as="span" fontSize="xs">{areaUnit || 'sq ft'}</Text>
               </Flex>

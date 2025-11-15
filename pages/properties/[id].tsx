@@ -26,6 +26,22 @@ import { getProperty } from '@/features/Property/API/getProperty';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 
+// Helper function to convert price to lakhs/crores
+const formatPriceInLakhsCrores = (priceValue: number): string => {
+  if (!priceValue || priceValue === 0) return '';
+  
+  if (priceValue >= 10000000) {
+    // Convert to crores
+    const crores = priceValue / 10000000;
+    return `${crores.toFixed(2)} Cr`;
+  } else if (priceValue >= 100000) {
+    // Convert to lakhs
+    const lakhs = priceValue / 100000;
+    return `${lakhs.toFixed(2)} L`;
+  }
+  return '';
+};
+
 const PropertyDetail = ({
   property,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
@@ -57,7 +73,8 @@ const PropertyDetail = ({
   const propertyState = property.state || '';
   // For House and Villa, show area and land area if available, otherwise show regular area
   const isHouseOrVilla = propertyType?.toLowerCase() === 'house' || propertyType?.toLowerCase() === 'villa';
-  const hasLandArea = landArea && isHouseOrVilla;
+  // Show land area for all property types if it exists and is not '0'
+  const hasLandArea = landArea && parseFloat(landArea) > 0;
   const lotSize = property.area_size ? `${property.area_size} ${property.area_unit || 'sq ft'}` : sqSize;
   const updatedDate = property.updated_at 
     ? new Date(property.updated_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
@@ -250,12 +267,34 @@ const PropertyDetail = ({
               {/* Property Details */}
               <Box mt={6}>
                 {/* Price */}
-                <HStack spacing={2} mb={4} align="baseline">
-                  <Text fontSize="3xl" fontWeight="700" fontFamily="'Playfair Display', serif">
-                    ₹ {parseFloat(price.replace(/[^0-9.]/g, '') || '0').toLocaleString('en-IN')}
-                  </Text>
-                  <Icon as={FiInfo} color="gray.500" cursor="pointer" />
-                </HStack>
+                <Flex alignItems="baseline" justifyContent="space-between" mb={4} gap={3} flexWrap="wrap">
+                  <HStack spacing={2} align="baseline">
+                    <Text fontSize="3xl" fontWeight="700" fontFamily="'Playfair Display', serif">
+                      ₹ {parseFloat(price.replace(/[^0-9.]/g, '') || '0').toLocaleString('en-IN')}
+                    </Text>
+                    <Icon as={FiInfo} color="gray.500" cursor="pointer" />
+                  </HStack>
+                  {propertyPrice > 0 && formatPriceInLakhsCrores(propertyPrice) && (
+                    <Box
+                      px={3}
+                      py={1.5}
+                      bg="gray.100"
+                      borderRadius="md"
+                      border="1px solid"
+                      borderColor="gray.200"
+                      alignSelf="flex-end"
+                    >
+                      <Text 
+                        fontSize="sm" 
+                        fontWeight="600" 
+                        color="gray.700"
+                        whiteSpace="nowrap"
+                      >
+                        {formatPriceInLakhsCrores(propertyPrice)}
+                      </Text>
+                    </Box>
+                  )}
+                </Flex>
 
                 {/* Title, Share and Favorite Buttons */}
                 <Flex justify="space-between" align="flex-start" mb={4} gap={4}>
@@ -310,17 +349,40 @@ const PropertyDetail = ({
 
                 {/* Lot Size and Location */}
                 <HStack spacing={4} mb={4} color="gray.600" fontSize="sm" flexWrap="wrap">
-                  {lotSize && (
-                    <Text>
-                      <strong>{lotSize}</strong>
-                    </Text>
-                  )}
-                  {hasLandArea && (
-                    <Text>
-                      <strong>Land Area:</strong> {parseFloat(landArea) % 1 === 0 
-                        ? parseInt(landArea).toLocaleString('en-IN') 
-                        : parseFloat(landArea).toLocaleString('en-IN', { maximumFractionDigits: 0 })} {landAreaUnit || 'Cent'}
-                    </Text>
+                  {/* For House and Villa: Show Built-up area and Plot area separately */}
+                  {isHouseOrVilla ? (
+                    <>
+                      {sqSize && sqSize !== '0.00' && parseFloat(sqSize) > 0 && (
+                        <Text>
+                          <strong>Built-up area:</strong> {parseFloat(sqSize) % 1 === 0 
+                            ? parseInt(sqSize).toLocaleString('en-IN') 
+                            : parseFloat(sqSize).toLocaleString('en-IN', { maximumFractionDigits: 0 })} {areaUnit || 'sq ft'}
+                        </Text>
+                      )}
+                      {hasLandArea && (
+                        <Text>
+                          <strong>Plot area:</strong> {parseFloat(landArea) % 1 === 0 
+                            ? parseInt(landArea).toLocaleString('en-IN') 
+                            : parseFloat(landArea).toLocaleString('en-IN', { maximumFractionDigits: 0 })} {landAreaUnit || 'Cent'}
+                        </Text>
+                      )}
+                    </>
+                  ) : (
+                    /* For other property types: Show regular area and land area if available */
+                    <>
+                      {lotSize && sqSize && sqSize !== '0.00' && parseFloat(sqSize) > 0 && (
+                        <Text>
+                          <strong>{lotSize}</strong>
+                        </Text>
+                      )}
+                      {hasLandArea && (
+                        <Text>
+                          <strong>Land Area:</strong> {parseFloat(landArea) % 1 === 0 
+                            ? parseInt(landArea).toLocaleString('en-IN') 
+                            : parseFloat(landArea).toLocaleString('en-IN', { maximumFractionDigits: 0 })} {landAreaUnit || 'Cent'}
+                        </Text>
+                      )}
+                    </>
                   )}
                   <HStack spacing={1}>
                     <Icon as={TbMapPin} />

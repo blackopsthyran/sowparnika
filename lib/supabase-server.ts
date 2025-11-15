@@ -37,6 +37,8 @@ export const PROPERTY_SELECT_COLUMNS = `
   price,
   area_size,
   area_unit,
+  land_area,
+  land_area_unit,
   city,
   address,
   state,

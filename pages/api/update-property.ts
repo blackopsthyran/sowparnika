@@ -134,7 +134,11 @@ export default async function handler(
     }
 
     // If images are being updated, delete removed images from storage
-    let imageDeletionResult = { successCount: 0, errorCount: 0, errors: [] };
+    let imageDeletionResult: { successCount: number; errorCount: number; errors: string[] } = { 
+      successCount: 0, 
+      errorCount: 0, 
+      errors: [] as string[] 
+    };
     if (images !== undefined && Array.isArray(images)) {
       // Get current property images
       const { data: currentProperty } = await supabase

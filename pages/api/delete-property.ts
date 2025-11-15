@@ -65,7 +65,11 @@ export default async function handler(
     }
 
     // Delete images from Supabase Storage if property has images
-    let imageDeletionResult = { successCount: 0, errorCount: 0, errors: [] };
+    let imageDeletionResult: { successCount: number; errorCount: number; errors: string[] } = { 
+      successCount: 0, 
+      errorCount: 0, 
+      errors: [] as string[] 
+    };
     if (property?.images && Array.isArray(property.images) && property.images.length > 0) {
       console.log(`[DELETE-PROPERTY] Deleting ${property.images.length} images for property ${id}`);
       imageDeletionResult = await deletePropertyImages(
