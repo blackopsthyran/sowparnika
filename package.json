@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "commit": "git-cz",
-    "postinstall": "husky install"
+    "postinstall": "husky install && npm rebuild sharp || true"
   },
   "config": {
     "commitizen": {

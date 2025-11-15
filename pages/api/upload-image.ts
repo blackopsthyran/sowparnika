@@ -29,6 +29,19 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // Log request details for debugging on Vercel
+  console.log('[UPLOAD] Request received:', {
+    method: req.method,
+    url: req.url,
+    headers: {
+      'content-type': req.headers['content-type'],
+      'content-length': req.headers['content-length'],
+      'user-agent': req.headers['user-agent']?.substring(0, 50),
+    },
+    query: req.query,
+    timestamp: new Date().toISOString(),
+  });
+
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -36,11 +49,22 @@ export default async function handler(
 
   // Handle preflight request
   if (req.method === 'OPTIONS') {
+    console.log('[UPLOAD] OPTIONS preflight request handled');
     return res.status(200).end();
   }
 
+  // Check method - log what we received for debugging
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    console.error('[UPLOAD] Method not allowed:', {
+      received: req.method,
+      expected: 'POST',
+      url: req.url,
+    });
+    return res.status(405).json({ 
+      error: 'Method not allowed',
+      received: req.method,
+      expected: 'POST',
+    });
   }
 
   console.log('[UPLOAD] Starting image upload request...');

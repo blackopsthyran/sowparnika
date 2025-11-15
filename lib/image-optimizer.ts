@@ -3,8 +3,18 @@
  * Automatically optimizes and reduces image file size while maintaining quality
  */
 
-import sharp from 'sharp';
-import { Readable } from 'stream';
+// Dynamic import for Sharp to handle cases where it's not available
+let sharp: any = null;
+let sharpAvailable = false;
+
+// Try to load Sharp at module load time
+try {
+  sharp = require('sharp');
+  sharpAvailable = true;
+} catch (error) {
+  console.warn('[IMAGE-OPTIMIZER] Sharp not available:', error);
+  sharpAvailable = false;
+}
 
 export interface ImageOptimizationOptions {
   maxWidth?: number;
@@ -43,6 +53,20 @@ export async function optimizeImage(
   } = options;
 
   const originalSize = inputBuffer.length;
+
+  // If Sharp is not available, return original buffer
+  if (!sharpAvailable || !sharp) {
+    console.warn('[IMAGE-OPTIMIZER] Sharp not available, returning original buffer');
+    return {
+      buffer: inputBuffer,
+      width: 0,
+      height: 0,
+      format: 'unknown',
+      originalSize,
+      optimizedSize: originalSize,
+      reductionPercent: 0,
+    };
+  }
 
   try {
     // Get image metadata
@@ -162,6 +186,21 @@ export async function optimizeImage(
  * Check if buffer is a valid image
  */
 export async function isValidImage(buffer: Buffer): Promise<boolean> {
+  // If Sharp is not available, do basic MIME type check
+  if (!sharpAvailable || !sharp) {
+    // Basic check: look for image file signatures (magic numbers)
+    const signatures = [
+      [0xff, 0xd8, 0xff], // JPEG
+      [0x89, 0x50, 0x4e, 0x47], // PNG
+      [0x47, 0x49, 0x46, 0x38], // GIF
+      [0x52, 0x49, 0x46, 0x46], // WebP (RIFF header)
+    ];
+    
+    return signatures.some(sig => {
+      return sig.every((byte, index) => buffer[index] === byte);
+    });
+  }
+
   try {
     const metadata = await sharp(buffer).metadata();
     return !!metadata.format;
@@ -174,6 +213,11 @@ export async function isValidImage(buffer: Buffer): Promise<boolean> {
  * Get image metadata without processing
  */
 export async function getImageMetadata(buffer: Buffer) {
+  if (!sharpAvailable || !sharp) {
+    console.warn('[IMAGE-OPTIMIZER] Sharp not available, cannot get metadata');
+    return null;
+  }
+
   try {
     return await sharp(buffer).metadata();
   } catch (error) {
