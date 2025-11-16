@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormErrorMessage,
   Input,
   Text,
   Textarea,
@@ -14,7 +15,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 type ContactFormType = {
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   message: string;
 };
 
@@ -38,18 +39,6 @@ const ContactForm = () => {
       toast({
         title: 'Verification required',
         description: 'Please complete the reCAPTCHA verification.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    // Validate required fields
-    if (!data.name || !data.email || !data.message) {
-      toast({
-        title: 'Validation error',
-        description: 'Please fill in all required fields.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -93,64 +82,109 @@ const ContactForm = () => {
       color="gray.700"
     >
       <form onSubmit={handleSubmit(onSubmit)}>
-        <FormControl>
+        <FormControl isInvalid={!!errors.name} isRequired>
           <Input
             marginTop="1.3rem"
             id="name"
             type="text"
             placeholder="Name"
-            {...register('name', { required: true })}
+            {...register('name', {
+              required: 'Name is required',
+              minLength: {
+                value: 2,
+                message: 'Name must be at least 2 characters',
+              },
+            })}
           />
-          <Input
-            marginTop="1.3rem"
-            id="phone"
-            type="email"
-            placeholder="Phone"
-            {...register('phone', { required: true })}
-          />
+          <FormErrorMessage>
+            {errors.name && errors.name.message}
+          </FormErrorMessage>
+        </FormControl>
+
+        <FormControl isInvalid={!!errors.email} isRequired>
           <Input
             marginTop="1.3rem"
             id="email"
-            type="text"
+            type="email"
             placeholder="Email"
-            {...register('email', { required: true })}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Please enter a valid email address',
+              },
+            })}
           />
+          <FormErrorMessage>
+            {errors.email && errors.email.message}
+          </FormErrorMessage>
+        </FormControl>
+
+        <FormControl isInvalid={!!errors.phone}>
+          <Input
+            marginTop="1.3rem"
+            id="phone"
+            type="tel"
+            placeholder="Phone (optional)"
+            {...register('phone', {
+              pattern: {
+                value: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
+                message: 'Please enter a valid phone number',
+              },
+            })}
+          />
+          <FormErrorMessage>
+            {errors.phone && errors.phone.message}
+          </FormErrorMessage>
+        </FormControl>
+
+        <FormControl isInvalid={!!errors.message} isRequired>
           <Textarea
             marginTop="1.3rem"
             id="message"
             placeholder="Message"
-            {...register('message', { required: true })}
+            {...register('message', {
+              required: 'Message is required',
+              minLength: {
+                value: 10,
+                message: 'Message must be at least 10 characters',
+              },
+            })}
           />
-          <FormControl isRequired marginTop="1.3rem">
-            <Box>
-              {recaptchaSiteKey ? (
-                <ReCAPTCHA
-                  ref={recaptchaRef}
-                  sitekey={recaptchaSiteKey}
-                  onChange={(value) => setRecaptchaValue(value)}
-                  onExpired={() => setRecaptchaValue(null)}
-                  onError={() => setRecaptchaValue(null)}
-                />
-              ) : (
-                <Text fontSize="sm" color="red.500">
-                  reCAPTCHA site key not configured. Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in your environment variables.
-                </Text>
-              )}
-            </Box>
-          </FormControl>
-          <Button
-            type="submit"
-            colorScheme="blue"
-            display="flex"
-            fontSize="base"
-            padding="1.6rem"
-            marginTop="4rem"
-            marginLeft="auto"
-            isDisabled={!recaptchaValue}
-          >
-            Send Message
-          </Button>
+          <FormErrorMessage>
+            {errors.message && errors.message.message}
+          </FormErrorMessage>
         </FormControl>
+
+        <FormControl isRequired marginTop="1.3rem">
+          <Box>
+            {recaptchaSiteKey ? (
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={recaptchaSiteKey}
+                onChange={(value) => setRecaptchaValue(value)}
+                onExpired={() => setRecaptchaValue(null)}
+                onError={() => setRecaptchaValue(null)}
+              />
+            ) : (
+              <Text fontSize="sm" color="red.500">
+                reCAPTCHA site key not configured. Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in your environment variables.
+              </Text>
+            )}
+          </Box>
+        </FormControl>
+        <Button
+          type="submit"
+          colorScheme="blue"
+          display="flex"
+          fontSize="base"
+          padding="1.6rem"
+          marginTop="4rem"
+          marginLeft="auto"
+          isDisabled={!recaptchaValue}
+        >
+          Send Message
+        </Button>
       </form>
     </Box>
   );
