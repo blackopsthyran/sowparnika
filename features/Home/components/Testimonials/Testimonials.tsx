@@ -1,18 +1,54 @@
 import TestimonialCard from '@/features/Home/components/Testimonials/components/TestimonialCard';
-import { testimonials } from '@/features/Home/components/Testimonials/testomonialConst';
 import { Box, Text, HStack } from '@chakra-ui/react';
 import React, { useState, useEffect } from 'react';
 import RetroGrid from '@/components/RetroGrid';
 
+interface Testimonial {
+  id: string;
+  name: string;
+  company: string;
+  image: string;
+  testimonial: string;
+  status: string;
+}
+
 const Testimonials = () => {
   const [mounted, setMounted] = useState(false);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    fetchTestimonials();
   }, []);
 
-  // Duplicate testimonials for seamless loop
-  const duplicatedTestimonials = [...testimonials, ...testimonials];
+  const fetchTestimonials = async () => {
+    try {
+      const response = await fetch('/api/get-testimonials?status=active', {
+        cache: 'no-store',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setTestimonials(data.testimonials || []);
+      } else {
+        console.error('Failed to fetch testimonials');
+        // Fallback to empty array if API fails
+        setTestimonials([]);
+      }
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      // Fallback to empty array if API fails
+      setTestimonials([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Duplicate testimonials for seamless loop (only if we have testimonials)
+  const duplicatedTestimonials = testimonials.length > 0 
+    ? [...testimonials, ...testimonials]
+    : [];
 
   return (
     <Box 
@@ -61,10 +97,18 @@ const Testimonials = () => {
           zIndex={2}
           py={4}
         >
-          {!mounted ? (
+          {loading ? (
+            <Box textAlign="center" py={8}>
+              <Text color="gray.600">Loading testimonials...</Text>
+            </Box>
+          ) : testimonials.length === 0 ? (
+            <Box textAlign="center" py={8}>
+              <Text color="gray.600">No testimonials available at the moment.</Text>
+            </Box>
+          ) : !mounted ? (
             <HStack spacing={6} px={6} overflowX="auto">
               {testimonials.slice(0, 3).map((testimonial, index) => (
-                <Box key={`${testimonial.name}-${index}`} minW="400px" flexShrink={0}>
+                <Box key={`${testimonial.id}-${index}`} minW="400px" flexShrink={0}>
                   <TestimonialCard {...testimonial} />
                 </Box>
               ))}
@@ -80,7 +124,7 @@ const Testimonials = () => {
               <HStack spacing={6} px={6} minW="max-content" alignItems="stretch">
                 {duplicatedTestimonials.map((testimonial, index) => (
                   <Box 
-                    key={`${testimonial.name}-${index}`} 
+                    key={`${testimonial.id}-${index}`} 
                     minW={{ base: '320px', md: '380px', lg: '420px' }}
                     maxW={{ base: '320px', md: '380px', lg: '420px' }}
                     flexShrink={0}

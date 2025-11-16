@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 import { Box, Container, SimpleGrid, Card, CardBody, Heading, Text, Button, VStack, HStack, Icon, Stat, StatLabel, StatNumber, StatHelpText, Flex } from '@chakra-ui/react';
-import { FaPlus, FaEdit, FaTrash, FaCog, FaChartBar } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaCog, FaChartBar, FaQuoteLeft } from 'react-icons/fa';
 import { FiHome } from 'react-icons/fi';
 import Link from 'next/link';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
@@ -177,6 +177,13 @@ const CpanelDashboard = () => {
       color: 'purple',
     },
     {
+      title: 'Manage Testimonials',
+      description: 'Add, edit, or delete testimonials',
+      icon: FaQuoteLeft,
+      link: '/cpanel/testimonials',
+      color: 'teal',
+    },
+    {
       title: 'Settings',
       description: 'Configure your website settings',
       icon: FaCog,
@@ -228,7 +235,7 @@ const CpanelDashboard = () => {
               </Link>
             </Flex>
 
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
               {menuItems.map((item) => (
                 <Link key={item.link} href={item.link}>
                   <Box
