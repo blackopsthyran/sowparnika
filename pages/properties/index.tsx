@@ -131,7 +131,7 @@ const Properties = () => {
     const urlPage = router.query.page ? parseInt(router.query.page as string) : 1;
     setCurrentPage(urlPage || 1);
     
-    const { search, bhk, minPrice, maxPrice, propertyType, city, status, sellingType, featured, sortBy: urlSortBy, sortOrder: urlSortOrder } = router.query;
+    const { search, bhk, minPrice, maxPrice, propertyType, city, status, sellingType, featured, propertyId, sortBy: urlSortBy, sortOrder: urlSortOrder } = router.query;
     
     // Update search query from URL
     const newSearchQuery = search && typeof search === 'string' ? decodeURIComponent(search) : '';
@@ -208,6 +208,10 @@ const Properties = () => {
     if (router.query.featured) params.append('featured', router.query.featured as string);
     if (filters.minPrice) params.append('minPrice', filters.minPrice);
     if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+    // Handle propertyId parameter
+    if (router.query.propertyId && typeof router.query.propertyId === 'string') {
+      params.append('propertyId', router.query.propertyId);
+    }
     if (sortBy !== 'created_at') params.append('sortBy', sortBy);
     if (sortOrder !== 'desc') params.append('sortOrder', sortOrder);
     if (currentPage > 1) params.append('page', currentPage.toString());
@@ -223,6 +227,7 @@ const Properties = () => {
     if (router.query.featured) currentParams.append('featured', router.query.featured as string);
     if (router.query.minPrice) currentParams.append('minPrice', router.query.minPrice as string);
     if (router.query.maxPrice) currentParams.append('maxPrice', router.query.maxPrice as string);
+    if (router.query.propertyId) currentParams.append('propertyId', router.query.propertyId as string);
     if (router.query.sortBy && router.query.sortBy !== 'created_at') currentParams.append('sortBy', router.query.sortBy as string);
     if (router.query.sortOrder && router.query.sortOrder !== 'desc') currentParams.append('sortOrder', router.query.sortOrder as string);
     if (router.query.page && router.query.page !== '1') currentParams.append('page', router.query.page as string);
@@ -454,7 +459,7 @@ const Properties = () => {
                     <Icon as={FiSearch} color="gray.400" boxSize={5} />
                   </InputLeftElement>
                   <Input
-                    placeholder="Search by title, address, or city..."
+                    placeholder="Search by title, address, city, or property ID (e.g., SP1)..."
                     value={searchQuery}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                     pl={12}

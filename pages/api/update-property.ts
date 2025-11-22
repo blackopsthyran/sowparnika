@@ -67,21 +67,47 @@ export default async function handler(
       return res.status(400).json({ error: 'Property ID is required' });
     }
 
+    // Parse property types - handle both comma-separated string and single value
+    const propertyTypesArray = propertyType
+      ? (Array.isArray(propertyType) ? propertyType : propertyType.split(',').map((t: string) => t.trim()).filter((t: string) => t))
+      : [];
+    
+    // Use first property type for backward compatibility and validation
+    const primaryPropertyType = propertyTypesArray[0] || propertyType || '';
+    
     // Property types that don't require bedrooms/bathrooms
     const landPropertyTypes = ['plot', 'land', 'commercial land'];
     const commercialPropertyTypes = ['warehouse', 'commercial building', 'commercial space/office space'];
-    const isLandType = propertyType && landPropertyTypes.includes(propertyType.toLowerCase());
-    const isCommercialType = propertyType && commercialPropertyTypes.includes(propertyType.toLowerCase());
-    const requiresBedroomsBathrooms = !isLandType && !isCommercialType;
-    const isCommercialBuilding = propertyType && 
-      (propertyType.toLowerCase() === 'commercial building' || 
-       propertyType.toLowerCase() === 'commercial space/office space');
+    
+    // Check if any selected type is land or commercial
+    const hasLandType = propertyTypesArray.some((type: string) => 
+      landPropertyTypes.includes(type.toLowerCase())
+    );
+    const hasCommercialType = propertyTypesArray.some((type: string) => 
+      commercialPropertyTypes.includes(type.toLowerCase())
+    );
+    const hasResidentialType = propertyTypesArray.some((type: string) => 
+      !landPropertyTypes.includes(type.toLowerCase()) && 
+      !commercialPropertyTypes.includes(type.toLowerCase())
+    );
+    
+    const requiresBedroomsBathrooms = hasResidentialType && propertyTypesArray.length > 0;
+    const isCommercialBuilding = propertyTypesArray.some((type: string) => 
+      type.toLowerCase() === 'commercial building' || 
+      type.toLowerCase() === 'commercial space/office space'
+    );
 
     // Prepare update data
     const updateData: any = {};
     if (title !== undefined) updateData.title = title;
     if (content !== undefined) updateData.content = content;
-    if (propertyType !== undefined) updateData.property_type = propertyType;
+    if (propertyType !== undefined) {
+      // Store property types as comma-separated string
+      const propertyTypeString = propertyTypesArray.length > 0 
+        ? propertyTypesArray.join(',')
+        : propertyType;
+      updateData.property_type = propertyTypeString;
+    }
     if (bhk !== undefined) {
       updateData.bhk = requiresBedroomsBathrooms && bhk ? parseInt(bhk) : null;
     }

@@ -21,6 +21,7 @@ import {
   Image,
   IconButton,
   Flex,
+  Badge,
 } from '@chakra-ui/react';
 import { useAuth } from '@/contexts/AuthContext';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
@@ -52,7 +53,7 @@ const EditListingPage = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    propertyType: '',
+    propertyTypes: [] as string[], // Changed to array for multiple selections
     bhk: '',
     baths: '',
     floors: '',
@@ -73,18 +74,25 @@ const EditListingPage = () => {
   // Property types that don't require bedrooms/bathrooms
   const landPropertyTypes = ['plot', 'land', 'commercial land'];
   const commercialPropertyTypes = ['warehouse', 'commercial building', 'commercial space/office space'];
-  const showBedroomsBathrooms = formData.propertyType && 
-    !landPropertyTypes.includes(formData.propertyType.toLowerCase()) &&
-    !commercialPropertyTypes.includes(formData.propertyType.toLowerCase());
   
-  // Show floors field for Commercial Building and Commercial Space/Office Space
-  const showFloors = formData.propertyType && 
-    (formData.propertyType.toLowerCase() === 'commercial building' || 
-     formData.propertyType.toLowerCase() === 'commercial space/office space');
+  // Check if any selected property type requires bedrooms/bathrooms
+  const hasResidentialType = formData.propertyTypes.some(type => {
+    const lowerType = type.toLowerCase();
+    return !landPropertyTypes.includes(lowerType) && !commercialPropertyTypes.includes(lowerType);
+  });
+  const showBedroomsBathrooms = formData.propertyTypes.length > 0 && hasResidentialType;
   
-  // Show land area field for House and Villa
-  const showLandArea = formData.propertyType && 
-    (formData.propertyType.toLowerCase() === 'house' || formData.propertyType.toLowerCase() === 'villa');
+  // Show floors field if Commercial Building or Commercial Space/Office Space is selected
+  const showFloors = formData.propertyTypes.some(type => {
+    const lowerType = type.toLowerCase();
+    return lowerType === 'commercial building' || lowerType === 'commercial space/office space';
+  });
+  
+  // Show land area field if House or Villa is selected
+  const showLandArea = formData.propertyTypes.some(type => {
+    const lowerType = type.toLowerCase();
+    return lowerType === 'house' || lowerType === 'villa';
+  });
 
   const [amenities, setAmenities] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -123,10 +131,15 @@ const EditListingPage = () => {
 
       if (response.ok && data.property) {
         const property = data.property;
+        // Parse property types - handle both comma-separated string and single value
+        const propertyTypesArray = property.property_type
+          ? property.property_type.split(',').map((t: string) => t.trim()).filter((t: string) => t)
+          : [];
+        
         setFormData({
           title: property.title || '',
           content: property.content || '',
-          propertyType: property.property_type || '',
+          propertyTypes: propertyTypesArray, // Store as array
           bhk: property.bhk?.toString() || '',
           baths: property.baths?.toString() || '',
           floors: property.floors?.toString() || '',
@@ -187,22 +200,53 @@ const EditListingPage = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    
-    // If property type changes, clear BHK, baths, and floors to prevent stale data
-    if (name === 'propertyType') {
-      const isHouseOrVilla = value.toLowerCase() === 'house' || value.toLowerCase() === 'villa';
-      setFormData((prev) => ({ 
-        ...prev, 
-        [name]: value,
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePropertyTypeChange = (propertyType: string, isChecked: boolean) => {
+    setFormData((prev) => {
+      let newPropertyTypes: string[];
+      
+      if (isChecked) {
+        // Allow maximum of 3 property types
+        if (prev.propertyTypes.length >= 3) {
+          toast({
+            title: 'Maximum reached',
+            description: 'You can select a maximum of 3 property types',
+            status: 'warning',
+            duration: 3000,
+          });
+          return prev; // Don't add if already at max
+        }
+        newPropertyTypes = [...prev.propertyTypes, propertyType];
+      } else {
+        newPropertyTypes = prev.propertyTypes.filter(type => type !== propertyType);
+      }
+      
+      // Clear BHK, baths, and floors when property types change
+      // Determine area unit based on selected types
+      const landAndCommercialTypes = ['Plot', 'Land', 'Commercial Land', 'Commercial Building', 'Commercial Space/Office Space'];
+      const hasLandOrCommercial = newPropertyTypes.some(type => landAndCommercialTypes.includes(type));
+      const hasResidential = newPropertyTypes.some(type => !landAndCommercialTypes.includes(type));
+      
+      // Use Cent if only land/commercial types, otherwise Sq. Ft.
+      const areaUnit = hasLandOrCommercial && !hasResidential ? 'Cent' : 'Sq. Ft.';
+      
+      // Clear land area if no House/Villa selected
+      const hasHouseOrVilla = newPropertyTypes.some(type => 
+        type.toLowerCase() === 'house' || type.toLowerCase() === 'villa'
+      );
+      
+      return {
+        ...prev,
+        propertyTypes: newPropertyTypes,
         bhk: '',
         baths: '',
         floors: '',
-        // Clear land area if not House/Villa
-        landArea: isHouseOrVilla ? prev.landArea : '',
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+        areaUnit,
+        landArea: hasHouseOrVilla ? prev.landArea : '',
+      };
+    });
   };
 
   const handleContentChange = (value: string) => {
@@ -230,7 +274,7 @@ const EditListingPage = () => {
         },
         body: JSON.stringify({
           text: formData.content,
-          propertyType: formData.propertyType,
+          propertyType: formData.propertyTypes.join(','), // Send as comma-separated
           city: formData.city,
           price: formData.price,
           bhk: formData.bhk,
@@ -457,6 +501,18 @@ const EditListingPage = () => {
         }
       }
 
+      // Validate that at least one property type is selected
+      if (formData.propertyTypes.length === 0) {
+        toast({
+          title: 'Validation Error',
+          description: 'Please select at least one property type',
+          status: 'error',
+          duration: 3000,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Combine existing and new images
       const allImages = [...existingImages, ...newImageUrls];
 
@@ -469,6 +525,8 @@ const EditListingPage = () => {
         body: JSON.stringify({
           id,
           ...formData,
+          propertyType: formData.propertyTypes.join(','), // Send as comma-separated string
+          propertyTypes: formData.propertyTypes, // Also send as array for future use
           amenities: showBedroomsBathrooms ? amenities : [],
           images: allImages,
           // Clear BHK and baths for land types and commercial types
@@ -583,7 +641,7 @@ const EditListingPage = () => {
               </HStack>
             </Flex>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <VStack spacing={6} align="stretch">
                 {/* Basic Information Card */}
                 <Card>
@@ -638,37 +696,87 @@ const EditListingPage = () => {
                       </FormControl>
 
                       <FormControl isRequired>
-                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase">
-                          Property Type
+                        <FormLabel color="gray.900" fontWeight="600" fontSize="sm" letterSpacing="0.05em" textTransform="uppercase" mb={3}>
+                          Property Type (Select Multiple)
                         </FormLabel>
-                        <Select
-                          name="propertyType"
-                          value={formData.propertyType}
-                          onChange={handleInputChange}
-                          bg="white"
-                          borderColor="gray.300"
-                          color="gray.900"
-                          borderRadius="0"
-                          _focus={{
-                            borderColor: 'gray.900',
-                            boxShadow: '0 0 0 1px gray.900',
-                          }}
-                        >
-                          <option value="">Select Type</option>
-                          <option value="Apartment">Apartment</option>
-                          <option value="House">House</option>
-                          <option value="Villa">Villa</option>
-                          <option value="Flat">Flat</option>
-                          <option value="Studio">Studio</option>
-                          <option value="Penthouse">Penthouse</option>
-                          <option value="Townhouse">Townhouse</option>
-                          <option value="Plot">Plot</option>
-                          <option value="Land">Land</option>
-                          <option value="Commercial Land">Commercial Land</option>
-                          <option value="Warehouse">Warehouse</option>
-                          <option value="Commercial Building">Commercial Building</option>
-                          <option value="Commercial Space/Office Space">Commercial Space/Office Space</option>
-                        </Select>
+                        <Text fontSize="xs" color="gray.600" mb={3} fontStyle="italic">
+                          Select 1 to 3 property types. For example, select both &quot;House&quot; and &quot;Villa&quot; so the property appears in searches for both. You can also select &quot;Plot&quot;, &quot;Land&quot;, and &quot;Commercial Land&quot; together.
+                        </Text>
+                        <SimpleGrid columns={{ base: 2, md: 3 }} spacing={3}>
+                          {[
+                            'Apartment',
+                            'House',
+                            'Villa',
+                            'Flat',
+                            'Studio',
+                            'Penthouse',
+                            'Townhouse',
+                            'Plot',
+                            'Land',
+                            'Commercial Land',
+                            'Warehouse',
+                            'Commercial Building',
+                            'Commercial Space/Office Space',
+                          ].map((type) => (
+                            <HStack key={type} spacing={2} align="center">
+                              <Checkbox
+                                isChecked={formData.propertyTypes.includes(type)}
+                                isDisabled={!formData.propertyTypes.includes(type) && formData.propertyTypes.length >= 3}
+                                onChange={(e) => handlePropertyTypeChange(type, e.target.checked)}
+                                colorScheme="teal"
+                                borderColor="gray.300"
+                                size="md"
+                                sx={{
+                                  '& .chakra-checkbox__control': {
+                                    borderColor: formData.propertyTypes.includes(type) ? 'gray.900 !important' : 'gray.300 !important',
+                                    bg: formData.propertyTypes.includes(type) ? 'gray.900 !important' : 'white !important',
+                                    _checked: {
+                                      borderColor: 'gray.900 !important',
+                                      bg: 'gray.900 !important',
+                                      color: 'white !important',
+                                    },
+                                  },
+                                }}
+                                _hover={{
+                                  '& .chakra-checkbox__control': {
+                                    borderColor: 'gray.900',
+                                  },
+                                }}
+                              />
+                              <Text 
+                                fontSize="sm" 
+                                color="gray.900" 
+                                fontWeight="500"
+                                cursor="pointer"
+                                onClick={() => handlePropertyTypeChange(type, !formData.propertyTypes.includes(type))}
+                              >
+                                {type}
+                              </Text>
+                            </HStack>
+                          ))}
+                        </SimpleGrid>
+                        {formData.propertyTypes.length === 0 && (
+                          <Text fontSize="xs" color="red.500" mt={2}>
+                            Please select at least one property type (you can select up to 3)
+                          </Text>
+                        )}
+                        {formData.propertyTypes.length > 0 && (
+                          <HStack spacing={2} mt={3} flexWrap="wrap">
+                            <Text fontSize="xs" color="gray.600" fontWeight="600">
+                              Selected ({formData.propertyTypes.length}/3):
+                            </Text>
+                            {formData.propertyTypes.map((type) => (
+                              <Badge key={type} colorScheme="teal" fontSize="xs" px={2} py={1}>
+                                {type}
+                              </Badge>
+                            ))}
+                            {formData.propertyTypes.length >= 3 && (
+                              <Text fontSize="xs" color="orange.500" fontStyle="italic">
+                                (Maximum 3 types selected)
+                              </Text>
+                            )}
+                          </HStack>
+                        )}
                       </FormControl>
 
                       {showBedroomsBathrooms && (

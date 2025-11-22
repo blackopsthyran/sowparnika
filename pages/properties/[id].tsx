@@ -296,6 +296,24 @@ const PropertyDetail = ({
                   )}
                 </Flex>
 
+                {/* Property ID and Date Posted */}
+                <HStack spacing={4} mb={3} flexWrap="wrap" alignItems="center">
+                  {property.property_id && (
+                    <Badge colorScheme="teal" fontSize="sm" px={3} py={1.5} borderRadius="md" fontWeight="600">
+                      Property ID: {property.property_id}
+                    </Badge>
+                  )}
+                  {property.created_at && (
+                    <Text fontSize="sm" color="gray.600">
+                      <strong>Date Posted:</strong> {new Date(property.created_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </Text>
+                  )}
+                </HStack>
+                
                 {/* Title, Share and Favorite Buttons */}
                 <Flex justify="space-between" align="flex-start" mb={4} gap={4}>
                   <Text
@@ -392,9 +410,22 @@ const PropertyDetail = ({
                   </HStack>
                 </HStack>
 
-                {/* Engagement Metrics */}
-                <HStack spacing={6} mb={6} fontSize="sm" color="gray.600">
-                  <Text>Updated: {updatedDate}</Text>
+                {/* Engagement Metrics and Dates */}
+                <HStack spacing={6} mb={6} fontSize="sm" color="gray.600" flexWrap="wrap">
+                  {property.created_at && (
+                    <Text>
+                      <strong>Posted:</strong> {new Date(property.created_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </Text>
+                  )}
+                  {property.updated_at && property.updated_at !== property.created_at && (
+                    <Text>
+                      <strong>Updated:</strong> {updatedDate}
+                    </Text>
+                  )}
                   <HStack spacing={1}>
                     <Icon as={TbEye} />
                     <Text>1,722</Text>

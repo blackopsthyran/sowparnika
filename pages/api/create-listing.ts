@@ -43,7 +43,8 @@ export default async function handler(
     const {
       title,
       content,
-      propertyType,
+      propertyType, // Can be comma-separated string or single value
+      propertyTypes, // Array of property types (if sent)
       bhk,
       baths,
       floors,
@@ -63,20 +64,42 @@ export default async function handler(
       status,
     } = req.body;
 
+    // Parse property types - handle both comma-separated string and array
+    const propertyTypesArray = propertyTypes && Array.isArray(propertyTypes) 
+      ? propertyTypes 
+      : propertyType 
+        ? propertyType.split(',').map((t: string) => t.trim()).filter((t: string) => t)
+        : [];
+    
+    // Use first property type for backward compatibility and validation
+    const primaryPropertyType = propertyTypesArray[0] || propertyType || '';
+    
     // Property types that don't require bedrooms/bathrooms
     const landPropertyTypes = ['plot', 'land', 'commercial land'];
     const commercialPropertyTypes = ['warehouse', 'commercial building', 'commercial space/office space'];
-    const isLandType = propertyType && landPropertyTypes.includes(propertyType.toLowerCase());
-    const isCommercialType = propertyType && commercialPropertyTypes.includes(propertyType.toLowerCase());
-    const requiresBedroomsBathrooms = !isLandType && !isCommercialType;
-    const isCommercialBuilding = propertyType && 
-      (propertyType.toLowerCase() === 'commercial building' || 
-       propertyType.toLowerCase() === 'commercial space/office space');
+    
+    // Check if any selected type is land or commercial
+    const hasLandType = propertyTypesArray.some((type: string) => 
+      landPropertyTypes.includes(type.toLowerCase())
+    );
+    const hasCommercialType = propertyTypesArray.some((type: string) => 
+      commercialPropertyTypes.includes(type.toLowerCase())
+    );
+    const hasResidentialType = propertyTypesArray.some((type: string) => 
+      !landPropertyTypes.includes(type.toLowerCase()) && 
+      !commercialPropertyTypes.includes(type.toLowerCase())
+    );
+    
+    const requiresBedroomsBathrooms = hasResidentialType && propertyTypesArray.length > 0;
+    const isCommercialBuilding = propertyTypesArray.some((type: string) => 
+      type.toLowerCase() === 'commercial building' || 
+      type.toLowerCase() === 'commercial space/office space'
+    );
 
     // Validate required fields
     const missingFields: any = {
       title: !title,
-      propertyType: !propertyType,
+      propertyType: !primaryPropertyType || propertyTypesArray.length === 0,
       price: !price,
       city: !city,
       address: !address,
@@ -104,10 +127,14 @@ export default async function handler(
     }
 
     // Prepare data for insertion
+    // Store property types as comma-separated string in property_type
+    // This allows search to find properties by any of the selected types
+    const propertyTypeString = propertyTypesArray.join(',');
+    
     const insertData: any = {
       title,
       content: content || '',
-      property_type: propertyType,
+      property_type: propertyTypeString, // Store all types as comma-separated
       bhk: requiresBedroomsBathrooms && bhk ? parseInt(bhk) : null,
       selling_type: sellingType || 'Sale',
       price: price ? parseFloat(price) : null,

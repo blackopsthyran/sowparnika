@@ -27,6 +27,7 @@ export function createServerSupabaseClient() {
  */
 export const PROPERTY_SELECT_COLUMNS = `
   id,
+  property_id,
   title,
   content,
   property_type,

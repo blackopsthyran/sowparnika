@@ -27,7 +27,7 @@ const HeroSection = () => {
   const handleSearch = () => {
     const params = new URLSearchParams();
     
-    // Add search query if provided (supports title, address, city search)
+    // Add search query if provided (supports title, address, city, property ID search)
     // Also supports special plot/land search logic handled by API
     if (searchQuery && searchQuery.trim()) {
       params.append('search', searchQuery.trim());
@@ -237,7 +237,7 @@ const HeroSection = () => {
                   <FiMapPin size={20} />
                 </Box>
                 <Input
-                  placeholder="Search by title, address, or city..."
+                  placeholder="Search by title, address, city, or property ID (e.g., SP1)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}

@@ -52,6 +52,7 @@ export default async function handler(
       bhk,
       status,
       featured,
+      propertyId,
       sortBy = 'created_at',
       sortOrder = 'desc',
       page = '1',
@@ -112,13 +113,18 @@ export default async function handler(
         }
         // If exact "plot" or "land", show all Plot, Land, and Commercial Land properties (no text search filter)
       }
+      // Check if search is a property ID (starts with SP followed by numbers)
+      else if (/^SP\d+$/i.test(normalizedSearch)) {
+        // Exact match for property ID (case-insensitive)
+        query = query.ilike('property_id', search.trim());
+      }
       // Normal search for other terms
       else {
         const searchTerm = `%${search}%`;
         // Supabase OR query syntax: column.ilike.value,column2.ilike.value2
         // Note: Supabase requires the % wildcards to be part of the value
         query = query.or(
-          `title.ilike.${searchTerm},content.ilike.${searchTerm},address.ilike.${searchTerm},city.ilike.${searchTerm},state.ilike.${searchTerm}`
+          `title.ilike.${searchTerm},content.ilike.${searchTerm},address.ilike.${searchTerm},city.ilike.${searchTerm},state.ilike.${searchTerm},property_id.ilike.${searchTerm}`
         );
       }
     }
@@ -129,17 +135,20 @@ export default async function handler(
       // Normalize the input: lowercase and trim
       const normalizedType = propertyType.toLowerCase().trim();
       
-      // Special case: "plot" should show only Plot and Land (not Commercial Land)
+      // Special case: "plot" should show Plot and Land (including comma-separated types)
       if (normalizedType === 'plot') {
-        query = query.in('property_type', ['Plot', 'Land']);
+        // Match properties with Plot or Land (handles comma-separated)
+        query = query.or('property_type.ilike.%Plot%,property_type.ilike.%Land%');
+        // Exclude Commercial Land
+        query = query.not('property_type', 'ilike', '%Commercial Land%');
       }
-      // Special case: "land" should show Plot, Land, and Commercial Land
+      // Special case: "land" should show Plot, Land, and Commercial Land (including comma-separated)
       else if (normalizedType === 'land') {
-        query = query.in('property_type', ['Plot', 'Land', 'Commercial Land']);
+        query = query.or('property_type.ilike.%Plot%,property_type.ilike.%Land%,property_type.ilike.%Commercial Land%');
       }
-      // Special case: "commercial land" should show only Commercial Land
+      // Special case: "commercial land" should show only Commercial Land (including comma-separated)
       else if (normalizedType === 'commercial land' || normalizedType === 'commercial lands') {
-        query = query.eq('property_type', 'Commercial Land');
+        query = query.ilike('property_type', '%Commercial Land%');
       }
       // For other property types, use the mapping
       else {
@@ -173,8 +182,9 @@ export default async function handler(
             .join(' ');
         }
         
-        // Use exact match with the normalized database value
-        query = query.eq('property_type', dbPropertyType);
+        // Use ILIKE to match comma-separated property types
+        // This allows finding properties that have multiple types like "House,Villa"
+        query = query.ilike('property_type', `%${dbPropertyType}%`);
       }
     }
 
@@ -199,6 +209,11 @@ export default async function handler(
     // BHK filter
     if (bhk && typeof bhk === 'string') {
       query = query.eq('bhk', parseInt(bhk));
+    }
+
+    // Property ID filter
+    if (propertyId && typeof propertyId === 'string') {
+      query = query.ilike('property_id', propertyId.trim());
     }
 
     // Status filter

@@ -40,6 +40,7 @@ import DefaultLayout from '@/features/Layout/DefaultLayout';
 
 interface Property {
   id: string;
+  property_id?: string;
   title: string;
   property_type: string;
   price: number;
@@ -352,7 +353,7 @@ const ManageListingsPage = () => {
                 <FiSearch color="gray.500" />
               </InputLeftElement>
               <Input
-                placeholder="Search by title or city..."
+                placeholder="Search by title, city, or property ID (e.g., SP1)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 bg="white"
@@ -441,6 +442,7 @@ const ManageListingsPage = () => {
                   <Thead bg="gray.100" borderBottom="2px solid" borderColor="gray.900">
                     <Tr>
                       <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Image</Th>
+                      <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Property ID</Th>
                       <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Title</Th>
                       <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Type</Th>
                       <Th color="gray.900" fontFamily="'Playfair Display', serif" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" fontSize="xs" py={4} whiteSpace="nowrap">Price</Th>
@@ -476,6 +478,15 @@ const ManageListingsPage = () => {
                             >
                               <Text fontSize="xs" color="gray.900">No Image</Text>
                             </Box>
+                          )}
+                        </Td>
+                        <Td py={4}>
+                          {property.property_id ? (
+                            <Badge colorScheme="teal" fontSize="xs" px={2} py={1} borderRadius="md">
+                              {property.property_id}
+                            </Badge>
+                          ) : (
+                            <Text fontSize="xs" color="gray.400">N/A</Text>
                           )}
                         </Td>
                         <Td fontWeight="600" color="gray.900" py={4}>{property.title}</Td>
