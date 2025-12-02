@@ -23,7 +23,7 @@ const SleekDropdown: React.FC<SleekDropdownProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  
+
   // Calculate dropdown position
   const calculatePosition = () => {
     if (buttonRef.current) {
@@ -32,20 +32,20 @@ const SleekDropdown: React.FC<SleekDropdownProps> = ({
       const dropdownWidth = 300;
       const dropdownHeight = 150; // Approximate height of dropdown
       const gap = 8;
-      
+
       // Adjust if dropdown would go off-screen on the right
       if (left + dropdownWidth > window.innerWidth) {
         left = window.innerWidth - dropdownWidth - 16;
       }
-      
+
       // Ensure dropdown doesn't go off-screen on the left
       if (left < 16) {
         left = 16;
       }
-      
+
       // Calculate top position - try below first
       let top = rect.bottom + gap;
-      
+
       // If dropdown would go off bottom of screen, position above button
       if (top + dropdownHeight > window.innerHeight - 16) {
         top = rect.top - dropdownHeight - gap;
@@ -54,7 +54,7 @@ const SleekDropdown: React.FC<SleekDropdownProps> = ({
           top = 16;
         }
       }
-      
+
       setDropdownPosition({
         top: Math.max(8, top),
         left: left,
@@ -62,7 +62,7 @@ const SleekDropdown: React.FC<SleekDropdownProps> = ({
       });
     }
   };
-  
+
   // Update position when dropdown opens
   useLayoutEffect(() => {
     if (isOpen) {
@@ -97,14 +97,22 @@ const SleekDropdown: React.FC<SleekDropdownProps> = ({
       }
     };
 
+    // Debounce resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 100);
+    };
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       window.addEventListener('scroll', handleScroll, true);
-      window.addEventListener('resize', handleResize);
+      window.addEventListener('resize', debouncedResize);
       return () => {
         document.removeEventListener('mousedown', handleClickOutside);
         window.removeEventListener('scroll', handleScroll, true);
-        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('resize', debouncedResize);
+        clearTimeout(resizeTimeout);
       };
     }
   }, [isOpen]);
@@ -208,44 +216,44 @@ const SleekDropdown: React.FC<SleekDropdownProps> = ({
                 w={{ base: 'auto', md: 'auto' }}
                 onClick={(e) => e.stopPropagation()}
               >
-          <Flex
-            direction="row"
-            wrap="wrap"
-            gap={1}
-            w="100%"
-          >
-            {options.map((option) => (
-              <Button
-                key={option.value}
-                type="button"
-                flex={{ base: '1 1 calc(33.333% - 8px)', md: 'none' }}
-                minW={{ base: 'calc(33.333% - 8px)', md: 'auto' }}
-                px={{ base: 2, md: 4 }}
-                py={{ base: 2, md: 2.5 }}
-                fontSize={{ base: 'xs', md: 'sm' }}
-                fontWeight={value === option.value ? '700' : '500'}
-                color={value === option.value ? 'white' : 'gray.900'}
-                bg={value === option.value ? 'gray.900' : 'gray.100'}
-                borderRadius="md"
-                transition="all 0.15s ease"
-                border="1px solid"
-                borderColor={value === option.value ? 'gray.900' : 'transparent'}
-                _hover={{
-                  bg: value === option.value ? 'gray.800' : 'gray.200',
-                  borderColor: value === option.value ? 'gray.800' : 'gray.300',
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onChange(option.value);
-                  setIsOpen(false);
-                }}
-                h="auto"
-                lineHeight="normal"
-              >
-                {option.label}
-              </Button>
-            ))}
-          </Flex>
+                <Flex
+                  direction="row"
+                  wrap="wrap"
+                  gap={1}
+                  w="100%"
+                >
+                  {options.map((option) => (
+                    <Button
+                      key={option.value}
+                      type="button"
+                      flex={{ base: '1 1 calc(33.333% - 8px)', md: 'none' }}
+                      minW={{ base: 'calc(33.333% - 8px)', md: 'auto' }}
+                      px={{ base: 2, md: 4 }}
+                      py={{ base: 2, md: 2.5 }}
+                      fontSize={{ base: 'xs', md: 'sm' }}
+                      fontWeight={value === option.value ? '700' : '500'}
+                      color={value === option.value ? 'white' : 'gray.900'}
+                      bg={value === option.value ? 'gray.900' : 'gray.100'}
+                      borderRadius="md"
+                      transition="all 0.15s ease"
+                      border="1px solid"
+                      borderColor={value === option.value ? 'gray.900' : 'transparent'}
+                      _hover={{
+                        bg: value === option.value ? 'gray.800' : 'gray.200',
+                        borderColor: value === option.value ? 'gray.800' : 'gray.300',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onChange(option.value);
+                        setIsOpen(false);
+                      }}
+                      h="auto"
+                      lineHeight="normal"
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </Flex>
               </Box>
             )}
           </Portal>

@@ -37,7 +37,7 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [swiper, setSwiper] = useState<any>(null);
-  
+
   // Refs for stable values that don't trigger re-renders
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const hasLoadedRef = useRef(false);
@@ -87,27 +87,27 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
   useEffect(() => {
     if (hasLoadedRef.current) return;
     hasLoadedRef.current = true;
-    
+
     const loadInitialProperties = async () => {
       try {
         setLoading(true);
         const url = new URL(fetchUrlRef.current, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
         url.searchParams.set('limit', initialLimit.toString());
         url.searchParams.set('page', '1');
-        
+
         const response = await fetch(url.toString());
         if (!response.ok) throw new Error('Failed to fetch');
-        
+
         const data = await response.json();
-        
+
         if (!isMountedRef.current) return;
-        
+
         if (data.properties && Array.isArray(data.properties)) {
           const transformed = data.properties.map((property: any) => ({
             ...property,
             images: Array.isArray(property.images) ? property.images : [],
           }));
-          
+
           setProperties(transformed);
           propertiesLengthRef.current = transformed.length;
           setTotal(data.total || 0);
@@ -144,7 +144,7 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
     if (isLoadingRef.current || !hasMoreRef.current || !isMountedRef.current) {
       return;
     }
-    
+
     isLoadingRef.current = true;
     setLoadingMore(true);
 
@@ -159,36 +159,36 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
       const url = new URL(fetchUrlRef.current, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
       url.searchParams.set('limit', loadMoreLimitRef.current.toString());
       url.searchParams.set('page', nextPage.toString());
-      
+
       const response = await fetch(url.toString());
       if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-      
+
       const data = await response.json();
-      
+
       if (!isMountedRef.current) {
         isLoadingRef.current = false;
         return;
       }
-      
+
       if (data.properties && Array.isArray(data.properties) && data.properties.length > 0) {
         const transformed = data.properties.map((property: any) => ({
           ...property,
           images: Array.isArray(property.images) ? property.images : [],
         }));
-        
+
         // Single batched state update
         setProperties(prev => {
           const newProperties = [...prev, ...transformed];
           propertiesLengthRef.current = newProperties.length;
           const newTotal = data.total || newProperties.length;
           const stillHasMore = newProperties.length < newTotal;
-          
+
           // Update all related state and refs together
           hasMoreRef.current = stillHasMore;
           setTotal(newTotal);
           setHasMore(stillHasMore);
           setCurrentPage(nextPage);
-          
+
           return newProperties;
         });
       } else {
@@ -214,7 +214,7 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
   const isIOSRef = useRef(false);
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      isIOSRef.current = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+      isIOSRef.current = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
   }, []);
@@ -272,9 +272,14 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
           if (!entry.isIntersecting) return;
 
           const now = Date.now();
-          
+
           // Very strict debounce for iOS
           if (now - lastTriggerTime < MIN_INTERVAL_MS) {
+            return;
+          }
+
+          // Don't load more if user is zoomed in (prevent issues during pinch-zoom)
+          if (window.visualViewport && window.visualViewport.scale > 1.1) {
             return;
           }
 
@@ -306,12 +311,12 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
                 const reEnableDelay = isIOSRef.current ? 4000 : 2500;
                 setTimeout(() => {
                   isProcessing = false;
-                  
+
                   // Only re-enable if all conditions are met
                   if (
-                    isMountedRef.current && 
-                    hasMoreRef.current && 
-                    currentRef && 
+                    isMountedRef.current &&
+                    hasMoreRef.current &&
+                    currentRef &&
                     observerRef.current &&
                     triggerCount < MAX_TRIGGERS
                   ) {
@@ -336,13 +341,13 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
               .catch((error) => {
                 console.error('Error in loadMoreProperties:', error);
                 isProcessing = false;
-                
+
                 // Disable on error to prevent loops
                 if (isMountedRef.current) {
                   hasMoreRef.current = false;
                   setHasMore(false);
                 }
-                
+
                 // Cleanup observer on error
                 if (observerRef.current) {
                   try {
@@ -506,10 +511,10 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
             autoplay={
               autoplay && properties.length > 1 && !isIOSRef.current
                 ? {
-                    delay: 3000,
-                    disableOnInteraction: true, // Disable on touch to prevent conflicts
-                    pauseOnMouseEnter: true,
-                  }
+                  delay: 3000,
+                  disableOnInteraction: true, // Disable on touch to prevent conflicts
+                  pauseOnMouseEnter: true,
+                }
                 : false
             }
             loop={false}
@@ -549,7 +554,7 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
                   const touch = touchEvent.touches[0];
                   const deltaX = Math.abs(touch.clientX - swiperAny.touchStartX);
                   const deltaY = Math.abs(touch.clientY - swiperAny.touchStartY);
-                  
+
                   // Determine if user is scrolling vertically or horizontally
                   if (deltaY > deltaX && deltaY > 15) {
                     // Vertical scroll - allow page scroll
@@ -618,9 +623,9 @@ const LazyPropertyCarousel: React.FC<LazyPropertyCarouselProps> = ({
 
         {/* Lazy load trigger - Only show when there are properties and more to load */}
         {properties.length > 0 && hasMore && (
-          <Box 
-            ref={loadMoreRef} 
-            h="50px" 
+          <Box
+            ref={loadMoreRef}
+            h="50px"
             mt={4}
             display="flex"
             alignItems="center"

@@ -3,7 +3,7 @@
 
 -- Add property_id column
 ALTER TABLE public.properties 
-ADD COLUMN IF NOT EXISTS property_id VARCHAR(20) UNIQUE;
+ADD COLUMN IF NOT EXISTS property_id VARCHAR(50) UNIQUE;
 
 -- Create index for property_id for faster searches
 CREATE INDEX IF NOT EXISTS idx_properties_property_id ON public.properties(property_id);
