@@ -14,6 +14,7 @@ const DashboardStats = () => {
     active: 0,
     sold: 0,
     rented: 0,
+    totalValue: 0,
   });
   const [graphs, setGraphs] = useState({
     typeDistribution: [],
@@ -40,6 +41,15 @@ const DashboardStats = () => {
     }
   };
 
+  const formatCurrency = (value: number) => {
+    if (value >= 10000000) {
+      return `₹${(value / 10000000).toFixed(2)} Cr`;
+    } else if (value >= 100000) {
+      return `₹${(value / 100000).toFixed(2)} L`;
+    }
+    return `₹${value.toLocaleString()}`;
+  };
+
   return (
     <Box
       border="2px solid"
@@ -59,7 +69,7 @@ const DashboardStats = () => {
       >
         Quick Stats
       </Heading>
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} mb={12}>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={8} mb={12}>
         <Box>
           <Text
             fontSize="xs"
@@ -130,6 +140,30 @@ const DashboardStats = () => {
           </Text>
           <Text fontSize="xs" color="gray.900" letterSpacing="0.05em">
             Completed transactions
+          </Text>
+        </Box>
+        <Box>
+          <Text
+            fontSize="xs"
+            color="gray.900"
+            fontWeight="600"
+            letterSpacing="0.1em"
+            textTransform="uppercase"
+            mb={2}
+          >
+            Total Portfolio Value
+          </Text>
+          <Text
+            fontSize="3xl"
+            color="gray.900"
+            fontWeight="700"
+            fontFamily="'Playfair Display', serif"
+            mb={1}
+          >
+            {loading ? '...' : formatCurrency(stats.totalValue || 0)}
+          </Text>
+          <Text fontSize="xs" color="gray.900" letterSpacing="0.05em">
+            Estimated value
           </Text>
         </Box>
       </SimpleGrid>

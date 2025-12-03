@@ -38,6 +38,7 @@ export default async function handler(
         const active = properties.filter(p => p.status === 'active').length;
         const sold = properties.filter(p => p.status === 'sold').length;
         const rented = properties.filter(p => p.status === 'rented').length;
+        const totalValue = properties.reduce((sum, p) => sum + (p.price || 0), 0);
 
         // Calculate Graphs Data
 
@@ -78,7 +79,7 @@ export default async function handler(
         const priceDistribution = priceRanges.map(r => ({ name: r.name, value: r.count }));
 
         return res.status(200).json({
-            stats: { total, active, sold, rented },
+            stats: { total, active, sold, rented, totalValue },
             graphs: {
                 typeDistribution,
                 priceDistribution
