@@ -6,6 +6,7 @@ import { FaPlus, FaEdit, FaTrash, FaCog, FaChartBar, FaQuoteLeft } from 'react-i
 import { FiHome } from 'react-icons/fi';
 import Link from 'next/link';
 import DefaultLayout from '@/features/Layout/DefaultLayout';
+import DashboardCharts from '@/features/cpanel/components/DashboardCharts';
 
 const DashboardStats = () => {
   const [stats, setStats] = useState({
@@ -13,6 +14,10 @@ const DashboardStats = () => {
     active: 0,
     sold: 0,
     rented: 0,
+  });
+  const [graphs, setGraphs] = useState({
+    typeDistribution: [],
+    priceDistribution: []
   });
   const [loading, setLoading] = useState(true);
 
@@ -22,16 +27,11 @@ const DashboardStats = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/get-properties?limit=1000');
+      const response = await fetch('/api/get-dashboard-stats');
       const data = await response.json();
-      if (response.ok && data.properties) {
-        const properties = data.properties;
-        setStats({
-          total: properties.length,
-          active: properties.filter((p: any) => p.status === 'active').length,
-          sold: properties.filter((p: any) => p.status === 'sold').length,
-          rented: properties.filter((p: any) => p.status === 'rented').length,
-        });
+      if (response.ok) {
+        setStats(data.stats);
+        setGraphs(data.graphs);
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -48,8 +48,8 @@ const DashboardStats = () => {
       bg="white"
       p={8}
     >
-      <Heading 
-        size="md" 
+      <Heading
+        size="md"
         mb={6}
         color="gray.900"
         fontFamily="'Playfair Display', serif"
@@ -59,21 +59,21 @@ const DashboardStats = () => {
       >
         Quick Stats
       </Heading>
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8}>
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} mb={12}>
         <Box>
-          <Text 
-            fontSize="xs" 
-            color="gray.900" 
-            fontWeight="600" 
-            letterSpacing="0.1em" 
+          <Text
+            fontSize="xs"
+            color="gray.900"
+            fontWeight="600"
+            letterSpacing="0.1em"
             textTransform="uppercase"
             mb={2}
           >
             Total Properties
           </Text>
-          <Text 
-            fontSize="3xl" 
-            color="gray.900" 
+          <Text
+            fontSize="3xl"
+            color="gray.900"
             fontWeight="700"
             fontFamily="'Playfair Display', serif"
             mb={1}
@@ -85,19 +85,19 @@ const DashboardStats = () => {
           </Text>
         </Box>
         <Box>
-          <Text 
-            fontSize="xs" 
-            color="gray.900" 
-            fontWeight="600" 
-            letterSpacing="0.1em" 
+          <Text
+            fontSize="xs"
+            color="gray.900"
+            fontWeight="600"
+            letterSpacing="0.1em"
             textTransform="uppercase"
             mb={2}
           >
             Active Listings
           </Text>
-          <Text 
-            fontSize="3xl" 
-            color="gray.900" 
+          <Text
+            fontSize="3xl"
+            color="gray.900"
             fontWeight="700"
             fontFamily="'Playfair Display', serif"
             mb={1}
@@ -109,19 +109,19 @@ const DashboardStats = () => {
           </Text>
         </Box>
         <Box>
-          <Text 
-            fontSize="xs" 
-            color="gray.900" 
-            fontWeight="600" 
-            letterSpacing="0.1em" 
+          <Text
+            fontSize="xs"
+            color="gray.900"
+            fontWeight="600"
+            letterSpacing="0.1em"
             textTransform="uppercase"
             mb={2}
           >
             Sold/Rented
           </Text>
-          <Text 
-            fontSize="3xl" 
-            color="gray.900" 
+          <Text
+            fontSize="3xl"
+            color="gray.900"
             fontWeight="700"
             fontFamily="'Playfair Display', serif"
             mb={1}
@@ -133,6 +133,20 @@ const DashboardStats = () => {
           </Text>
         </Box>
       </SimpleGrid>
+
+      <Heading
+        size="md"
+        mb={6}
+        color="gray.900"
+        fontFamily="'Playfair Display', serif"
+        fontWeight="700"
+        letterSpacing="0.05em"
+        textTransform="uppercase"
+      >
+        Analytics
+      </Heading>
+
+      <DashboardCharts graphs={graphs} />
     </Box>
   );
 };
@@ -199,9 +213,9 @@ const CpanelDashboard = () => {
           <VStack spacing={10} align="stretch">
             <Flex justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
               <Box>
-                <Heading 
-                  size="xl" 
-                  mb={3} 
+                <Heading
+                  size="xl"
+                  mb={3}
                   color="gray.900"
                   fontFamily="'Playfair Display', serif"
                   fontWeight="700"
@@ -248,7 +262,7 @@ const CpanelDashboard = () => {
                     p={6}
                     height="100%"
                     transition="all 0.2s"
-                    _hover={{ 
+                    _hover={{
                       transform: 'translateY(-4px)',
                       bg: 'gray.50',
                     }}
